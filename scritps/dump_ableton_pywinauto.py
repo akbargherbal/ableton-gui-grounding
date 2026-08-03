@@ -32,7 +32,28 @@ import json
 import sys
 import time
 from dataclasses import dataclass, field, asdict
+from datetime import datetime
+from pathlib import Path
 from typing import Optional
+
+
+def default_json_path(label: Optional[str], out_dir: str) -> str:
+    """Build a timestamped, optionally-labeled output filename so repeat
+    runs never silently overwrite a previous dump.
+
+    e.g. dumps/ableton_uia_20260803_153000.json
+         dumps/ableton_uia_20260803_153512_sounds-pane.json
+    """
+    Path(out_dir).mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    if label:
+        safe_label = "".join(
+            c if (c.isalnum() or c in "-_") else "-" for c in label
+        ).strip("-")
+        fname = f"ableton_uia_{stamp}_{safe_label}.json"
+    else:
+        fname = f"ableton_uia_{stamp}.json"
+    return str(Path(out_dir) / fname)
 
 try:
     from pywinauto import Desktop
@@ -283,8 +304,27 @@ def main() -> None:
     parser.add_argument(
         "--json",
         type=str,
-        default="ableton_uia_tree.json",
-        help="Path to write the JSON dump (default: ableton_uia_tree.json)",
+        default=None,
+        help="Path to write the JSON dump. If omitted, an auto-timestamped "
+        "filename is generated under --out-dir (default: dumps/), so "
+        "repeat runs never overwrite each other. Pass this explicitly "
+        "only if you want a fixed filename.",
+    )
+    parser.add_argument(
+        "--label",
+        type=str,
+        default=None,
+        help="Short tag describing what state Ableton was in for this "
+        "dump, e.g. 'sounds-pane', 'file-menu-open', 'device-loaded'. "
+        "Folded into the auto-generated filename. Ignored if --json is "
+        "given explicitly.",
+    )
+    parser.add_argument(
+        "--out-dir",
+        type=str,
+        default="dumps",
+        help="Directory for auto-generated dump filenames (default: dumps/). "
+        "Ignored if --json is given explicitly.",
     )
     parser.add_argument(
         "--no-print",
@@ -308,6 +348,9 @@ def main() -> None:
         "when normal search finds suspiciously few / zero windows.",
     )
     args = parser.parse_args()
+
+    if args.json is None:
+        args.json = default_json_path(args.label, args.out_dir)
 
     if args.diagnose:
         diagnose_root_children()

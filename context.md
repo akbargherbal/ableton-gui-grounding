@@ -1,252 +1,246 @@
 # Context: Grounding Text-Based LLMs in Ableton's Actual UI
 
-For future-me picking this up in a fresh session. This is the second
-working document for this project — it supersedes the first draft in
-substance (scope and mechanism are now settled, not open questions) while
-keeping the lineage info. This project is a direct spinoff of a prior
-6-session project — `gui_grounding_benchmark`
-(https://github.com/akbargherbal/gui_grounding_benchmark) — which
-benchmarked open-source vision-grounding models against real Ableton Live
-12 screenshots. That project is finished and archived. It was re-cloned
-and its `context.md`, `report.md`, and Medium article
-(`gui-grounding-ableton-article.md`) were reviewed in detail this
-session — see "What we confirmed from the benchmarking project" below,
-which replaces the earlier draft's secondhand summary of it.
+For future-me picking this up in a fresh session. This is the **sixth**
+working document for this project — it supersedes the fifth draft. This
+session executed the fifth draft's two-part goal (build+validate the UIA
+wrapper, draft the AGENTS.md diff), found and fixed one blocker the fifth
+draft didn't know about, and did a repo-structure pass against a series of
+real `tree` outputs. **The user is now going to live-test the current
+setup and will report back next session what worked and what didn't** —
+that report is this project's next real input, more than any further
+unprompted work on the open items below.
 
-## The problem this project solves (unchanged, now sharper)
+Everything from prior drafts not explicitly revisited below is still
+intact: the problem statement (version drift, not live customization), the
+target user (total beginner, first ~4 weeks), the version range (12.x
+only), the consumption mechanism (manifest entry -> LLM instruction +
+bbox-on-screenshot), and the still-open scope question (does the manifest
+need to stay narrow now that UIA removes the original cost constraint —
+parked, not forgotten, not touched this session).
 
-A **text-only** LLM (no vision) gives Ableton instructions from a
-training-data blend of screenshots/docs across many versions, with no
-label on which version any given tutorial came from. It confidently gives
-instructions that don't match the user's actual, current-version screen.
+## NEW this session: both required files reviewed in full, prior audit confirmed
 
-**This project targets version drift only** — not live user customization
-(hidden panels, rearranged layout, changed themes). That's explicitly out
-of scope. The reasoning, settled this session: the target user is a
-*beginner*, and a beginner hasn't customized anything yet — their install
-is factory-default. If a mismatch ever does occur for this user, the
-realistic fix is conversational ("let's reset to factory settings"), not
-a manifest feature. Don't build customization-tracking; it solves a
-problem this user population mostly doesn't have.
+`AGENTS.md` was read in full this session (a prior session's `view` call
+truncated the middle section; that was a tooling artifact, not a real
+document gap — the file itself was never actually short a section). The
+full read confirmed the fifth draft's audit table was accurate: Rule 6
+step 5 (`the agent does not interpret or describe [screenshot] visual
+contents`) is about screenshot pixels specifically, not UIA, and correctly
+verdicted "no change." Rule 3, Rule 10, and the color rule all read
+exactly as the audit described.
 
-## Who this is for, precisely (settled this session)
+`dump_ableton_pywinauto.py` was read in full, resolving item 2 from the
+fifth draft's "files needed" list:
+- **Parameterizable**: yes (`--max-depth`, `--json`, `--label`,
+  `--out-dir`, `--title-contains`, `--no-print`).
+- **Not headless**: requires a title-substring window match via
+  `Desktop(backend="uia").windows()`; no PID/handle targeting option.
+  Has an elevation-mismatch failure mode (`is_elevated()`) that can
+  silently return near-nothing if the script and Ableton run at
+  different privilege levels.
+- **Zero filtering built in**: confirmed by inspection. `walk()` is a
+  raw recursive dump — no normalization, no de-dup, no bounds-check.
+  All three had to be added fresh in the wrapper (below).
+- **Output-path inconsistency vs. `take_shot.sh`**: `--out-dir` defaults
+  to a bare relative `"dumps"`, resolved from wherever the script happens
+  to be *run from* — unlike `take_shot.sh`, which anchors to its own
+  script location (`BASH_SOURCE`) regardless of cwd. Not fixed this
+  session; flagged as a real inconsistency, relevant if the two scripts
+  ever get merged (see fifth draft's secondary item, still undecided).
 
-Explicitly: a total beginner, first ~4 weeks with Ableton. No music
-background, no DAW jargon, no prior mental model to fall back on when an
-instruction doesn't match their screen. The user described themselves as
-literally fitting this persona for design purposes.
+## NEW this session: the three re-supplied dumps, cross-checked against prior claims
 
-The "tricycle" framing: this is training wheels, not a permanent
-accessibility layer. After roughly a month, the user develops enough
-internal mapping that "go to Preferences" self-resolves to wherever it
-actually lives, the way an experienced user doesn't need to be told. The
-manifest's job is to bridge that specific early gap, not to be a
-permanent GUI translation layer.
+The `baseline`, `sounds-pane`, and `arrangement-view` dumps (already
+characterized in the fifth draft) were re-supplied and machine-checked
+against that draft's specific claims, not just re-read.
 
-**Why this population changes the failure mode that matters:** for an
-experienced user, a stale instruction is a minor annoyance they can
-self-correct. For this beginner, a stale instruction reads as personal
-failure ("I must be doing something wrong") because they have no prior
-knowledge to attribute the mismatch to version drift. The manifest's real
-job is protecting that handshake — the moment where the LLM's claim and
-the user's screen either agree or don't — not cataloguing UI
-comprehensively.
+**Confirmed exactly as claimed:**
+- Node counts: 384 / 434 / 729 respectively.
+- `DataItem` counts in the non-arrangement dumps: 51 / 89.
+- The MIDI-vs-Audio mixer gap: `Track[0]`/`Track[1]` (MIDI) genuinely lack
+  `Pan`/`PeakLevel`/`Send[0]`/`Send[1]`/`Volume` automation_ids that
+  `Track[2]`/`Track[3]` (Audio) have. **Still an open question** — real,
+  not a fluke, but MIDI-vs-Audio vs. render-state isn't resolved.
+- The 3-level nested chain: `DataItem -> DataItem -> Text`, verified
+  directly on `3D Reso Percussion.adg` in arrangement-view.
+- Zero out-of-bounds `DataItem`s in baseline/sounds-pane.
+- `take_shot.sh`'s seven error codes all match AGENTS.md's table exactly.
 
-## Scope, settled (was open question #1 in the old draft)
+**One correction to a "confirmed consistent" claim:** the fifth draft
+said all four dumps were "confirmed consistent... by track count and
+title-bar text." Track *count* (4) is consistent. Title-bar *text* is
+not: `Track[0]` reads `"1-MIDI"` in baseline/sounds-pane but
+`"1-Arr Matey Lead, Armed"` in arrangement-view (a device got loaded and
+the track renamed/armed by that point in the session). Expected, given
+AGENTS.md's own rule that a rename becomes the new anchor — but worth not
+repeating "text is consistent across all four" verbatim again.
 
-**Not** "every element" and **not** even the earlier-guessed "~30-50
-commonly-instructed elements." Narrower: **only elements that appear in
-the canonical first tasks** — open a project, drop in a track, browse
-for/preview a sound or instrument, hit play, arm/mute/solo a track, save.
-If a candidate manifest entry doesn't map to one of those concrete
-first-task actions, it's out of scope for v1, even if it would be easy to
-capture while we're in there. Exception carved out: enough of
-Preferences/Settings to name the path correctly (e.g. audio device setup
-is a real beginner blocker), but not the internals of every settings tab.
+**One correction to the virtualized-list numbers themselves:** the fifth
+draft reported "249 sample/preset rows loaded... 84 of 249 (34%) land in
+bounds." The actual dump shows the browser's file-list `Tree` node
+(`"Sounds List, 1001 Items"`) has **84 direct row children**, of which
+**29 are in-bounds and 55 are not**. The bug itself is real and correctly
+described — the fix (bounds-check filter) was still right — but "84"
+appears to have gotten reused between two different meanings (total rows
+vs. in-bounds count) somewhere in the prior session's write-up, and "249"
+doesn't correspond to anything found in this file. **Use this session's
+numbers (84 total / 29 in-bounds / 55 out) as the reference case going
+forward, not the fifth draft's.**
 
-Test for whether something belongs in the manifest: would getting this
-wrong break the LLM/user handshake during one of the canonical first
-tasks? If not, it's out.
+## NEW this session: Part 1 built, validated, and one new blocker found+fixed
 
-## Version range, settled (was open question #2 in the old draft)
+`uia_wrapper.py` was built implementing the three confirmed-necessary
+transforms, then validated against all three real dumps (not just
+designed against the narrative description of them):
 
-**Current Ableton 12.x only. No 11.x.** Reasoning: a beginner installed
-recently, so they're on a recent 12.x point release by construction —
-someone still on 11.x who knows Ableton well enough to still be running
-it isn't this project's user. Track point-release granularity (12.0 →
-12.1 → 12.2 etc.) only where an element demonstrably moved — don't
-pre-catalog all point releases as if they're equally likely to diverge;
-most first-task chrome is stable release to release.
+  a. **Window-relative normalization** — see the offset bug below; this
+     step needed a real fix, not just implementation.
+  b. **Innermost-of-chain de-dup** — walks same-name descendant chains
+     (matching on `name`, regardless of `control_type`, since the real
+     chain is `DataItem -> DataItem -> Text`, all three sharing one
+     name) to the innermost node. Verified against `3D Reso Percussion.adg`:
+     raw 3-level chain collapses to one node with `collapsed_levels: 2`.
+  c. **Bounds-check filter** — uses a true rect-intersection test (not a
+     single-corner-in-bounds check), and treats zero-area/degenerate
+     rects (e.g. an empty placeholder `Text` node) as `in_bounds: None`
+     ("no real geometry to judge") rather than a false out-of-bounds flag.
 
-## The consumption mechanism, now demonstrated (not just designed)
+**New blocker, not previously known: a ~75px title-bar/menu-bar origin
+offset.** `dump_ableton_pywinauto.py`'s root node comes from pywinauto's
+`control.rectangle()`, which turns out to report something narrower than
+the full outer window — `take_shot.sh` captures via the native
+`GetWindowRect` Win32 API, which is documented to include title bar, menu
+bar, and borders. Evidence: the `TitleBar` element sits **exactly 75px
+above** the root's own reported top edge, identically, across all three
+dumps — including one dump whose window sits on an entirely different
+monitor at different absolute coordinates. A constant that survives a
+completely different window position isn't coincidence.
 
-The old draft proposed a manifest as an LLM-only tool-call fact-base and
-separately worried that this leaves the *user* with nothing to visually
-verify against, since a beginner can't confirm "yes, that's the button"
-from a text description alone. Rebuilding a full interactive HTML mockup
-to fix that was considered and rejected — it reintroduces version drift
-into a hand-drawn asset instead of solving it, and is expensive to
-maintain in parallel with the manifest.
+**Why it mattered:** left as originally scoped, this would have
+misaligned *every* bbox the wrapper produced by ~75px when drawn on an
+actual `take_shot.sh` screenshot — not just the browser-list rows. This
+is more consequential than the bounds-check bug, since it would have
+silently broken the project's core "highlight box on the real screenshot"
+mechanism rather than just producing some garbage rows.
 
-**Resolution: one manifest entry, two derived outputs, both from real
-screenshots — no mockup needed.**
+**Fix applied:** the wrapper now calibrates its origin off the `TitleBar`
+element's own top-left (always present on a real window, immune to the
+virtualized-list staleness problem) instead of hardcoding "75" or trusting
+the root's self-reported rect. Falls back to the root's rect with a
+printed warning if no `TitleBar` is found in a given dump.
 
-```json
-{
-  "element_id": "solo_button_track4",
-  "label": "Solo button",
-  "shape": "square button labeled S",
-  "location": "bottom of track 4's channel strip, left of the mute dot",
-  "version": "12.x",
-  "bbox": [999, 944, 1024, 969],
-  "source_screenshot": "02_browser-sounds-tab.png"
-}
-```
+**Post-fix validation (final numbers):**
 
-- **LLM consumption**: reads `label`/`location` → gives the verbal
-  instruction ("click the small 'S' button at the bottom of track 4's
-  channel strip").
-- **User-facing consumption**: the same `bbox` is drawn as a highlight box
-  on the *actual* `source_screenshot` (not a redrawn approximation) and
-  shown alongside the text answer.
+| dump | nodes | chains collapsed | out-of-bounds (final) |
+|---|---|---|---|
+| baseline | 290 | 35 | 0 |
+| sounds-pane | 301 | 54 | 0 |
+| arrangement-view | 464 | 122 | 51 (all genuine `DataItem` rows; 0 chrome false-positives) |
 
-This was actually built and tested this session against a real uploaded
-screenshot (`02_browser-sounds-tab.png`, 1936×1048), for two elements:
-the Solo button on track 4, and the Drums category chip + a
-double-click-to-preview sound row. Both worked as intended: text answer
-plus a real, correctly-positioned highlight, no jargon comprehension
-required from the user to verify the match.
+**Not yet done:** `device-loaded.json` (the fourth dump, described in the
+fifth draft but never actually uploaded until this session's repo-tree
+pass put it in `dumps/`) has **not** been run through the wrapper yet —
+worth doing next, since it's the one dump in the regression set the
+wrapper hasn't personally been validated against.
 
-**Real finding from doing this by hand, worth remembering:** getting a
-`bbox` right took actual work — crop, grid overlay, zoom, cross-check,
-then draw. This is the concrete cost case for eventually building the
-"click the fake element in a mockup, it emits the bbox" authoring tool
-from the original draft — not for the LLM's sake, but to make *this*
-step (deriving accurate coordinates) fast instead of manual pixel
-archaeology.
+Delivered: `uia_wrapper.py`, CLI (`python uia_wrapper.py <in.json> --out
+<out.json> [--keep-out-of-bounds]`).
 
-**A real version-drift example surfaced accidentally while doing this**:
-the bottom of the browser panel in this Live 12 screenshot shows a
-**Tuning system panel** (Octave/Note/Ref. Pitch/Freq, "Drop Tuning System
-Here") — a feature that didn't exist in the Ableton versions most
-existing tutorials were written against, which instead describe a preview
-volume knob in roughly that location. This is a genuine, unprompted
-instance of exactly the failure mode the whole project exists to prevent
-— worth using as the canonical example in any write-up or pitch for this
-project, since it wasn't constructed for effect.
+## NEW this session: Part 2 diff drafted and delivered
 
-**Schema implication confirmed**: `bbox` values are only meaningful
-paired with their specific `source_screenshot` — not portable across
-screenshots of different resolution. If an element's position differs
-across 12.x point releases, that's a second `source_screenshot` +
-`bbox` pair, not a reused image with swapped coordinates. The draft
-schema's per-version `source_screenshot` field already anticipated this;
-this session confirmed it's load-bearing, not optional.
+Gated correctly on Part 1 actually working, per the fifth draft's
+ordering. Three changes, verified via `diff` that nothing else moved:
 
-## What we confirmed from the benchmarking project (re-read this session)
+1. **System Constraints** — the "no vision" bullet now scopes the claim
+   to `AbletonMCP` specifically. The old wording ("The agent has zero
+   direct knowledge...") oversold the limitation at the *agent* level,
+   which is no longer true now that a second channel exists; the new
+   wording keeps `AbletonMCP` itself pixel-blind while noting the
+   separate UIA channel.
+2. **Rule 5** — widened from "drawn from an actual MCP response" to "...or
+   a live, filtered UIA query," with **"filtered" made explicit and
+   load-bearing**: raw/unfiltered UIA output must never be cited
+   directly, for two concrete reasons now on record (virtualized-list
+   garbage rects, and the origin-offset bug above) — only the validated
+   wrapper's output counts as verified evidence.
+3. **Rule 3** — added a non-binding "consider adding" line about an
+   optional filtered-UIA cross-check as a second post-change verification
+   step. Explicitly not a required part of the diff, per the fifth
+   draft's instruction.
 
-Re-cloned and read `context.md`, `report.md`, and
-`gui-grounding-ableton-article.md` directly (not from memory). Key
-findings, now confirmed rather than recalled secondhand:
+Rule 6 step 5, the color rule, and Rule 10 confirmed untouched (absent
+from the diff).
 
-- **GTA1-7B is the model to use for any future bulk bbox-extraction
-  pass. UI-TARS-1.5-7B should not be run at all going forward** — this
-  isn't a soft preference, it's confirmed by both the internal benchmark
-  and external literature. In session 6's 30-task run, on the 7 tasks
-  that showed sharp model disagreement, GTA1-7B was correct on every one
-  and UI-TARS-1.5-7B missed clearly on at least 4 (one prediction landed
-  in the literal corner of the screenshot, nowhere near the target
-  dialog). This replicates a statistically validated split from **GUI-
-  Perturbed: Domain Randomization Reveals Systematic Brittleness in GUI
-  Grounding Models** (arXiv:2604.14262): GTA1-7B scores 65.8% vs. UI-
-  TARS-1.5-7B's 35.0% on *relational* grounding (identifying an element
-  by its relationship to others, not direct naming) — even though UI-
-  TARS actually wins the aggregate ScreenSpot-Pro leaderboard (61.6% vs.
-  55.5%), so leaderboard rank would have picked the wrong model. GTA1 is
-  UI-TARS-1.5 plus extra GRPO reinforcement learning with a direct
-  click-reward; that extra RL stage specifically recovers relational/
-  spatial reasoning that UI-TARS's SFT/DPO training degrades below even
-  the untrained Qwen2.5-VL base (35.0% vs. 45.0%).
-- **Practical implication for triage**: GTA1 is reliable on direct-naming
-  instructions ("click the Sounds item," "click the Solo button") without
-  much extra checking; it should still be manually verified (crop/zoom/
-  view, as done by hand this session) specifically on *relational*
-  instructions ("the second chain's title," "the title bar of the middle
-  device") — that's where the failure risk concentrates, in GTA1 too, per
-  the paper's 65.8% (not 100%) score on that category.
-- **Reassuring overlap with this project's scope**: almost everything in
-  the beginner/first-task curated set (Solo button, browser categories,
-  double-click-to-preview) is direct-naming, not relational — exactly the
-  category both models handled well in the original benchmark. The
-  relational-disambiguation failure cases in the old dataset (chain title
-  vs. device title bar; locator flag vs. loop brace) are power-user
-  territory already outside this project's scope. So the manifest's
-  actual verification burden is lower than the benchmark's worst-case
-  numbers might suggest — most future entries should be low-risk to
-  extract in bulk.
-- **Reuse the debugged Colab script (`gui_grounding_benchmark.py`) as-is
-  for any future bulk-extraction pass** — it already has two
-  infrastructure bugs fixed that cost real time in the old project's
-  sessions 1–2: HF model cache not clearing between model loads (blew
-  Colab's disk), and a `transformers` API drift where GTA1's image
-  processor moved `min_pixels`/`max_pixels` off direct attributes into a
-  nested `.size["shortest_edge"/"longest_edge"]` dict. No need to
-  rediscover either.
-- **Cost implication of dropping UI-TARS from future runs**: GTA1-7B loads
-  in ~86s vs. UI-TARS's ~251s (about 3x), so a GTA1-only bulk pass is both
-  cheaper and faster, not just more accurate for this use case — there's
-  no longer a reason to pay for the second model at all, since the
-  "which one do we trust" question that motivated running both is
-  answered.
-- **Coordinate-agreement triage is reusable as a technique even with one
-  model now** — e.g. running the same instruction phrased two different
-  ways through GTA1 and treating close agreement as a self-consistency
-  signal, reserving manual crop/zoom verification for cases that
-  disagree or are known relational tasks. Not yet tried; worth testing
-  before assuming it's a good substitute for the old two-model
-  comparison.
-- **The 15 shortlisted screenshots and 30 (instruction, coordinate) pairs
-  are real, present in the repo, and directly usable** — confirmed by
-  browsing the cloned repo this session (`shortlisted_screenshots/`,
-  `report.md`'s full coordinate table). These cover browser tabs, device
-  views, several menus, automation, locators, and a save dialog, and can
-  seed manifest entries for elements that fall in scope without any new
-  Colab run.
-- **dHash + farthest-point-sampling screenshot curation
-  (`select_diverse_screenshots.py`)** remains a reusable tool if a future
-  bulk pass needs to select a new, diverse set of raw screenshots (e.g.
-  across several 12.x point releases) rather than eyeballing which ones
-  to keep.
+Delivered: `AGENTS.diff` (unified diff) and the full patched `AGENTS.md`.
+**Open cosmetic note**: Rule 5's widened text currently describes "the
+validated UIA wrapper" generically rather than naming `uia_wrapper.py` —
+worth tightening once the file's final repo location is settled (see
+below).
 
-## First things to do next session
+## NEW this session: repo-structure pass against real `tree` output
 
-1. **Draft the actual element list** for the "canonical first tasks"
-   scope defined above (open project, add track, browse/preview sound,
-   play, arm/mute/solo, save, minimal Preferences path). Cross-reference
-   against the 30 existing (instruction, coordinate) pairs to see how
-   many are already covered vs. need fresh extraction.
-2. **Finalize the manifest schema** — the draft shape (`element_id`,
-   `label`, `shape`, `location`, `versions` block, `bbox`,
-   `source_screenshot`) held up under real use this session; formalize it
-   as JSON Schema and decide how per-point-release entries nest under a
-   single `element_id`.
-3. **Decide the tool-calling convention** — `lookup_ui_element(name, ...,
-   ableton_version)`-style shape was assumed throughout this session's
-   demos; confirm the actual calling convention before building around
-   it, since that affects schema ergonomics.
-4. **For any new bulk extraction**: use GTA1-7B only, via the existing
-   debugged script; classify each candidate instruction as direct-naming
-   vs. relational before running, and only budget manual crop/zoom
-   verification time for the relational ones (should be a small minority
-   given this project's scope).
-5. **Build the highlight-rendering step** as an actual reusable function
-   (bbox + screenshot in, cropped/annotated image out) rather than
-   redoing the crop/grid/zoom/draw process by hand each time, as was done
-   manually this session for two elements.
-6. Sketch the authoring-tool UI (the original "mockup" framing, now
-   understood as an authoring tool that emits `bbox` values rather than a
-   thing shown to end users) only after the schema is finalized per item
-   2.
-7. Set up this project's own repo/README pointing back to
-   `gui_grounding_benchmark` for lineage, copying over only the specific
-   reusable assets listed above.
+The user pasted several real `tree` outputs over the course of the
+session and iterated live. Current state, as of the last `tree` seen:
+
+- **Fixed, confirmed correct**: `LABS/ableton-live-12-manual-en.pdf`. A
+  real bug was caught here — the actual file was originally named
+  `LABS/ableton-liv-12-manual-en.pdf` (missing the "e" in "live"),
+  which did not match AGENTS.md's reference to
+  `LABS/ableton-live-12-manual-en.pdf`. A first fix attempt produced a
+  botched concatenated name (`LABS/LABSableton-live-12-manual-en.pdf`);
+  the final state now matches AGENTS.md correctly.
+- **`dumps/` now exists and is populated** with `baseline`,
+  `sounds-pane`, `arrangement-view`, and `device-loaded` — the full
+  four-dump regression set the fifth draft called for, finally all
+  physically present in the repo (not just described in a doc).
+- **New, unreviewed file discovered**: `dumps/ableton_uia_20260803_184638_file-menu-open.json`.
+  This does not appear anywhere in any prior draft of this document — it
+  looks like a fifth capture nobody has looked at yet in any session.
+  Not reviewed this session either. Flagged, not forgotten.
+- **Left unresolved, by explicit user choice**: `dump_ableton_pywinauto.py`
+  and `uia_wrapper.py` currently sit at project **root**, not in a
+  `scripts/` directory as this document previously stated they should.
+  The user chose to leave the current flat layout alone for now rather
+  than restructure. Treat this as the actual current state, not a bug to
+  silently "fix" next time — if `scripts/` placement matters later, it
+  needs to be a deliberate decision, not an assumed correction.
+
+## NEXT SESSION GOAL
+
+**Primary: incorporate the user's live-test report.** The user is testing
+the current setup (wrapper + patched AGENTS.md + repo layout) hands-on and
+will come back with what worked and what didn't. That report should drive
+next session's actual priorities more than the list below — don't assume
+the items below still matter in the same shape once real usage data exists.
+
+**Secondary, worth doing opportunistically if the test report leaves room:**
+- Run `device-loaded.json` through `uia_wrapper.py` — the one regression-set
+  dump the wrapper hasn't actually been validated against yet.
+- Review `ableton_uia_20260803_184638_file-menu-open.json` — unreviewed,
+  unknown content, unknown relevance.
+- Resolve the MIDI-vs-Audio mixer-strip open question with a live Ableton
+  check (still unresolved, now three dumps deep).
+- Decide the `scripts/` vs. root placement question for
+  `dump_ableton_pywinauto.py` / `uia_wrapper.py`, and if `scripts/` is
+  chosen, update Rule 5's wrapper reference in AGENTS.md to the concrete
+  filename.
+- Decide whether merging `take_shot.sh` and `dump_ableton_pywinauto.py`
+  into one focus-locked capture call is a co-requisite of trusting Rule
+  5's widened evidence class (raised repeatedly, never yet built).
+
+## Files needed next session, alongside this context.md
+
+1. **Whatever the user's live test surfaces** — most likely to matter of
+   anything on this list.
+2. **`AGENTS.md`, current state** — to confirm the patched version is
+   actually the one in use, and to draft any further diff against it.
+3. **`ableton_uia_20260803_184638_file-menu-open.json`** — if review of
+   the unknown fifth dump gets picked up.
+4. Not strictly needed again, but useful if convenient: the other three
+   dumps already in `dumps/` (`baseline`, `sounds-pane`,
+   `arrangement-view`) — already fully characterized across two
+   sessions now, re-supplying them only matters if something about them
+   is suspected to have changed.
+
+Not needed next session: `gui_grounding_benchmark.py` (still out of
+scope, unchanged from prior drafts).
