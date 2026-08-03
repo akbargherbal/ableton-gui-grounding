@@ -1,0 +1,11 @@
+
+*.pyc
+
+__pycache__
+**/__pycache__/*
+
+.vevn
+**/.venv/*
+
+node_modules
+**/node_modules/*
