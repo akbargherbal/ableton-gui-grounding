@@ -55,8 +55,11 @@ clickable target.
 - Device parameters — not started.
 
 ### Next session should
-Ask the user what's next functionally (clip launching / device params /
-`click_by_id()` hardening are the live candidates), rather than assuming.
+No code work in progress on this project's own files right now — active work
+has shifted to the RELATED PROJECT comparison/integration task below (see
+that section for current status and what's pending). Once that resolves,
+functional candidates for this project remain: clip launching, device
+params, `click_by_id()` hardening — ask the user which, don't assume.
 
 ---
 
@@ -125,6 +128,36 @@ unverified paths in it.**
 **Verified pixel-accuracy of an early uiautomation-based (non-pywinauto)
 dump against a screenshot** — closed, no issues, not revisited since.
 
+**RELATED PROJECT investigation (this session, no code touched in this repo).**
+Read the MCP project's setup doc + `take_shot.sh`, then read three real
+OpenCode session transcripts (one flagged by the user as pedagogically
+"unsatisfactory," two earlier attempts at the same module) to post-mortem
+concrete failures rather than reason abstractly. Found three real instances
+of the same root cause, all evidenced in the transcripts (see RELATED
+PROJECT section below for detail): (1) `add_notes_to_clip` is write-only,
+no read-back tool exists, agent explicitly stated it couldn't re-verify
+notes it wrote; (2) a user manually replicating an MCP-driven step by hand
+(double-clicking a drum kit in the browser) caused Ableton to spawn a new
+track instead of loading onto the selected one — undetected for ~700 lines
+of transcript until the user reported no sound, because the agent had no
+way to check rendered UI state against its LOM-level assumption; (3) agent
+narrated in raw MIDI pitch numbers (36/38/42) instead of what's actually
+rendered (drum-rack pad names), confusing the user until corrected. This
+is evidence for, not just theory about, this project's UIA tree serving as
+a verification layer for MCP's write-only/blind-to-rendered-UI actions —
+see RELATED PROJECT for what's still pending before pursuing that.
+
+**To keep evaluation of further archived sessions cheap:** built a
+reusable LLM-eval prompt (delivered to user as `session_eval_prompt.md`,
+not part of this repo) that scores one transcript at a time against a
+fixed rubric (task completion, verification discipline, model-vs-reality
+grounding, pedagogical clarity, error recovery, efficiency, internal
+consistency) and outputs a comparable structured summary — so future
+sessions get evaluated by a separate LLM call instead of full reads in
+this context window. User is running it now against the three sessions
+above (with the "unsatisfactory" label stripped from the transcript first,
+to keep that one's evaluation unbiased) and will bring back the outputs.
+
 ---
 
 ## RELATED PROJECT (preview only — do not treat as fully known)
@@ -137,15 +170,27 @@ different control mechanism entirely from this project's approach
 (Windows UI Automation via pywinauto) — MCP + Remote Script vs. UIA tree
 walking + click simulation.
 
-**Status of my knowledge here: PREVIEW ONLY.** The user has shared one
-setup doc (`opencode-ableton-mcp-setup.md`) and explicitly said more
-detail is coming next session — treat everything below as partial
-context, not the full picture, and don't assume the setup is confirmed
-working just because the doc describes it in detail. No terminal output
-from actually running it has been shared yet in either project's
-sessions.
+**Status of my knowledge here: PARTIAL BUT EVIDENCE-BACKED**, up from
+preview-only. Have now seen: the setup doc, `take_shot.sh`, and three real
+OpenCode session transcripts (not just descriptions of the system — actual
+transcripts of it running against real Ableton, with real user friction).
+Not yet seen: the project's `AGENTS.md` (deliberately withheld by the user —
+it's been rewritten many times this project and is considered unreliable/
+being redone; **don't ask for it or reason from rule numbers mentioned
+inside old transcripts, e.g. "Rule 6," they don't reflect current truth**).
+Still preview-only on: the actual `MCP_Server/server.py` code, the full
+tool surface beyond what's been exercised in the transcripts I've read.
 
-### What the setup doc describes (unverified by me, not yet run/confirmed this-session)
+### What project 2 actually is (clarified this session)
+Not just "control Ableton via MCP" — a **tutorial/curriculum generator**.
+OpenCode drives Ableton through MCP (LOM-level actions: create track, load
+kit, add MIDI notes, fire clip) while teaching a beginner interactively;
+`take_shot.sh` screenshots each step afterward to build a `walkthrough.md`
+with numbered PNGs for a documentation pass. The MCP server acts and
+teaches live; the screenshot pass documents after the fact — it is not a
+live verification step during teaching.
+
+### Setup doc facts (still not independently run/confirmed by me)
 - Architecture: OpenCode ↔ MCP server via stdio; MCP server ↔ Ableton via
   a TCP socket opened by an `AbletonMCP` Remote Script (Control Surface).
   The WSL/Windows boundary is crossed only at that second hop.
@@ -160,35 +205,49 @@ sessions.
 - Known install gotcha: don't run `pip install -e .` (packaging bug in
   upstream `pyproject.toml`); install deps directly instead.
 
-### Next session: exploratory comparison (this is the actual next task)
-User wants to combine the best of both projects. When more detail on the
-MCP project arrives, work through:
-- **Where they overlap** — both ultimately want to read/control Session
-  View state; is one strictly more capable, or do they cover different
-  ground (e.g. MCP's device-parameter read/write vs. this project's
-  direct clip-slot/mixer control)?
-- **What each does better** — likely candidates to check: MCP may be
-  faster/more semantic (structured commands vs. simulated clicks) and
-  reach deeper into device internals; pywinauto/UIA may be more general
-  (works on anything with a UIA tree, no Remote Script dependency, no
-  WSL networking layer) and more transparent about *why* something
-  failed (this project's whole verify-after-every-action discipline).
-  Don't assume either of these without checking — confirm from what the
-  user shares next session.
-- **Where they could complement each other** — e.g. MCP for
-  device-parameter/audio-engine-level control, UIA for anything MCP
-  doesn't expose or for validating that an MCP command actually produced
-  the expected UI state (a verification layer, playing to this project's
-  established strength).
-- **Challenges specific to combining them**: two live control channels
-  into the same running Ableton instance could race or conflict if used
-  concurrently; WSL2 networking (mirrored-mode requirement) only affects
-  the MCP path, not this one; different processes own "trust" in each
-  project (verify-after-click here vs. MCP's own correctness) — worth
-  deciding which is authoritative if both act on the same session.
-- Don't start implementation work on a combined approach until the
-  exploratory session has actually happened — this is a planning/
-  comparison task first.
+### Confirmed real failure patterns (from transcript post-mortem, this session)
+Three concrete instances, all with transcript evidence, all the same root
+cause — **MCP writes to/reads from the Live Object Model; nothing confirms
+the rendered UI matches, and the human's manual actions happen in the
+actual UI, which can diverge from the data model:**
+1. `add_notes_to_clip` has no read-back tool — agent explicitly stated
+   contents were "as-written, not re-queried."
+2. User manually double-clicked a drum kit in the browser to replicate an
+   MCP-driven step; Ableton spawned a **new track** instead of loading
+   onto the selected one. Went undetected for ~700 transcript lines across
+   multiple user messages ("I can't hear anything") before `get_track_info`
+   on the intended track showed `devices: []`.
+3. Agent narrated in raw MIDI pitch numbers (36/38/42) instead of the
+   pad names actually rendered on a Drum Rack — user confusion until
+   corrected.
+This is now evidence for, not just a theory about, this project's UIA tree
+(`automation_id`s, structural and checkable without a screenshot) serving
+as a **verification layer** for case 2 specifically — a UIA dump of
+`SessionView.Track[N]` right after `load_drum_kit` would show immediately
+whether a device landed on the intended track. Cases 1 and 3 are softer
+fits (1 may not be UIA-checkable at all — individual clip notes are
+custom-drawn, likely no per-note automation_id; 3 is a prompting issue,
+not an automation gap).
+
+### Next session: pending, waiting on user
+Built a reusable LLM-eval prompt (given to the user directly, not stored in
+this repo) that scores one archived session transcript at a time against a
+fixed rubric, to evaluate the rest of the user's archived sessions cheaply
+without full reads in this context window. **User is running it now** on
+the three sessions already read (transcript pre-scrubbed of the
+"unsatisfactory" label for an unbiased read) and will bring back the
+structured outputs. When that happens:
+- Read the eval outputs (not raw transcripts) to check whether the three
+  failure patterns above generalize across more sessions, or whether
+  those three were unusual.
+- Only then resume the actual planning task: where the two projects
+  overlap, what each does better, where they complement (the verification-
+  layer idea above is the leading candidate, not yet a conclusion), and
+  integration challenges (two live control channels into one Ableton
+  instance could race; WSL2 mirrored-networking only affects the MCP path;
+  whose "trust" is authoritative if both act on the same session).
+- Do not start implementation work on a combined approach yet — still in
+  the evidence-gathering/planning phase.
 
 ---
 
