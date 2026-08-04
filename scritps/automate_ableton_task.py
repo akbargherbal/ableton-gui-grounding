@@ -73,6 +73,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import time
 from typing import Callable
@@ -95,6 +96,40 @@ from dump_ableton_pywinauto import find_ableton_window, ensure_window_ready
 # hardcoded here -- see that file for the full index, sourcing, and which
 # other shortcuts are still BLOCKED on the "no selected-track read" gap.
 from keyboard_shortcuts import activator_shortcut_for_index
+
+
+# --------------------------------------------------------------------------
+# Structured events (Phase 0 -- see context.md / phased_plan.md)
+# --------------------------------------------------------------------------
+#
+# Goal: replace stdout-parsing-by-wording (an orchestrator grepping for
+# "[click]"/"[warn]"/etc. and hoping the wording never changes) with a
+# stable, greppable, versioned signal. This is ADDITIVE: every existing
+# print() line stays exactly where it was, for a human reading raw
+# terminal output. emit_event() lines are a second, parallel channel on
+# the same stdout stream (so ordering relative to the print() lines is
+# preserved for free), each prefixed "EVENT: " for a trivial `grep`.
+#
+# The "v" field is a schema version. A consumer (orchestrate.sh, Phase 1)
+# should read the fields it recognizes for the "v" it knows about and
+# ignore the rest -- that's what lets this vocabulary grow later (e.g. a
+# new event type, or a new field on action_result) without breaking an
+# already-written orchestrator.
+
+EVENT_SCHEMA_VERSION = 1
+
+
+def emit_event(event_type: str, **fields) -> None:
+    """Print one single-line, greppable, versioned JSON event.
+
+    `default=str` on json.dumps is a deliberate safety net: some fields
+    passed in here (e.g. a caught exception) aren't natively JSON-
+    serializable, and this is a logging call, not a wire protocol -- it's
+    better to stringify something unexpected than to raise out of a
+    logging call and mask the real error underneath it.
+    """
+    payload = {"v": EVENT_SCHEMA_VERSION, "type": event_type, **fields}
+    print(f"EVENT: {json.dumps(payload, default=str)}")
 
 
 # --------------------------------------------------------------------------
@@ -254,25 +289,31 @@ def set_checkbox_by_id(window: UIAWrapper, auto_id: str, desired: bool,
     current = get_toggle_state(control)
     if current == desired:
         print(f"  [skip] {label} already {'on' if desired else 'off'}")
+        emit_event("action_result", label=label, level="L1", result="skip")
         return
 
     print(f"  {'[dry-run] would click' if dry_run else '[click]'} {label} "
           f"({'on' if current else 'off'} -> {'on' if desired else 'off'})")
     if dry_run:
+        emit_event("action_result", label=label, level="L1", result="dry_run")
         return
 
+    emit_event("action_start", label=label, level="L1")
     for attempt in range(1, max_attempts + 1):
         control.click_input()
         time.sleep(0.15)  # let the UI actually redraw before we re-read
         verify_control = resolve(window, auto_id)  # fresh again, not the same handle
         actual = get_toggle_state(verify_control)
         if actual == desired:
+            emit_event("action_result", label=label, level="L1", result="success", attempt=attempt)
             return
         print(f"  [warn] {label}: clicked but state reads "
               f"{'on' if actual else 'off'}, expected {'on' if desired else 'off'} "
               f"(attempt {attempt}/{max_attempts})")
+        emit_event("action_result", label=label, level="L1", result="warn", attempt=attempt)
         control = verify_control  # try the freshly-resolved one next attempt
 
+    emit_event("action_result", label=label, level="L1", result="failed", attempts=max_attempts)
     raise RuntimeError(
         f"{label}: state did not change to {'on' if desired else 'off'} after "
         f"{max_attempts} click attempt(s). Either the click isn't landing on the "
@@ -288,7 +329,7 @@ class EscalationExhausted(RuntimeError):
 
 
 def click_by_id(window: UIAWrapper, auto_id: str, dry_run: bool, label: str,
-                 verify: "Callable[[], bool] | None" = None,
+                 verify: Callable[[], bool] | None = None,
                  keyboard_shortcut: str | None = None,
                  max_attempts: int = 2) -> None:
     """Click a control via an escalation ladder: Mouse -> Keyboard shortcut
@@ -333,16 +374,24 @@ def click_by_id(window: UIAWrapper, auto_id: str, dry_run: bool, label: str,
     control = resolve(window, auto_id)
     print(f"  {'[dry-run] would click' if dry_run else '[click L1/mouse]'} {label}")
     if dry_run:
+        emit_event("action_result", label=label, level="L1", result="dry_run")
         return
+    emit_event("action_start", label=label, level="L1")
     for attempt in range(1, max_attempts + 1):
         control.click_input()
         time.sleep(0.15)  # let the UI redraw before re-checking, same as set_checkbox_by_id
         if verify is None:
-            return  # nothing to check against; trust by necessity, not by default
+            # Nothing to check against; trust by necessity, not by default --
+            # still a real, distinct outcome worth an event of its own so an
+            # orchestrator can tell "verified success" from "unverifiable".
+            emit_event("action_result", label=label, level="L1", result="success", verified=False)
+            return
         if verify():
+            emit_event("action_result", label=label, level="L1", result="success", attempt=attempt)
             return
         print(f"  [warn] {label}: L1 mouse click did not verify "
               f"(attempt {attempt}/{max_attempts})")
+        emit_event("action_result", label=label, level="L1", result="warn", attempt=attempt)
         control = resolve(window, auto_id)  # fresh handle for the retry, never reused
 
     # --- Level 2: keyboard shortcut ---
@@ -351,8 +400,14 @@ def click_by_id(window: UIAWrapper, auto_id: str, dry_run: bool, label: str,
               "shortcut supplied for this control -- not the same as 'none exists'; "
               "check ableton-live-12-manual-en.pdf or the (not-yet-built) "
               "keyboard-shortcut index before assuming there isn't one.")
+        emit_event("escalate", label=label, from_level="L1", to_level="L2",
+                    reason="no_keyboard_shortcut_supplied")
+        emit_event("escalate", label=label, from_level="L2", to_level="L3",
+                    reason="L2_unavailable")
     else:
+        emit_event("escalate", label=label, from_level="L1", to_level="L2")
         print(f"  [click L2/keyboard] {label}: sending {keyboard_shortcut!r}")
+        emit_event("action_start", label=label, level="L2")
         # type_keys() (BaseWrapper) is the correct call for UIAWrapper --
         # verified against pywinauto 0.6.9 source directly, not assumed.
         # send_keystrokes() is a real pywinauto method too, but it lives on
@@ -360,9 +415,15 @@ def click_by_id(window: UIAWrapper, auto_id: str, dry_run: bool, label: str,
         # UIAWrapper, which is what this project uses throughout.
         window.type_keys(keyboard_shortcut)
         time.sleep(0.15)
-        if verify is not None and verify():
+        # Note: reaching this branch means verify is guaranteed non-None --
+        # the "verify is None" case above always returns at L1 on the first
+        # attempt and never falls through to L2 at all.
+        if verify():
+            emit_event("action_result", label=label, level="L2", result="success")
             return
         print(f"  [warn] {label}: L2 keyboard shortcut did not verify either")
+        emit_event("action_result", label=label, level="L2", result="warn")
+        emit_event("escalate", label=label, from_level="L2", to_level="L3")
 
     # --- Level 3: explicit human instructions (last resort) ---
     # Per the escalation-ladder design: named menu paths/states only, never
@@ -371,6 +432,7 @@ def click_by_id(window: UIAWrapper, auto_id: str, dry_run: bool, label: str,
     # it prints to the terminal, which the user pastes back -- so it
     # raises with the instruction text ready to relay verbatim, rather
     # than a generic failure message.
+    emit_event("action_result", label=label, level="L3", result="failed")
     raise EscalationExhausted(
         f"{label}: automated levels exhausted (mouse"
         + (", keyboard" if keyboard_shortcut else "")
@@ -700,6 +762,27 @@ def task_set_tempo(window: UIAWrapper, bpm: float, dry_run: bool) -> None:
     tempo.type_keys(f"{bpm}{{ENTER}}", with_spaces=True)
 
 
+def run_task(task_name: str, tracks: list[int], fn: Callable[[], None]) -> None:
+    """Wrap a single task_* call with task_start/task_done events.
+
+    One instrumentation point in main()'s dispatch, rather than duplicating
+    start/done bookkeeping inside every task_* function -- every dispatch
+    path (arm_track, solo_tour, the probes, etc.) goes through here, so
+    "wraps every task_* function" (phased_plan.md, Phase 0) holds without
+    touching each function's own body. Re-raises after emitting task_done
+    on failure, so the caller's own error handling/exit code is unaffected
+    -- this only adds a signal, it never changes control flow.
+    """
+    emit_event("task_start", task=task_name, tracks=tracks)
+    try:
+        fn()
+    except Exception as e:
+        emit_event("task_done", task=task_name, tracks=tracks, result="failed", error=str(e))
+        raise
+    else:
+        emit_event("task_done", task=task_name, tracks=tracks, result="success")
+
+
 # --------------------------------------------------------------------------
 # CLI
 # --------------------------------------------------------------------------
@@ -756,29 +839,35 @@ def main() -> None:
     if args.task == "arm_track":
         if len(args.tracks) != 1:
             parser.error("--task arm_track needs exactly one --tracks index")
-        task_arm_track(window, args.tracks[0], dry_run)
+        run_task("arm_track", args.tracks,
+                  lambda: task_arm_track(window, args.tracks[0], dry_run))
     elif args.task == "solo_tour":
         if not args.tracks:
             parser.error("--task solo_tour needs at least one --tracks index")
-        task_solo_tour(window, args.tracks, args.seconds, dry_run)
+        run_task("solo_tour", args.tracks,
+                  lambda: task_solo_tour(window, args.tracks, args.seconds, dry_run))
     elif args.task == "set_tempo":
-        task_set_tempo(window, args.bpm, dry_run)
+        run_task("set_tempo", [], lambda: task_set_tempo(window, args.bpm, dry_run))
     elif args.task == "probe_toggle":
         if len(args.tracks) != 1:
             parser.error("--task probe_toggle needs exactly one --tracks index")
-        task_probe_toggle(window, args.tracks[0])
+        run_task("probe_toggle", args.tracks,
+                  lambda: task_probe_toggle(window, args.tracks[0]))
     elif args.task == "probe_solo_transport":
         if len(args.tracks) != 1:
             parser.error("--task probe_solo_transport needs exactly one --tracks index")
-        task_probe_solo_transport(window, args.tracks[0], args.seconds)
+        run_task("probe_solo_transport", args.tracks,
+                  lambda: task_probe_solo_transport(window, args.tracks[0], args.seconds))
     elif args.task == "probe_keyboard_activator":
         if len(args.tracks) != 1:
             parser.error("--task probe_keyboard_activator needs exactly one --tracks index")
-        task_probe_keyboard_activator(window, args.tracks[0])
+        run_task("probe_keyboard_activator", args.tracks,
+                  lambda: task_probe_keyboard_activator(window, args.tracks[0]))
     elif args.task == "read_solo_states":
         if not args.tracks:
             parser.error("--task read_solo_states needs at least one --tracks index")
-        task_read_solo_states(window, args.tracks)
+        run_task("read_solo_states", args.tracks,
+                  lambda: task_read_solo_states(window, args.tracks))
 
 
 if __name__ == "__main__":
