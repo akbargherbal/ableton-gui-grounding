@@ -6,13 +6,6 @@ context.md). Runs the real orchestrate.sh as a subprocess against STUB
 automate/take_shot scripts (via the ORCH_PYTHON_CMD / ORCH_AUTOMATE_SCRIPT /
 ORCH_TAKE_SHOT env-var seams orchestrate.sh exposes for exactly this
 purpose) — no Windows, no Ableton, no real screenshot needed.
-
-Covers what phased_plan.md's Phase 1 section calls out as verifiable
-without Windows: arg parsing, the seq counter, path passthrough, and error
-branching. It deliberately does NOT attempt to verify the real
-`python.exe .../automate_ableton_task.py --live` <-> `./take_shot.sh`
-round-trip against actual Ableton — that acceptance test still needs the
-user's Windows machine, same as every other session in this project.
 """
 
 from __future__ import annotations
@@ -32,8 +25,6 @@ ORCHESTRATE_SH = REPO_ROOT / "orchestrate.sh"
 
 FAKE_PYTHON_SRC = r"""#!/usr/bin/env bash
 # Stub for ORCH_PYTHON_CMD. Args: <automate_script_path> --task X --live [...]
-# The real script path/args are ignored -- behavior is fully controlled by
-# env vars so each test can script an exact scenario.
 set -u
 if [ -n "${FAKE_AUTOMATE_CALLS_FILE:-}" ]; then
   echo "call" >> "$FAKE_AUTOMATE_CALLS_FILE"
@@ -65,9 +56,6 @@ def _make_executable(path: Path, src: str) -> None:
 
 
 class Sandbox:
-    """One temp dir per test: stub scripts + a place for the lab dir /
-    orchestrate's seq-counter file to live, fully isolated from the repo."""
-
     def __enter__(self):
         self.tmp = Path(tempfile.mkdtemp(prefix="orchestrate_test_"))
         self.fake_python = self.tmp / "fake_python.sh"
@@ -94,7 +82,7 @@ class Sandbox:
         env.update(
             {
                 "ORCH_PYTHON_CMD": str(self.fake_python),
-                "ORCH_AUTOMATE_SCRIPT": "/dev/null",  # ignored by the stub
+                "ORCH_AUTOMATE_SCRIPT": "/dev/null",
                 "ORCH_TAKE_SHOT": str(self.fake_take_shot),
                 "ABLETON_PROJECT_ROOT": str(self.project_root),
                 "FAKE_AUTOMATE_CALLS_FILE": str(self.automate_calls_file),
@@ -136,9 +124,6 @@ class Sandbox:
 
 def test_usage_error_when_too_few_args():
     with Sandbox() as sb:
-        proc = (
-            sb.run.__wrapped__ if False else None
-        )  # placeholder to keep symmetry; unused
         result = subprocess.run(
             ["bash", str(ORCHESTRATE_SH), "only_one_arg"],
             capture_output=True,
@@ -188,9 +173,9 @@ def test_happy_path_derives_desc_from_label_and_passes_lab_dir_unchanged():
         calls = sb.take_shot_calls()
         assert len(calls) == 1
         got_lab_dir, got_seq, got_desc = calls[0]
-        assert got_lab_dir == lab_dir  # unchanged -- no /mnt/c <-> C:\ logic here
+        assert got_lab_dir == lab_dir
         assert got_seq == "01"
-        assert got_desc == "track_1_mixer_arm"  # slugified label, not the raw task name
+        assert got_desc == "track_1_mixer_arm"
 
 
 def test_desc_falls_back_to_task_field_when_no_label():
@@ -244,8 +229,7 @@ def test_seq_independent_per_lab_dir():
 
 
 # --------------------------------------------------------------------------
-# Error branching: failure still gets documented, never retried, and the
-# automate failure's own exit code wins.
+# Error branching
 # --------------------------------------------------------------------------
 
 
@@ -261,12 +245,12 @@ def test_automate_failure_still_takes_a_failed_screenshot_and_does_not_retry():
                 "FAKE_AUTOMATE_LABEL_EVENT": "Track[1].Mixer.Arm",
             },
         )
-        assert proc.returncode == 1  # automate's own exit code, not swallowed
-        assert sb.automate_call_count() == 1  # never retried against "live" Ableton
+        assert proc.returncode == 1
+        assert sb.automate_call_count() == 1
         calls = sb.take_shot_calls()
-        assert len(calls) == 1  # failure is still documented
+        assert len(calls) == 1
         _, _, desc = calls[0]
-        assert desc == "track_1_mixer_arm_failed"
+        assert desc == "track_1_mixer_arm_FAILED"
 
 
 def test_take_shot_failure_surfaces_when_automate_succeeded():
@@ -278,15 +262,13 @@ def test_take_shot_failure_surfaces_when_automate_succeeded():
             "1",
             env_overrides={"FAKE_TAKE_SHOT_EXIT": "1"},
         )
-        assert (
-            proc.returncode == 1
-        )  # take_shot's exit code, since automate itself was fine
+        assert proc.returncode == 1
         assert sb.automate_call_count() == 1
         assert len(sb.take_shot_calls()) == 1
 
 
 # --------------------------------------------------------------------------
-# Output tagging (shortcoming #7 in screenshot_orchestration_analysis.md)
+# Output tagging
 # --------------------------------------------------------------------------
 
 
