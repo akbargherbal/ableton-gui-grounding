@@ -1,0 +1,591 @@
+"""
+automate_ableton_task.py
+
+Builds on dump_ableton_pywinauto.py: instead of just reading the UIA tree,
+this script *acts* on it, using the stable `automation_id` scheme Ableton
+exposes under the Session View (discovered by inspecting a prior dump):
+
+    SessionView.Track[N].Mixer.Arm                    CheckBox
+    SessionView.Track[N].Mixer.Activator               CheckBox (mute)
+    SessionView.Track[N].Mixer.Solo                     CheckBox
+    SessionView.Track[N].Mixer.Monitoring.Buttons[0..2] RadioButton (In/Auto/Off)
+    SessionView.Track[N].Mixer.Stop                     Button (clip stop)
+    SessionView.Track[N].Slot[M]                        Group (clip slot)
+    SessionView.ReturnTrack[N].Mixer.*                   same shape, return tracks
+    Transport.Tempo                                     Slider
+    Transport.Play / Transport.Stop
+
+Using automation_id instead of visible `name` matters because names repeat
+on every track ("In", "Auto", "Off", "Solo/Cue" all exist 4+ times) and are
+locale-dependent, while these IDs are structural, per-track, and index-based.
+
+Two hard-won lessons baked into this version (found by actually running it):
+
+1. Ableton's Session View is UI-virtualized. A non-maximized/backgrounded
+   window can expose ~60 automation_ids instead of ~201, missing controls
+   entirely -- not a lookup bug, the element wasn't rendered yet. We
+   maximize + focus the window before every run (see ensure_window_ready).
+
+2. Cached control references go stale across state-changing actions.
+   Holding a UIAWrapper captured before clicking Play, sleeping, then
+   clicking Stop, and reusing that *same* reference afterward silently
+   returned the wrong toggle state in testing -- one track was left
+   soloed after a "restore" step that should have turned it off. The fix
+   is to never hold a control across a gap; every click/read below
+   re-resolves the control from a fresh, targeted tree walk immediately
+   before touching it (see resolve()).
+
+That trades some speed for correctness. For this scale of tree (~200
+elements) a fresh walk is well under a second -- worth it for a script
+that touches a live project.
+
+Requirements
+------------
+- Windows 10/11, Ableton Live 12+ running with a project open
+- pip install pywinauto
+- dump_ableton_pywinauto.py in the same folder (we import find_ableton_window
+  from it rather than re-implementing window discovery)
+
+Usage
+-----
+    # Safe: prints the plan, clicks nothing
+    python automate_ableton_task.py --task solo_tour --tracks 0 1 2 3
+
+    # Actually perform it
+    python automate_ableton_task.py --task solo_tour --tracks 0 1 2 3 --live
+
+    # Arm track 1 for recording and set its monitor to "In"
+    python automate_ableton_task.py --task arm_track --tracks 1 --live
+
+    # Discover what track indices exist right now
+    python automate_ableton_task.py --list-tracks
+
+    # Diagnostics (always live-click regardless of --live -- see their
+    # own docstrings for why)
+    python automate_ableton_task.py --task probe_toggle --tracks 1
+    python automate_ableton_task.py --task probe_solo_transport --tracks 1
+"""
+
+from __future__ import annotations
+
+import argparse
+import sys
+import time
+
+try:
+    from pywinauto.controls.uiawrapper import UIAWrapper
+except ImportError:
+    print("Missing dependency. Install with:\n    pip install pywinauto\n", file=sys.stderr)
+    sys.exit(1)
+
+# Reuse window discovery from the read-only dump script instead of
+# duplicating it -- keep one source of truth for "how do we find Live".
+from dump_ableton_pywinauto import find_ableton_window
+
+
+# --------------------------------------------------------------------------
+# Window readiness
+# --------------------------------------------------------------------------
+
+def ensure_window_ready(window: UIAWrapper) -> None:
+    """Best-effort: make sure Live's window is restored/foregrounded.
+
+    Ableton's Session View appears to be UI-virtualized -- controls that
+    aren't actually rendered on screen (window minimized, too small, not
+    focused) simply don't exist as UIA elements yet, even though their
+    automation_id is well-defined once they ARE visible.
+    """
+    try:
+        if window.is_minimized():
+            print("Window is minimized; restoring...", file=sys.stderr)
+            window.restore()
+    except Exception:
+        pass
+    try:
+        window.set_focus()
+    except Exception:
+        pass
+    try:
+        window.maximize()
+    except Exception:
+        pass
+    time.sleep(0.3)  # give the redraw a moment before we walk the tree
+
+
+# --------------------------------------------------------------------------
+# Control resolution
+# --------------------------------------------------------------------------
+#
+# NOTE: pywinauto's element_info.descendants(auto_id=...) doesn't exist --
+# UIAElementInfo.descendants() only builds conditions on process, class_name,
+# title, control_type, content_only. And even descendants(control_type=...)
+# -- a single FindAll-style query -- returned nothing against Ableton's
+# deeply-nested, custom-drawn UIA tree in testing, the same way
+# dump_ableton_pywinauto.py needed a manual recursive control.children()
+# walk (not a single query) to see everything. So we walk manually here too.
+#
+# Deliberately NOT caching resolved controls across calls: see the module
+# docstring for why a stale reference produced a wrong result in testing.
+
+def find_control(window: UIAWrapper, auto_id: str, max_depth: int = 20) -> UIAWrapper | None:
+    """DFS the live tree for one control by automation_id, stopping at the
+    first match. Returns None if not found (caller decides how to react).
+    """
+    found: list[UIAWrapper] = []
+
+    def _walk(ctrl: UIAWrapper, depth: int) -> None:
+        if found:
+            return
+        try:
+            aid = ctrl.element_info.automation_id
+        except Exception:
+            aid = None
+        if aid == auto_id:
+            found.append(ctrl)
+            return
+        if depth >= max_depth:
+            return
+        try:
+            children = ctrl.children()
+        except Exception:
+            children = []
+        for child in children:
+            _walk(child, depth + 1)
+            if found:
+                return
+
+    _walk(window, 0)
+    return found[0] if found else None
+
+
+def resolve(window: UIAWrapper, auto_id: str, retry_with_refocus: bool = True) -> UIAWrapper:
+    """Resolve one control by automation_id, right now, freshly.
+
+    If it's missing, try once more after ensure_window_ready() -- covers
+    the case where focus/visibility shifted between the start of a task
+    and this particular click (e.g. clicking Play could plausibly steal
+    focus). Raises a clear error if it's still missing after that.
+    """
+    control = find_control(window, auto_id)
+    if control is None and retry_with_refocus:
+        ensure_window_ready(window)
+        control = find_control(window, auto_id)
+    if control is None:
+        raise LookupError(
+            f"No element with automation_id={auto_id!r} found in a fresh tree walk. "
+            "The control may be off-screen/virtualized, or the UI just redrew mid-task. "
+            "Run --list-tracks to check what's currently visible/indexed."
+        )
+    return control
+
+
+def build_automation_id_index(control: UIAWrapper, max_depth: int = 20) -> dict[str, list[UIAWrapper]]:
+    """Full one-shot index, used only for --list-tracks (bulk discovery,
+    not held onto for later clicking) and for the up-front sanity check
+    before a task starts.
+    """
+    index: dict[str, list[UIAWrapper]] = {}
+
+    def _walk(ctrl: UIAWrapper, depth: int) -> None:
+        try:
+            aid = ctrl.element_info.automation_id
+        except Exception:
+            aid = None
+        if aid:
+            index.setdefault(aid, []).append(ctrl)
+        if depth >= max_depth:
+            return
+        try:
+            children = ctrl.children()
+        except Exception:
+            children = []
+        for child in children:
+            _walk(child, depth + 1)
+
+    _walk(control, 0)
+    return index
+
+
+def verify_present(index: dict[str, list[UIAWrapper]], required_ids: list[str]) -> None:
+    """Fail fast, before clicking anything, if expected controls aren't
+    visible right now. This is a friendly up-front check only -- actual
+    clicks still re-resolve fresh via resolve(), since state can shift
+    between this check and the moment we act.
+    """
+    missing = [i for i in required_ids if i not in index]
+    if missing:
+        raise LookupError(
+            "The following controls were not found in the tree:\n  "
+            + "\n  ".join(missing)
+            + "\n\nThis usually means Ableton's window wasn't fully visible/maximized "
+              "(Session View appears to be UI-virtualized -- off-screen controls aren't "
+              "exposed to accessibility APIs until rendered). Maximize the window and "
+              "try again, or run --list-tracks to confirm what's currently indexed."
+        )
+
+
+def track_mixer_id(track_index: int, field: str, return_track: bool = False) -> str:
+    prefix = "ReturnTrack" if return_track else "Track"
+    return f"SessionView.{prefix}[{track_index}].Mixer.{field}"
+
+
+# --------------------------------------------------------------------------
+# Control actions
+# --------------------------------------------------------------------------
+
+def get_toggle_state(control: UIAWrapper) -> bool:
+    """Read a CheckBox's current on/off state.
+
+    pywinauto's uia backend exposes TogglePattern via get_toggle_state()
+    for real checkboxes; fall back to legacy is_selected() if that's
+    absent, since Ableton's radio-style Monitoring buttons behave a bit
+    differently.
+    """
+    try:
+        return bool(control.get_toggle_state())
+    except Exception:
+        try:
+            return bool(control.is_selected())
+        except Exception:
+            aid = getattr(control.element_info, "automation_id", "?")
+            raise RuntimeError(
+                f"Could not read state of {aid!r}; add a case for this control "
+                "type before automating it."
+            )
+
+
+def set_checkbox_by_id(window: UIAWrapper, auto_id: str, desired: bool,
+                        dry_run: bool, label: str, max_attempts: int = 2) -> None:
+    """Resolve fresh, read current state, click only if it doesn't already
+    match `desired` -- then, critically, RE-READ after clicking to confirm
+    it actually changed. Testing showed a click can be logged as sent while
+    the real toggle state doesn't end up where we expected (either the read
+    or the click itself is unreliable against this custom-drawn control) --
+    trusting the click without checking is what left a track soloed after
+    a "restore" step. If verification fails, retry once, then raise loudly
+    instead of silently continuing with wrong bookkeeping.
+    """
+    control = resolve(window, auto_id)
+    current = get_toggle_state(control)
+    if current == desired:
+        print(f"  [skip] {label} already {'on' if desired else 'off'}")
+        return
+
+    print(f"  {'[dry-run] would click' if dry_run else '[click]'} {label} "
+          f"({'on' if current else 'off'} -> {'on' if desired else 'off'})")
+    if dry_run:
+        return
+
+    for attempt in range(1, max_attempts + 1):
+        control.click_input()
+        time.sleep(0.15)  # let the UI actually redraw before we re-read
+        verify_control = resolve(window, auto_id)  # fresh again, not the same handle
+        actual = get_toggle_state(verify_control)
+        if actual == desired:
+            return
+        print(f"  [warn] {label}: clicked but state reads "
+              f"{'on' if actual else 'off'}, expected {'on' if desired else 'off'} "
+              f"(attempt {attempt}/{max_attempts})")
+        control = verify_control  # try the freshly-resolved one next attempt
+
+    raise RuntimeError(
+        f"{label}: state did not change to {'on' if desired else 'off'} after "
+        f"{max_attempts} click attempt(s). Either the click isn't landing on the "
+        "real control (coordinates stale/offset) or get_toggle_state() isn't "
+        "reporting this control's true state. Run --task probe_toggle to isolate which."
+    )
+
+
+def click_by_id(window: UIAWrapper, auto_id: str, dry_run: bool, label: str) -> None:
+    control = resolve(window, auto_id)
+    print(f"  {'[dry-run] would click' if dry_run else '[click]'} {label}")
+    if not dry_run:
+        control.click_input()
+
+
+def task_probe_toggle(window: UIAWrapper, track_index: int) -> None:
+    """Diagnostic: click a track's Solo checkbox 4 times, 1s apart, printing
+    the read-back state after each click plus its screen bounding_rect.
+
+    NOTE: this task always live-clicks, regardless of --live / dry-run.
+    A probe that doesn't click can't tell you anything -- there'd be no
+    "after" to compare. main() skips the "*** DRY RUN ***" banner for
+    this task specifically so that isn't misreported (see main()).
+
+    Use this to tell apart the two possible causes of the solo_tour bug:
+      * if the printed state toggles cleanly on/off/on/off each click,
+        get_toggle_state() and click_input() actually agree with each
+        other -- the bug is elsewhere (e.g. a race with Play/Stop).
+      * if the state DOESN'T toggle cleanly (e.g. stays "on" for two
+        clicks in a row, or the rect stays identical across the run while
+        Ableton visibly shows different colors), that points at
+        get_toggle_state() misreading this custom RadioButton-style
+        control, or click_input() missing its target.
+    Watch the actual Ableton window while this runs and compare what you
+    see on screen to what gets printed.
+    """
+    auto_id = track_mixer_id(track_index, "Solo")
+    print(f"Probing {auto_id} -- watch the Ableton window while this runs.\n")
+    for i in range(4):
+        control = resolve(window, auto_id)
+        rect = control.rectangle()
+        before = get_toggle_state(control)
+        control.click_input()
+        time.sleep(1.0)
+        control2 = resolve(window, auto_id)
+        after = get_toggle_state(control2)
+        print(f"click {i+1}: before={'on' if before else 'off'} -> "
+              f"after={'on' if after else 'off'}  rect={rect}")
+
+
+def task_probe_solo_transport(window: UIAWrapper, track_index: int, seconds: float) -> None:
+    """Diagnostic: reproduce solo_tour's exact sequence for ONE track --
+    solo on -> Play -> sleep -> Stop -> solo off -- but read+print state
+    after every single action instead of only verifying at the end.
+
+    probe_toggle showed the toggle read/click agree with each other and
+    with the screen in isolation (clean off/on/off/on, identical rect
+    every time). That rules out "click doesn't land" and "get_toggle_state
+    misreads this control" as standalone causes. This probe exists to
+    catch a timing interaction with Play/Stop specifically -- e.g. Play
+    stealing focus, or Ableton's tree re-virtualizing during playback --
+    that wouldn't show up when Solo is clicked in isolation with nothing
+    else happening in between.
+
+    Like probe_toggle, this always live-clicks regardless of --live.
+    Watch the actual Solo button on screen throughout and compare against
+    what's printed -- specifically the two states are most interesting:
+    "after Stop, before unsolo click" and "after unsolo click".
+    """
+    solo_id = track_mixer_id(track_index, "Solo")
+
+    def read(label: str) -> bool:
+        control = resolve(window, solo_id)
+        state = get_toggle_state(control)
+        rect = control.rectangle()
+        print(f"  [{label}] solo={'on' if state else 'off'}  rect={rect}")
+        return state
+
+    print(f"Probing full solo_tour sequence on Track[{track_index}] -- "
+          f"watch the Ableton window throughout.\n")
+
+    original = read("0. before anything")
+
+    control = resolve(window, solo_id)
+    control.click_input()
+    time.sleep(0.15)
+    read("1. after solo-on click")
+
+    play = resolve(window, "Transport.Play")
+    play.click_input()
+    print(f"  [2. clicked Transport.Play] sleeping {seconds}s...")
+    time.sleep(seconds)
+    read("3. after sleep, before Stop click")
+
+    stop = resolve(window, "Transport.Stop")
+    stop.click_input()
+    time.sleep(0.15)
+    read("4. after Stop click, before unsolo click")
+
+    control = resolve(window, solo_id)
+    control.click_input()
+    time.sleep(0.15)
+    final = read("5. after unsolo click")
+
+    if final != original:
+        print(f"\n  [MISMATCH] started {'on' if original else 'off'}, "
+              f"ended {'on' if final else 'off'} -- track was NOT restored. "
+              "Compare step 3/4/5 above against what the screen showed at "
+              "each moment to see where the click and the real state part ways.")
+    else:
+        print(f"\n  [OK] state restored to {'on' if original else 'off'} "
+              "as expected.")
+
+
+# --------------------------------------------------------------------------
+# Discovery: what track indices currently exist
+# --------------------------------------------------------------------------
+
+def list_tracks(index: dict[str, list[UIAWrapper]]) -> None:
+    all_ids = index.keys()
+    track_ids = sorted(
+        a for a in all_ids
+        if a.startswith("SessionView.Track[") and a.endswith(".Mixer")
+    )
+    return_ids = sorted(
+        a for a in all_ids
+        if a.startswith("SessionView.ReturnTrack[") and a.endswith(".Mixer")
+    )
+    print("Tracks found:")
+    for t in track_ids:
+        print(f"  {t}")
+    print("Return tracks found:")
+    for t in return_ids:
+        print(f"  {t}")
+    if not track_ids and not return_ids:
+        print(f"\n(nothing matched -- indexed {len(all_ids)} automation_ids total; "
+              "if that's 0, see the troubleshooting note in this script's docstring)")
+
+
+# --------------------------------------------------------------------------
+# Tasks
+# --------------------------------------------------------------------------
+
+def task_arm_track(window: UIAWrapper, track_index: int, dry_run: bool) -> None:
+    """Arm a track for recording and set its monitor mode to 'In'."""
+    arm_id = track_mixer_id(track_index, "Arm")
+    monitor_id = track_mixer_id(track_index, "Monitoring.Buttons[0]")
+
+    preflight = build_automation_id_index(window)
+    verify_present(preflight, [arm_id, monitor_id])
+
+    print(f"Task: arm track {track_index} + set monitor to In")
+    set_checkbox_by_id(window, arm_id, desired=True, dry_run=dry_run,
+                        label=f"Track[{track_index}].Arm")
+    click_by_id(window, monitor_id, dry_run=dry_run,
+                label=f"Track[{track_index}].Monitoring=In")
+
+
+def task_solo_tour(window: UIAWrapper, track_indices: list[int],
+                    seconds: float, dry_run: bool) -> None:
+    """Solo each given track in turn, play for `seconds`, then restore.
+
+    Demonstrates the pattern that matters most for agent-driven automation:
+    read state -> act -> ALWAYS restore, even on error -- and resolve every
+    control fresh right before touching it, never across a Play/sleep/Stop
+    gap (see module docstring for why that matters here).
+    """
+    solo_ids = {i: track_mixer_id(i, "Solo") for i in track_indices}
+
+    preflight = build_automation_id_index(window)
+    verify_present(preflight, list(solo_ids.values()) + ["Transport.Play", "Transport.Stop"])
+
+    # Snapshot original state via fresh resolves, not the preflight index --
+    # that index is only for the existence check above, we don't reuse its
+    # control references for anything we intend to click later.
+    original_state = {i: get_toggle_state(resolve(window, solo_ids[i])) for i in track_indices}
+
+    try:
+        for i in track_indices:
+            print(f"\nTrack {i}: solo -> play {seconds}s -> stop -> unsolo")
+            set_checkbox_by_id(window, solo_ids[i], desired=True, dry_run=dry_run,
+                                label=f"Track[{i}].Solo")
+            click_by_id(window, "Transport.Play", dry_run=dry_run, label="Transport.Play")
+            if not dry_run:
+                time.sleep(seconds)
+            click_by_id(window, "Transport.Stop", dry_run=dry_run, label="Transport.Stop")
+            set_checkbox_by_id(window, solo_ids[i], desired=original_state[i], dry_run=dry_run,
+                                label=f"Track[{i}].Solo")
+    finally:
+        # Safety net: whatever happened above, put solo state back exactly
+        # as we found it -- resolved fresh again, not from a stale handle.
+        print("\nRestoring original solo state...")
+        for i in track_indices:
+            set_checkbox_by_id(window, solo_ids[i], desired=original_state[i], dry_run=dry_run,
+                                label=f"Track[{i}].Solo (restore)")
+
+
+def task_set_tempo(window: UIAWrapper, bpm: float, dry_run: bool) -> None:
+    """Set the project tempo.
+
+    Live's tempo slider supports direct numeric entry: double-click to
+    enter edit mode, type the value, press Enter. We try the UIA
+    RangeValuePattern first (exact, no simulated typing) and fall back to
+    the click+type approach, since not every build exposes ValuePattern
+    on this control.
+    """
+    preflight = build_automation_id_index(window)
+    verify_present(preflight, ["Transport.Tempo"])
+
+    tempo = resolve(window, "Transport.Tempo")
+    print(f"Task: set tempo to {bpm} BPM")
+
+    try:
+        current = tempo.iface_value.CurrentValue
+        print(f"  current value (RangeValuePattern): {current}")
+        if dry_run:
+            print(f"  [dry-run] would set_value({bpm})")
+        else:
+            tempo.iface_value.SetValue(bpm)
+        return
+    except Exception as e:
+        print(f"  RangeValuePattern unavailable ({e}); falling back to click+type")
+
+    if dry_run:
+        print(f"  [dry-run] would double-click tempo field and type {bpm}")
+        return
+    tempo.double_click_input()
+    tempo.type_keys(f"{bpm}{{ENTER}}", with_spaces=True)
+
+
+# --------------------------------------------------------------------------
+# CLI
+# --------------------------------------------------------------------------
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__,
+                                      formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--task", choices=["arm_track", "solo_tour", "set_tempo",
+                                            "probe_toggle", "probe_solo_transport"],
+                         help="Which demo task to run")
+    parser.add_argument("--tracks", type=int, nargs="+", default=[],
+                         help="Zero-based track indices to act on")
+    parser.add_argument("--seconds", type=float, default=3.0,
+                         help="Playback duration per track for solo_tour (default: 3.0)")
+    parser.add_argument("--bpm", type=float, default=120.0,
+                         help="Target tempo for set_tempo (default: 120.0)")
+    parser.add_argument("--live", action="store_true",
+                         help="Actually click/type. Without this flag, only the plan is printed.")
+    parser.add_argument("--list-tracks", action="store_true",
+                         help="Print discovered track/return-track automation_ids and exit")
+    args = parser.parse_args()
+
+    dry_run = not args.live
+
+    window = find_ableton_window()
+    if window is None:
+        print("Could not find the Ableton Live window. Is it running?", file=sys.stderr)
+        sys.exit(1)
+
+    ensure_window_ready(window)
+
+    if args.list_tracks:
+        print("Indexing controls by automation_id (recursive walk, matches dump script)...",
+              file=sys.stderr)
+        index = build_automation_id_index(window)
+        print(f"Indexed {len(index)} distinct automation_ids.\n", file=sys.stderr)
+        list_tracks(index)
+        return
+
+    if not args.task:
+        parser.error("--task is required unless --list-tracks is given")
+
+    probe_tasks = ("probe_toggle", "probe_solo_transport")
+    if dry_run and args.task not in probe_tasks:
+        print("*** DRY RUN -- nothing will be clicked. Pass --live to actually execute. ***\n")
+    elif args.task in probe_tasks:
+        print(f"*** {args.task} always live-clicks regardless of --live -- "
+              "a probe that doesn't click can't tell you anything. ***\n")
+
+    if args.task == "arm_track":
+        if len(args.tracks) != 1:
+            parser.error("--task arm_track needs exactly one --tracks index")
+        task_arm_track(window, args.tracks[0], dry_run)
+    elif args.task == "solo_tour":
+        if not args.tracks:
+            parser.error("--task solo_tour needs at least one --tracks index")
+        task_solo_tour(window, args.tracks, args.seconds, dry_run)
+    elif args.task == "set_tempo":
+        task_set_tempo(window, args.bpm, dry_run)
+    elif args.task == "probe_toggle":
+        if len(args.tracks) != 1:
+            parser.error("--task probe_toggle needs exactly one --tracks index")
+        task_probe_toggle(window, args.tracks[0])
+    elif args.task == "probe_solo_transport":
+        if len(args.tracks) != 1:
+            parser.error("--task probe_solo_transport needs exactly one --tracks index")
+        task_probe_solo_transport(window, args.tracks[0], args.seconds)
+
+
+if __name__ == "__main__":
+    main()
