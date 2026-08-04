@@ -1098,7 +1098,7 @@
             -1887,
             143
           ],
-          "is_enabled": false,
+          "is_enabled": true,
           "is_visible": true,
           "children": []
         },
@@ -2345,7 +2345,7 @@
             -1629,
             169,
             -1293,
-            301
+            377
           ],
           "is_enabled": true,
           "is_visible": true,
@@ -2353,12 +2353,12 @@
         },
         {
           "control_type": "Tree",
-          "name": "Sounds List, 1001 Items",
+          "name": "Drums List, 1001 Items",
           "automation_id": "",
           "class_name": "",
           "bounding_rect": [
             -1629,
-            304,
+            379,
             -1293,
             674
           ],
@@ -2372,9 +2372,9 @@
               "class_name": "",
               "bounding_rect": [
                 -1626,
-                304,
+                379,
                 -1319,
-                326
+                402
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -2382,42 +2382,42 @@
             },
             {
               "control_type": "DataItem",
-              "name": "3D Reso Percussion.adg",
+              "name": "Drum Rack",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                326,
+                402,
                 -1293,
-                348
+                424
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "3D Reso Percussion.adg",
+                  "name": "Drum Rack",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    326,
+                    402,
                     -1305,
-                    347
+                    423
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "3D Reso Percussion.adg",
+                      "name": "Drum Rack",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        330,
-                        -1448,
-                        343
+                        405,
+                        -1522,
+                        418
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -2429,57 +2429,42 @@
             },
             {
               "control_type": "DataItem",
-              "name": "5ths Detuned Pad.adv",
+              "name": "Drum Sampler",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                348,
+                424,
                 -1293,
-                371
+                446
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "5ths Detuned Pad.adv",
+                  "name": "Drum Sampler",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    348,
+                    424,
                     -1305,
-                    370
+                    445
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "5ths Detuned Pad.adv",
+                      "name": "Drum Sampler",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        352,
-                        -1457,
-                        365
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    },
-                    {
-                      "control_type": "Button",
-                      "name": "Show Similar Files",
-                      "automation_id": "ContentBrowser.KeywordEditorSplitter.SidebarSplitter.ContentPane.TreeContentView.FilterViewContentSplitter.TreeviewCell.ShowSimilarFilesButton",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1325,
-                        350,
-                        -1308,
-                        367
+                        428,
+                        -1503,
+                        441
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -2491,42 +2476,42 @@
             },
             {
               "control_type": "DataItem",
-              "name": "5ths Filter Sweep Pad.adv",
+              "name": "505 Core Kit.adg",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                371,
+                446,
                 -1293,
-                393
+                469
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "5ths Filter Sweep Pad.adv",
+                  "name": "505 Core Kit.adg",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    371,
+                    446,
                     -1305,
-                    392
+                    468
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "5ths Filter Sweep Pad.adv",
+                      "name": "505 Core Kit.adg",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        374,
-                        -1436,
-                        387
+                        450,
+                        -1489,
+                        463
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -2538,42 +2523,42 @@
             },
             {
               "control_type": "DataItem",
-              "name": "5ths Glass Motion Pad.adv",
+              "name": "606 Core Kit.adg",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                393,
+                469,
                 -1293,
-                416
+                491
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "5ths Glass Motion Pad.adv",
+                  "name": "606 Core Kit.adg",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    393,
+                    469,
                     -1305,
-                    415
+                    490
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "5ths Glass Motion Pad.adv",
+                      "name": "606 Core Kit.adg",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        397,
-                        -1434,
-                        410
+                        472,
+                        -1489,
+                        485
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -2585,42 +2570,42 @@
             },
             {
               "control_type": "DataItem",
-              "name": "12 CC's and Counting.adv",
+              "name": "707 Core Kit.adg",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                416,
+                491,
                 -1293,
-                438
+                514
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "12 CC's and Counting.adv",
+                  "name": "707 Core Kit.adg",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    416,
+                    491,
                     -1305,
-                    437
+                    512
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "12 CC's and Counting.adv",
+                      "name": "707 Core Kit.adg",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        419,
-                        -1437,
-                        432
+                        495,
+                        -1489,
+                        508
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -2632,42 +2617,42 @@
             },
             {
               "control_type": "DataItem",
-              "name": "12 String Chorus Guitar.adv",
+              "name": "808 Core Kit.adg",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                438,
+                514,
                 -1293,
-                461
+                536
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "12 String Chorus Guitar.adv",
+                  "name": "808 Core Kit.adg",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    438,
+                    514,
                     -1305,
-                    459
+                    535
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "12 String Chorus Guitar.adv",
+                      "name": "808 Core Kit.adg",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        442,
-                        -1426,
-                        455
+                        517,
+                        -1489,
+                        530
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -2679,42 +2664,42 @@
             },
             {
               "control_type": "DataItem",
-              "name": "12 String Guitar.adv",
+              "name": "909 Core Kit.adg",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                461,
+                536,
                 -1293,
-                483
+                559
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "12 String Guitar.adv",
+                  "name": "909 Core Kit.adg",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    461,
+                    536,
                     -1305,
-                    482
+                    557
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "12 String Guitar.adv",
+                      "name": "909 Core Kit.adg",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        464,
-                        -1469,
-                        477
+                        540,
+                        -1489,
+                        553
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -2726,230 +2711,42 @@
             },
             {
               "control_type": "DataItem",
-              "name": "37th Street.adv",
+              "name": "Acuff Kit.adg",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                483,
+                559,
                 -1293,
-                505
+                581
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "37th Street.adv",
+                  "name": "Acuff Kit.adg",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    483,
+                    559,
                     -1305,
-                    504
+                    580
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "37th Street.adv",
+                      "name": "Acuff Kit.adg",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        487,
-                        -1494,
-                        500
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "DataItem",
-              "name": "80s Tape.adv",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                505,
-                -1293,
-                528
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "80s Tape.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    505,
-                    -1305,
-                    527
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "80s Tape.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        509,
-                        -1511,
-                        522
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "DataItem",
-              "name": "80s VCO Brass.adv",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                528,
-                -1293,
-                550
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "80s VCO Brass.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    528,
-                    -1305,
-                    549
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "80s VCO Brass.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        531,
-                        -1479,
-                        544
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "DataItem",
-              "name": "808 Drifter.adg",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                550,
-                -1293,
-                573
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "808 Drifter.adg",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    550,
-                    -1305,
-                    571
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "808 Drifter.adg",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        554,
-                        -1496,
-                        567
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "DataItem",
-              "name": "808 Pure.adg",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                573,
-                -1293,
-                595
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "808 Pure.adg",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    573,
-                    -1305,
-                    594
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "808 Pure.adg",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        576,
+                        562,
                         -1508,
-                        589
+                        575
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -2961,42 +2758,42 @@
             },
             {
               "control_type": "DataItem",
-              "name": "808 Selector Rack.adg",
+              "name": "AG Techno Kit.adg",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                595,
+                581,
                 -1293,
-                618
+                603
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "808 Selector Rack.adg",
+                  "name": "AG Techno Kit.adg",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    595,
+                    581,
                     -1305,
-                    616
+                    602
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "808 Selector Rack.adg",
+                      "name": "AG Techno Kit.adg",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        599,
-                        -1456,
-                        612
+                        584,
+                        -1479,
+                        597
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -3008,42 +2805,42 @@
             },
             {
               "control_type": "DataItem",
-              "name": "808 Slapping.adg",
+              "name": "Ahlimba Kit.adg",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                618,
+                603,
                 -1293,
-                640
+                626
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "808 Slapping.adg",
+                  "name": "Ahlimba Kit.adg",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    618,
+                    603,
                     -1305,
-                    639
+                    625
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "808 Slapping.adg",
+                      "name": "Ahlimba Kit.adg",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        621,
-                        -1486,
-                        634
+                        607,
+                        -1493,
+                        620
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -3055,42 +2852,42 @@
             },
             {
               "control_type": "DataItem",
-              "name": "A Brief History of Chime.adv",
+              "name": "Akustichord Kit.adg",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                640,
+                626,
                 -1293,
-                662
+                648
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "A Brief History of Chime.adv",
+                  "name": "Akustichord Kit.adg",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    640,
+                    626,
                     -1305,
-                    661
+                    647
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "A Brief History of Chime.adv",
+                      "name": "Akustichord Kit.adg",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        643,
-                        -1423,
-                        656
+                        629,
+                        -1469,
+                        642
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -3102,42 +2899,42 @@
             },
             {
               "control_type": "DataItem",
-              "name": "A Degree Of Synth.adv",
+              "name": "Alert Kit.adg",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                662,
+                648,
                 -1293,
-                685
+                671
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "A Degree Of Synth.adv",
+                  "name": "Alert Kit.adg",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    662,
+                    648,
                     -1305,
-                    684
+                    669
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "A Degree Of Synth.adv",
+                      "name": "Alert Kit.adg",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        666,
-                        -1455,
-                        679
+                        652,
+                        -1511,
+                        665
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -3149,42 +2946,89 @@
             },
             {
               "control_type": "DataItem",
-              "name": "A Soft Chord.adv",
+              "name": "Atom Kit.adg",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                685,
+                671,
                 -1293,
-                707
+                693
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": [
                 {
                   "control_type": "DataItem",
-                  "name": "A Soft Chord.adv",
+                  "name": "Atom Kit.adg",
                   "automation_id": "",
                   "class_name": "",
                   "bounding_rect": [
                     -1629,
-                    685,
+                    671,
                     -1305,
-                    706
+                    692
                   ],
                   "is_enabled": true,
                   "is_visible": true,
                   "children": [
                     {
                       "control_type": "Text",
-                      "name": "A Soft Chord.adv",
+                      "name": "Atom Kit.adg",
                       "automation_id": "",
                       "class_name": "",
                       "bounding_rect": [
                         -1586,
-                        688,
-                        -1487,
-                        701
+                        674,
+                        -1509,
+                        687
+                      ],
+                      "is_enabled": true,
+                      "is_visible": true,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "control_type": "DataItem",
+              "name": "Battu Kit.adg",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -1629,
+                693,
+                -1293,
+                715
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": [
+                {
+                  "control_type": "DataItem",
+                  "name": "Battu Kit.adg",
+                  "automation_id": "",
+                  "class_name": "",
+                  "bounding_rect": [
+                    -1629,
+                    693,
+                    -1305,
+                    714
+                  ],
+                  "is_enabled": true,
+                  "is_visible": true,
+                  "children": [
+                    {
+                      "control_type": "Text",
+                      "name": "Battu Kit.adg",
+                      "automation_id": "",
+                      "class_name": "",
+                      "bounding_rect": [
+                        -1586,
+                        697,
+                        -1508,
+                        710
                       ],
                       "is_enabled": true,
                       "is_visible": true,
@@ -3206,21 +3050,6 @@
             679,
             -1607,
             697
-          ],
-          "is_enabled": true,
-          "is_visible": true,
-          "children": []
-        },
-        {
-          "control_type": "Text",
-          "name": "1 item selected",
-          "automation_id": "ContentBrowser.KeywordEditorSplitter.SidebarSplitter.ContentPane.TreeContentView.FooterCell.Container.SelectionInfoCell.SelectionInfoText",
-          "class_name": "",
-          "bounding_rect": [
-            -1505,
-            681,
-            -1415,
-            694
           ],
           "is_enabled": true,
           "is_visible": true,
@@ -3336,12 +3165,12 @@
     },
     {
       "control_type": "Group",
-      "name": "Session",
-      "automation_id": "SessionView",
+      "name": "Arrangement",
+      "automation_id": "ArrangementView",
       "class_name": "",
       "bounding_rect": [
         -1283,
-        118,
+        140,
         -11,
         756
       ],
@@ -3349,1524 +3178,149 @@
       "is_visible": true,
       "children": [
         {
-          "control_type": "Tree",
-          "name": "Track Headers",
+          "control_type": "Text",
+          "name": "Timeline, 1, selected on 1-MIDI, Track 1 of 4",
           "automation_id": "",
           "class_name": "",
           "bounding_rect": [
             -1283,
-            118,
-            -11,
-            138
+            189,
+            -354,
+            728
           ],
           "is_enabled": true,
           "is_visible": true,
-          "children": [
-            {
-              "control_type": "DataItem",
-              "name": "1-MIDI",
-              "automation_id": "SessionView.Track[0].TitleBar",
-              "class_name": "",
-              "bounding_rect": [
-                -1283,
-                118,
-                -1173,
-                138
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Edit",
-                  "name": "Track Title Bar",
-                  "automation_id": "SessionView.Track[0].TitleBar.TitleBarEditField",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1271,
-                    121,
-                    -1175,
-                    136
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": []
-                }
-              ]
-            },
-            {
-              "control_type": "DataItem",
-              "name": "2-MIDI",
-              "automation_id": "SessionView.Track[1].TitleBar",
-              "class_name": "",
-              "bounding_rect": [
-                -1171,
-                118,
-                -1061,
-                138
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Edit",
-                  "name": "Track Title Bar",
-                  "automation_id": "SessionView.Track[1].TitleBar.TitleBarEditField",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1159,
-                    121,
-                    -1063,
-                    136
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": []
-                }
-              ]
-            },
-            {
-              "control_type": "DataItem",
-              "name": "3-Audio",
-              "automation_id": "SessionView.Track[2].TitleBar",
-              "class_name": "",
-              "bounding_rect": [
-                -1059,
-                118,
-                -949,
-                138
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Edit",
-                  "name": "Track Title Bar",
-                  "automation_id": "SessionView.Track[2].TitleBar.TitleBarEditField",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1047,
-                    121,
-                    -951,
-                    136
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": []
-                }
-              ]
-            },
-            {
-              "control_type": "DataItem",
-              "name": "4-Audio",
-              "automation_id": "SessionView.Track[3].TitleBar",
-              "class_name": "",
-              "bounding_rect": [
-                -947,
-                118,
-                -837,
-                138
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Edit",
-                  "name": "Track Title Bar",
-                  "automation_id": "SessionView.Track[3].TitleBar.TitleBarEditField",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -935,
-                    121,
-                    -839,
-                    136
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": []
-                }
-              ]
-            },
-            {
-              "control_type": "DataItem",
-              "name": "A-Reverb",
-              "automation_id": "SessionView.ReturnTrack[0].TitleBar",
-              "class_name": "",
-              "bounding_rect": [
-                -334,
-                118,
-                -224,
-                138
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Edit",
-                  "name": "Return Track Title Bar",
-                  "automation_id": "SessionView.ReturnTrack[0].TitleBar.TitleBarEditField",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -321,
-                    121,
-                    -227,
-                    136
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": []
-                }
-              ]
-            },
-            {
-              "control_type": "DataItem",
-              "name": "B-Delay",
-              "automation_id": "SessionView.ReturnTrack[1].TitleBar",
-              "class_name": "",
-              "bounding_rect": [
-                -222,
-                118,
-                -112,
-                138
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Edit",
-                  "name": "Return Track Title Bar",
-                  "automation_id": "SessionView.ReturnTrack[1].TitleBar.TitleBarEditField",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -209,
-                    121,
-                    -115,
-                    136
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": []
-                }
-              ]
-            },
-            {
-              "control_type": "DataItem",
-              "name": "Main",
-              "automation_id": "SessionView.MainTrack.TitleBar",
-              "class_name": "",
-              "bounding_rect": [
-                -110,
-                118,
-                -11,
-                138
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Edit",
-                  "name": "Main Track Title Bar",
-                  "automation_id": "SessionView.MainTrack.TitleBar.TitleBarEditField",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -106,
-                    121,
-                    -13,
-                    136
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": []
-                }
-              ]
-            }
-          ]
+          "children": []
         },
         {
           "control_type": "Group",
-          "name": "Slots",
+          "name": "Arrangement Controls",
           "automation_id": "",
           "class_name": "",
           "bounding_rect": [
-            -1283,
-            138,
-            -110,
-            374
-          ],
-          "is_enabled": true,
-          "is_visible": true,
-          "children": [
-            {
-              "control_type": "Group",
-              "name": "in track 1-MIDI, scene 1",
-              "automation_id": "SessionView.Track[0].Slot[0]",
-              "class_name": "",
-              "bounding_rect": [
-                -1283,
-                141,
-                -1173,
-                161
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 1-MIDI, scene 2",
-              "automation_id": "SessionView.Track[0].Slot[1]",
-              "class_name": "",
-              "bounding_rect": [
-                -1283,
-                162,
-                -1173,
-                182
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 1-MIDI, scene 3",
-              "automation_id": "SessionView.Track[0].Slot[2]",
-              "class_name": "",
-              "bounding_rect": [
-                -1283,
-                183,
-                -1173,
-                203
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 1-MIDI, scene 4",
-              "automation_id": "SessionView.Track[0].Slot[3]",
-              "class_name": "",
-              "bounding_rect": [
-                -1283,
-                205,
-                -1173,
-                225
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 1-MIDI, scene 5",
-              "automation_id": "SessionView.Track[0].Slot[4]",
-              "class_name": "",
-              "bounding_rect": [
-                -1283,
-                226,
-                -1173,
-                246
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 1-MIDI, scene 6",
-              "automation_id": "SessionView.Track[0].Slot[5]",
-              "class_name": "",
-              "bounding_rect": [
-                -1283,
-                247,
-                -1173,
-                267
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 1-MIDI, scene 7",
-              "automation_id": "SessionView.Track[0].Slot[6]",
-              "class_name": "",
-              "bounding_rect": [
-                -1283,
-                268,
-                -1173,
-                288
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 1-MIDI, scene 8",
-              "automation_id": "SessionView.Track[0].Slot[7]",
-              "class_name": "",
-              "bounding_rect": [
-                -1283,
-                289,
-                -1173,
-                310
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 2-MIDI, scene 1",
-              "automation_id": "SessionView.Track[1].Slot[0]",
-              "class_name": "",
-              "bounding_rect": [
-                -1171,
-                141,
-                -1061,
-                161
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 2-MIDI, scene 2",
-              "automation_id": "SessionView.Track[1].Slot[1]",
-              "class_name": "",
-              "bounding_rect": [
-                -1171,
-                162,
-                -1061,
-                182
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 2-MIDI, scene 3",
-              "automation_id": "SessionView.Track[1].Slot[2]",
-              "class_name": "",
-              "bounding_rect": [
-                -1171,
-                183,
-                -1061,
-                203
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 2-MIDI, scene 4",
-              "automation_id": "SessionView.Track[1].Slot[3]",
-              "class_name": "",
-              "bounding_rect": [
-                -1171,
-                205,
-                -1061,
-                225
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 2-MIDI, scene 5",
-              "automation_id": "SessionView.Track[1].Slot[4]",
-              "class_name": "",
-              "bounding_rect": [
-                -1171,
-                226,
-                -1061,
-                246
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 2-MIDI, scene 6",
-              "automation_id": "SessionView.Track[1].Slot[5]",
-              "class_name": "",
-              "bounding_rect": [
-                -1171,
-                247,
-                -1061,
-                267
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 2-MIDI, scene 7",
-              "automation_id": "SessionView.Track[1].Slot[6]",
-              "class_name": "",
-              "bounding_rect": [
-                -1171,
-                268,
-                -1061,
-                288
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 2-MIDI, scene 8",
-              "automation_id": "SessionView.Track[1].Slot[7]",
-              "class_name": "",
-              "bounding_rect": [
-                -1171,
-                289,
-                -1061,
-                310
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 3-Audio, scene 1",
-              "automation_id": "SessionView.Track[2].Slot[0]",
-              "class_name": "",
-              "bounding_rect": [
-                -1059,
-                141,
-                -949,
-                161
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 3-Audio, scene 2",
-              "automation_id": "SessionView.Track[2].Slot[1]",
-              "class_name": "",
-              "bounding_rect": [
-                -1059,
-                162,
-                -949,
-                182
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 3-Audio, scene 3",
-              "automation_id": "SessionView.Track[2].Slot[2]",
-              "class_name": "",
-              "bounding_rect": [
-                -1059,
-                183,
-                -949,
-                203
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 3-Audio, scene 4",
-              "automation_id": "SessionView.Track[2].Slot[3]",
-              "class_name": "",
-              "bounding_rect": [
-                -1059,
-                205,
-                -949,
-                225
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 3-Audio, scene 5",
-              "automation_id": "SessionView.Track[2].Slot[4]",
-              "class_name": "",
-              "bounding_rect": [
-                -1059,
-                226,
-                -949,
-                246
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 3-Audio, scene 6",
-              "automation_id": "SessionView.Track[2].Slot[5]",
-              "class_name": "",
-              "bounding_rect": [
-                -1059,
-                247,
-                -949,
-                267
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 3-Audio, scene 7",
-              "automation_id": "SessionView.Track[2].Slot[6]",
-              "class_name": "",
-              "bounding_rect": [
-                -1059,
-                268,
-                -949,
-                288
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 3-Audio, scene 8",
-              "automation_id": "SessionView.Track[2].Slot[7]",
-              "class_name": "",
-              "bounding_rect": [
-                -1059,
-                289,
-                -949,
-                310
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 4-Audio, scene 1",
-              "automation_id": "SessionView.Track[3].Slot[0]",
-              "class_name": "",
-              "bounding_rect": [
-                -947,
-                141,
-                -837,
-                161
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 4-Audio, scene 2",
-              "automation_id": "SessionView.Track[3].Slot[1]",
-              "class_name": "",
-              "bounding_rect": [
-                -947,
-                162,
-                -837,
-                182
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 4-Audio, scene 3",
-              "automation_id": "SessionView.Track[3].Slot[2]",
-              "class_name": "",
-              "bounding_rect": [
-                -947,
-                183,
-                -837,
-                203
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 4-Audio, scene 4",
-              "automation_id": "SessionView.Track[3].Slot[3]",
-              "class_name": "",
-              "bounding_rect": [
-                -947,
-                205,
-                -837,
-                225
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 4-Audio, scene 5",
-              "automation_id": "SessionView.Track[3].Slot[4]",
-              "class_name": "",
-              "bounding_rect": [
-                -947,
-                226,
-                -837,
-                246
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 4-Audio, scene 6",
-              "automation_id": "SessionView.Track[3].Slot[5]",
-              "class_name": "",
-              "bounding_rect": [
-                -947,
-                247,
-                -837,
-                267
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 4-Audio, scene 7",
-              "automation_id": "SessionView.Track[3].Slot[6]",
-              "class_name": "",
-              "bounding_rect": [
-                -947,
-                268,
-                -837,
-                288
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "in track 4-Audio, scene 8",
-              "automation_id": "SessionView.Track[3].Slot[7]",
-              "class_name": "",
-              "bounding_rect": [
-                -947,
-                289,
-                -837,
-                310
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track A-Reverb, scene 1",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -334,
-                141,
-                -224,
-                161
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track A-Reverb, scene 2",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -334,
-                162,
-                -224,
-                182
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track A-Reverb, scene 3",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -334,
-                183,
-                -224,
-                203
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track A-Reverb, scene 4",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -334,
-                205,
-                -224,
-                225
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track A-Reverb, scene 5",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -334,
-                226,
-                -224,
-                246
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track A-Reverb, scene 6",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -334,
-                247,
-                -224,
-                267
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track A-Reverb, scene 7",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -334,
-                268,
-                -224,
-                288
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track A-Reverb, scene 8",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -334,
-                289,
-                -224,
-                310
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track B-Delay, scene 1",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -222,
-                141,
-                -112,
-                161
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track B-Delay, scene 2",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -222,
-                162,
-                -112,
-                182
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track B-Delay, scene 3",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -222,
-                183,
-                -112,
-                203
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track B-Delay, scene 4",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -222,
-                205,
-                -112,
-                225
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track B-Delay, scene 5",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -222,
-                226,
-                -112,
-                246
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track B-Delay, scene 6",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -222,
-                247,
-                -112,
-                267
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track B-Delay, scene 7",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -222,
-                268,
-                -112,
-                288
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Group",
-              "name": "In track B-Delay, scene 8",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -222,
-                289,
-                -112,
-                310
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Text",
-              "name": "Drop Files and Devices Here",
-              "automation_id": "SessionView.DropFilesAndDevices",
-              "class_name": "",
-              "bounding_rect": [
-                -670,
-                218,
-                -500,
-                230
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            }
-          ]
-        },
-        {
-          "control_type": "Group",
-          "name": "Scenes",
-          "automation_id": "SessionView.MainTrack",
-          "class_name": "",
-          "bounding_rect": [
-            -110,
-            138,
-            -11,
-            374
-          ],
-          "is_enabled": true,
-          "is_visible": true,
-          "children": [
-            {
-              "control_type": "Group",
-              "name": "Scene 1",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -110,
-                141,
-                -11,
-                161
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Group",
-                  "name": "1",
-                  "automation_id": "SessionView.MainTrack.SceneControl",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -110,
-                    141,
-                    -18,
-                    161
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Edit",
-                      "name": "Scene",
-                      "automation_id": "SessionView.MainTrack.SceneControl.Title",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -91,
-                        143,
-                        -40,
-                        158
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    },
-                    {
-                      "control_type": "Text",
-                      "name": "1",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -31,
-                        144,
-                        -23,
-                        157
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "Group",
-              "name": "Scene 2",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -110,
-                162,
-                -11,
-                182
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Group",
-                  "name": "2",
-                  "automation_id": "SessionView.MainTrack.SceneControl",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -110,
-                    162,
-                    -18,
-                    182
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Edit",
-                      "name": "Scene",
-                      "automation_id": "SessionView.MainTrack.SceneControl.Title",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -91,
-                        164,
-                        -40,
-                        180
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    },
-                    {
-                      "control_type": "Text",
-                      "name": "2",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -31,
-                        166,
-                        -23,
-                        179
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "Group",
-              "name": "Scene 3",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -110,
-                183,
-                -11,
-                203
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Group",
-                  "name": "3",
-                  "automation_id": "SessionView.MainTrack.SceneControl",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -110,
-                    183,
-                    -18,
-                    203
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Edit",
-                      "name": "Scene",
-                      "automation_id": "SessionView.MainTrack.SceneControl.Title",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -91,
-                        186,
-                        -40,
-                        201
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    },
-                    {
-                      "control_type": "Text",
-                      "name": "3",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -31,
-                        187,
-                        -23,
-                        200
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "Group",
-              "name": "Scene 4",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -110,
-                205,
-                -11,
-                225
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Group",
-                  "name": "4",
-                  "automation_id": "SessionView.MainTrack.SceneControl",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -110,
-                    205,
-                    -18,
-                    225
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Edit",
-                      "name": "Scene",
-                      "automation_id": "SessionView.MainTrack.SceneControl.Title",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -91,
-                        207,
-                        -40,
-                        222
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    },
-                    {
-                      "control_type": "Text",
-                      "name": "4",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -31,
-                        208,
-                        -23,
-                        221
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "Group",
-              "name": "Scene 5",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -110,
-                226,
-                -11,
-                246
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Group",
-                  "name": "5",
-                  "automation_id": "SessionView.MainTrack.SceneControl",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -110,
-                    226,
-                    -18,
-                    246
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Edit",
-                      "name": "Scene",
-                      "automation_id": "SessionView.MainTrack.SceneControl.Title",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -91,
-                        228,
-                        -40,
-                        243
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    },
-                    {
-                      "control_type": "Text",
-                      "name": "5",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -31,
-                        229,
-                        -23,
-                        242
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "Group",
-              "name": "Scene 6",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -110,
-                247,
-                -11,
-                267
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Group",
-                  "name": "6",
-                  "automation_id": "SessionView.MainTrack.SceneControl",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -110,
-                    247,
-                    -18,
-                    267
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Edit",
-                      "name": "Scene",
-                      "automation_id": "SessionView.MainTrack.SceneControl.Title",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -91,
-                        249,
-                        -40,
-                        265
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    },
-                    {
-                      "control_type": "Text",
-                      "name": "6",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -31,
-                        251,
-                        -23,
-                        264
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "Group",
-              "name": "Scene 7",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -110,
-                268,
-                -11,
-                288
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Group",
-                  "name": "7",
-                  "automation_id": "SessionView.MainTrack.SceneControl",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -110,
-                    268,
-                    -18,
-                    288
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Edit",
-                      "name": "Scene",
-                      "automation_id": "SessionView.MainTrack.SceneControl.Title",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -91,
-                        271,
-                        -40,
-                        286
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    },
-                    {
-                      "control_type": "Text",
-                      "name": "7",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -31,
-                        272,
-                        -23,
-                        285
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "Group",
-              "name": "Scene 8",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -110,
-                289,
-                -11,
-                310
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "Group",
-                  "name": "8",
-                  "automation_id": "SessionView.MainTrack.SceneControl",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -110,
-                    289,
-                    -18,
-                    310
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Edit",
-                      "name": "Scene",
-                      "automation_id": "SessionView.MainTrack.SceneControl.Title",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -91,
-                        292,
-                        -40,
-                        307
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    },
-                    {
-                      "control_type": "Text",
-                      "name": "8",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -31,
-                        293,
-                        -23,
-                        306
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "control_type": "Group",
-          "name": "1-MIDI",
-          "automation_id": "SessionView.Track[0].Mixer",
-          "class_name": "",
-          "bounding_rect": [
-            -1283,
-            377,
-            -1173,
-            756
+            -354,
+            144,
+            -242,
+            187
           ],
           "is_enabled": true,
           "is_visible": true,
           "children": [
             {
               "control_type": "Button",
-              "name": "Clip Stop",
-              "automation_id": "SessionView.Track[0].Mixer.Stop",
+              "name": "Set Locator",
+              "automation_id": "ArrangementView.SetDeleteLocator",
               "class_name": "",
               "bounding_rect": [
-                -1280,
-                379,
-                -1265,
+                -351,
+                144,
+                -314,
+                162
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Button",
+              "name": "Previous Locator",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -351,
+                166,
+                -333,
+                183
+              ],
+              "is_enabled": false,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Button",
+              "name": "Next Locator",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -332,
+                166,
+                -314,
+                183
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "CheckBox",
+              "name": "Automation Mode",
+              "automation_id": "ArrangementView.AutomationModeButton",
+              "class_name": "",
+              "bounding_rect": [
+                -303,
+                144,
+                -274,
+                162
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "CheckBox",
+              "name": "Lock Envelopes",
+              "automation_id": "ArrangementView.LockEnvelopes",
+              "class_name": "",
+              "bounding_rect": [
+                -272,
+                144,
+                -242,
+                162
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            }
+          ]
+        },
+        {
+          "control_type": "Tree",
+          "name": "Track Headers",
+          "automation_id": "ArrangementView.ArrangerHeaderManager",
+          "class_name": "",
+          "bounding_rect": [
+            -354,
+            189,
+            -243,
+            728
+          ],
+          "is_enabled": true,
+          "is_visible": true,
+          "children": [
+            {
+              "control_type": "TreeItem",
+              "name": "1-MIDI",
+              "automation_id": "ArrangementView.Track[0].TitleBar",
+              "class_name": "",
+              "bounding_rect": [
+                -353,
+                189,
+                -243,
+                291
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "TreeItem",
+              "name": "2-MIDI",
+              "automation_id": "ArrangementView.Track[1].TitleBar",
+              "class_name": "",
+              "bounding_rect": [
+                -353,
+                293,
+                -243,
                 395
               ],
               "is_enabled": true,
@@ -4874,30 +3328,106 @@
               "children": []
             },
             {
-              "control_type": "Text",
-              "name": "MIDI From",
-              "automation_id": "",
+              "control_type": "TreeItem",
+              "name": "3-Audio",
+              "automation_id": "ArrangementView.Track[2].TitleBar",
               "class_name": "",
               "bounding_rect": [
-                -1279,
-                402,
-                -1177,
-                415
+                -353,
+                397,
+                -243,
+                498
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": []
             },
             {
-              "control_type": "ComboBox",
-              "name": "Input Type",
-              "automation_id": "SessionView.Track[0].Mixer.InputType",
+              "control_type": "TreeItem",
+              "name": "4-Audio",
+              "automation_id": "ArrangementView.Track[3].TitleBar",
               "class_name": "",
               "bounding_rect": [
-                -1279,
-                415,
-                -1177,
-                432
+                -353,
+                501,
+                -243,
+                602
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "TreeItem",
+              "name": "A-Reverb",
+              "automation_id": "ArrangementView.ReturnTrack[0].TitleBar",
+              "class_name": "",
+              "bounding_rect": [
+                -353,
+                664,
+                -243,
+                684
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "TreeItem",
+              "name": "B-Delay",
+              "automation_id": "ArrangementView.ReturnTrack[1].TitleBar",
+              "class_name": "",
+              "bounding_rect": [
+                -353,
+                686,
+                -243,
+                706
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "TreeItem",
+              "name": "Main",
+              "automation_id": "ArrangementView.MainTrack.TitleBar",
+              "class_name": "",
+              "bounding_rect": [
+                -353,
+                708,
+                -243,
+                728
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            }
+          ]
+        },
+        {
+          "control_type": "Group",
+          "name": "1-MIDI",
+          "automation_id": "ArrangementView.Track[0].Mixer",
+          "class_name": "",
+          "bounding_rect": [
+            -243,
+            189,
+            -11,
+            293
+          ],
+          "is_enabled": true,
+          "is_visible": true,
+          "children": [
+            {
+              "control_type": "ComboBox",
+              "name": "Input Type",
+              "automation_id": "ArrangementView.Track[0].Mixer.InputType",
+              "class_name": "",
+              "bounding_rect": [
+                -240,
+                190,
+                -155,
+                208
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -4906,28 +3436,13 @@
             {
               "control_type": "ComboBox",
               "name": "Input Channel",
-              "automation_id": "SessionView.Track[0].Mixer.InputChannel",
+              "automation_id": "ArrangementView.Track[0].Mixer.InputChannel",
               "class_name": "",
               "bounding_rect": [
-                -1279,
-                433,
-                -1177,
-                451
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Text",
-              "name": "Monitor",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1279,
-                451,
-                -1177,
-                464
+                -240,
+                210,
+                -155,
+                228
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -4936,13 +3451,13 @@
             {
               "control_type": "Group",
               "name": "Monitoring",
-              "automation_id": "SessionView.Track[0].Mixer.Monitoring",
+              "automation_id": "ArrangementView.Track[0].Mixer.Monitoring",
               "class_name": "",
               "bounding_rect": [
-                -1279,
-                464,
-                -1177,
-                482
+                -240,
+                230,
+                -155,
+                248
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -4950,13 +3465,13 @@
                 {
                   "control_type": "RadioButton",
                   "name": "In",
-                  "automation_id": "SessionView.Track[0].Mixer.Monitoring.Buttons[0]",
+                  "automation_id": "ArrangementView.Track[0].Mixer.Monitoring.Buttons[0]",
                   "class_name": "",
                   "bounding_rect": [
-                    -1279,
-                    464,
-                    -1257,
-                    482
+                    -240,
+                    230,
+                    -217,
+                    248
                   ],
                   "is_enabled": true,
                   "is_visible": true,
@@ -4965,13 +3480,13 @@
                 {
                   "control_type": "RadioButton",
                   "name": "Auto",
-                  "automation_id": "SessionView.Track[0].Mixer.Monitoring.Buttons[1]",
+                  "automation_id": "ArrangementView.Track[0].Mixer.Monitoring.Buttons[1]",
                   "class_name": "",
                   "bounding_rect": [
-                    -1256,
-                    464,
-                    -1221,
-                    482
+                    -216,
+                    230,
+                    -182,
+                    248
                   ],
                   "is_enabled": true,
                   "is_visible": true,
@@ -4980,13 +3495,13 @@
                 {
                   "control_type": "RadioButton",
                   "name": "Off",
-                  "automation_id": "SessionView.Track[0].Mixer.Monitoring.Buttons[2]",
+                  "automation_id": "ArrangementView.Track[0].Mixer.Monitoring.Buttons[2]",
                   "class_name": "",
                   "bounding_rect": [
-                    -1220,
-                    464,
-                    -1194,
-                    482
+                    -181,
+                    230,
+                    -155,
+                    248
                   ],
                   "is_enabled": true,
                   "is_visible": true,
@@ -4995,30 +3510,15 @@
               ]
             },
             {
-              "control_type": "Text",
-              "name": "MIDI To",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1279,
-                482,
-                -1177,
-                495
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "ComboBox",
               "name": "Output Type",
-              "automation_id": "SessionView.Track[0].Mixer.OutputType",
+              "automation_id": "ArrangementView.Track[0].Mixer.OutputType",
               "class_name": "",
               "bounding_rect": [
-                -1279,
-                495,
-                -1177,
-                512
+                -240,
+                251,
+                -155,
+                268
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5027,13 +3527,13 @@
             {
               "control_type": "ComboBox",
               "name": "Output Channel",
-              "automation_id": "SessionView.Track[0].Mixer.OutputChannel",
+              "automation_id": "ArrangementView.Track[0].Mixer.OutputChannel",
               "class_name": "",
               "bounding_rect": [
-                -1279,
-                514,
-                -1177,
-                531
+                -240,
+                271,
+                -155,
+                288
               ],
               "is_enabled": false,
               "is_visible": true,
@@ -5042,13 +3542,13 @@
             {
               "control_type": "CheckBox",
               "name": "Track Activator",
-              "automation_id": "SessionView.Track[0].Mixer.Activator",
+              "automation_id": "ArrangementView.Track[0].Mixer.Activator",
               "class_name": "",
               "bounding_rect": [
-                -1269,
-                671,
-                -1239,
-                700
+                -150,
+                190,
+                -93,
+                208
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5057,13 +3557,13 @@
             {
               "control_type": "CheckBox",
               "name": "Solo/Cue",
-              "automation_id": "SessionView.Track[0].Mixer.Solo",
+              "automation_id": "ArrangementView.Track[0].Mixer.Solo",
               "class_name": "",
               "bounding_rect": [
-                -1269,
-                702,
-                -1239,
-                720
+                -91,
+                190,
+                -64,
+                208
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5072,13 +3572,13 @@
             {
               "control_type": "CheckBox",
               "name": "Arm Recording",
-              "automation_id": "SessionView.Track[0].Mixer.Arm",
+              "automation_id": "ArrangementView.Track[0].Mixer.Arm",
               "class_name": "",
               "bounding_rect": [
-                -1269,
-                723,
-                -1239,
-                740
+                -62,
+                190,
+                -34,
+                208
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5089,57 +3589,27 @@
         {
           "control_type": "Group",
           "name": "2-MIDI",
-          "automation_id": "SessionView.Track[1].Mixer",
+          "automation_id": "ArrangementView.Track[1].Mixer",
           "class_name": "",
           "bounding_rect": [
-            -1171,
-            377,
-            -1061,
-            756
+            -243,
+            293,
+            -11,
+            397
           ],
           "is_enabled": true,
           "is_visible": true,
           "children": [
             {
-              "control_type": "Button",
-              "name": "Clip Stop",
-              "automation_id": "SessionView.Track[1].Mixer.Stop",
-              "class_name": "",
-              "bounding_rect": [
-                -1168,
-                379,
-                -1153,
-                395
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Text",
-              "name": "MIDI From",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1167,
-                402,
-                -1065,
-                415
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "ComboBox",
               "name": "Input Type",
-              "automation_id": "SessionView.Track[1].Mixer.InputType",
+              "automation_id": "ArrangementView.Track[1].Mixer.InputType",
               "class_name": "",
               "bounding_rect": [
-                -1167,
-                415,
-                -1065,
-                432
+                -240,
+                294,
+                -155,
+                312
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5148,28 +3618,13 @@
             {
               "control_type": "ComboBox",
               "name": "Input Channel",
-              "automation_id": "SessionView.Track[1].Mixer.InputChannel",
+              "automation_id": "ArrangementView.Track[1].Mixer.InputChannel",
               "class_name": "",
               "bounding_rect": [
-                -1167,
-                433,
-                -1065,
-                451
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Text",
-              "name": "Monitor",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1167,
-                451,
-                -1065,
-                464
+                -240,
+                314,
+                -155,
+                332
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5178,13 +3633,13 @@
             {
               "control_type": "Group",
               "name": "Monitoring",
-              "automation_id": "SessionView.Track[1].Mixer.Monitoring",
+              "automation_id": "ArrangementView.Track[1].Mixer.Monitoring",
               "class_name": "",
               "bounding_rect": [
-                -1167,
-                464,
-                -1065,
-                482
+                -240,
+                334,
+                -155,
+                352
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5192,13 +3647,13 @@
                 {
                   "control_type": "RadioButton",
                   "name": "In",
-                  "automation_id": "SessionView.Track[1].Mixer.Monitoring.Buttons[0]",
+                  "automation_id": "ArrangementView.Track[1].Mixer.Monitoring.Buttons[0]",
                   "class_name": "",
                   "bounding_rect": [
-                    -1167,
-                    464,
-                    -1145,
-                    482
+                    -240,
+                    334,
+                    -217,
+                    352
                   ],
                   "is_enabled": true,
                   "is_visible": true,
@@ -5207,13 +3662,13 @@
                 {
                   "control_type": "RadioButton",
                   "name": "Auto",
-                  "automation_id": "SessionView.Track[1].Mixer.Monitoring.Buttons[1]",
+                  "automation_id": "ArrangementView.Track[1].Mixer.Monitoring.Buttons[1]",
                   "class_name": "",
                   "bounding_rect": [
-                    -1144,
-                    464,
-                    -1109,
-                    482
+                    -216,
+                    334,
+                    -182,
+                    352
                   ],
                   "is_enabled": true,
                   "is_visible": true,
@@ -5222,13 +3677,13 @@
                 {
                   "control_type": "RadioButton",
                   "name": "Off",
-                  "automation_id": "SessionView.Track[1].Mixer.Monitoring.Buttons[2]",
+                  "automation_id": "ArrangementView.Track[1].Mixer.Monitoring.Buttons[2]",
                   "class_name": "",
                   "bounding_rect": [
-                    -1108,
-                    464,
-                    -1082,
-                    482
+                    -181,
+                    334,
+                    -155,
+                    352
                   ],
                   "is_enabled": true,
                   "is_visible": true,
@@ -5237,30 +3692,15 @@
               ]
             },
             {
-              "control_type": "Text",
-              "name": "MIDI To",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1167,
-                482,
-                -1065,
-                495
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "ComboBox",
               "name": "Output Type",
-              "automation_id": "SessionView.Track[1].Mixer.OutputType",
+              "automation_id": "ArrangementView.Track[1].Mixer.OutputType",
               "class_name": "",
               "bounding_rect": [
-                -1167,
-                495,
-                -1065,
-                512
+                -240,
+                354,
+                -155,
+                372
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5269,13 +3709,13 @@
             {
               "control_type": "ComboBox",
               "name": "Output Channel",
-              "automation_id": "SessionView.Track[1].Mixer.OutputChannel",
+              "automation_id": "ArrangementView.Track[1].Mixer.OutputChannel",
               "class_name": "",
               "bounding_rect": [
-                -1167,
-                514,
-                -1065,
-                531
+                -240,
+                374,
+                -155,
+                392
               ],
               "is_enabled": false,
               "is_visible": true,
@@ -5284,13 +3724,13 @@
             {
               "control_type": "CheckBox",
               "name": "Track Activator",
-              "automation_id": "SessionView.Track[1].Mixer.Activator",
+              "automation_id": "ArrangementView.Track[1].Mixer.Activator",
               "class_name": "",
               "bounding_rect": [
-                -1157,
-                671,
-                -1127,
-                700
+                -150,
+                294,
+                -93,
+                312
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5299,13 +3739,13 @@
             {
               "control_type": "CheckBox",
               "name": "Solo/Cue",
-              "automation_id": "SessionView.Track[1].Mixer.Solo",
+              "automation_id": "ArrangementView.Track[1].Mixer.Solo",
               "class_name": "",
               "bounding_rect": [
-                -1157,
-                702,
-                -1127,
-                720
+                -91,
+                294,
+                -64,
+                312
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5314,13 +3754,13 @@
             {
               "control_type": "CheckBox",
               "name": "Arm Recording",
-              "automation_id": "SessionView.Track[1].Mixer.Arm",
+              "automation_id": "ArrangementView.Track[1].Mixer.Arm",
               "class_name": "",
               "bounding_rect": [
-                -1157,
-                723,
-                -1127,
-                740
+                -62,
+                294,
+                -34,
+                312
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5331,57 +3771,27 @@
         {
           "control_type": "Group",
           "name": "3-Audio",
-          "automation_id": "SessionView.Track[2].Mixer",
+          "automation_id": "ArrangementView.Track[2].Mixer",
           "class_name": "",
           "bounding_rect": [
-            -1059,
-            377,
-            -949,
-            756
+            -243,
+            397,
+            -11,
+            501
           ],
           "is_enabled": true,
           "is_visible": true,
           "children": [
             {
-              "control_type": "Button",
-              "name": "Clip Stop",
-              "automation_id": "SessionView.Track[2].Mixer.Stop",
-              "class_name": "",
-              "bounding_rect": [
-                -1056,
-                379,
-                -1041,
-                395
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Text",
-              "name": "Audio From",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1055,
-                402,
-                -952,
-                415
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "ComboBox",
               "name": "Input Type",
-              "automation_id": "SessionView.Track[2].Mixer.InputType",
+              "automation_id": "ArrangementView.Track[2].Mixer.InputType",
               "class_name": "",
               "bounding_rect": [
-                -1055,
-                415,
-                -952,
-                432
+                -240,
+                398,
+                -155,
+                416
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5390,28 +3800,13 @@
             {
               "control_type": "ComboBox",
               "name": "Input Channel",
-              "automation_id": "SessionView.Track[2].Mixer.InputChannel",
+              "automation_id": "ArrangementView.Track[2].Mixer.InputChannel",
               "class_name": "",
               "bounding_rect": [
-                -1055,
-                433,
-                -952,
-                451
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Text",
-              "name": "Monitor",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1055,
-                451,
-                -952,
-                464
+                -240,
+                418,
+                -155,
+                436
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5420,13 +3815,13 @@
             {
               "control_type": "Group",
               "name": "Monitoring",
-              "automation_id": "SessionView.Track[2].Mixer.Monitoring",
+              "automation_id": "ArrangementView.Track[2].Mixer.Monitoring",
               "class_name": "",
               "bounding_rect": [
-                -1055,
-                464,
-                -952,
-                482
+                -240,
+                438,
+                -155,
+                456
               ],
               "is_enabled": false,
               "is_visible": true,
@@ -5434,13 +3829,13 @@
                 {
                   "control_type": "RadioButton",
                   "name": "In",
-                  "automation_id": "SessionView.Track[2].Mixer.Monitoring.Buttons[0]",
+                  "automation_id": "ArrangementView.Track[2].Mixer.Monitoring.Buttons[0]",
                   "class_name": "",
                   "bounding_rect": [
-                    -1055,
-                    464,
-                    -1033,
-                    482
+                    -240,
+                    438,
+                    -217,
+                    456
                   ],
                   "is_enabled": false,
                   "is_visible": true,
@@ -5449,13 +3844,13 @@
                 {
                   "control_type": "RadioButton",
                   "name": "Auto",
-                  "automation_id": "SessionView.Track[2].Mixer.Monitoring.Buttons[1]",
+                  "automation_id": "ArrangementView.Track[2].Mixer.Monitoring.Buttons[1]",
                   "class_name": "",
                   "bounding_rect": [
-                    -1031,
-                    464,
-                    -997,
-                    482
+                    -216,
+                    438,
+                    -182,
+                    456
                   ],
                   "is_enabled": false,
                   "is_visible": true,
@@ -5464,13 +3859,13 @@
                 {
                   "control_type": "RadioButton",
                   "name": "Off",
-                  "automation_id": "SessionView.Track[2].Mixer.Monitoring.Buttons[2]",
+                  "automation_id": "ArrangementView.Track[2].Mixer.Monitoring.Buttons[2]",
                   "class_name": "",
                   "bounding_rect": [
-                    -996,
-                    464,
-                    -970,
-                    482
+                    -181,
+                    438,
+                    -155,
+                    456
                   ],
                   "is_enabled": false,
                   "is_visible": true,
@@ -5479,30 +3874,15 @@
               ]
             },
             {
-              "control_type": "Text",
-              "name": "Audio To",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1055,
-                482,
-                -952,
-                495
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "ComboBox",
               "name": "Output Type",
-              "automation_id": "SessionView.Track[2].Mixer.OutputType",
+              "automation_id": "ArrangementView.Track[2].Mixer.OutputType",
               "class_name": "",
               "bounding_rect": [
-                -1055,
-                495,
-                -952,
-                512
+                -240,
+                458,
+                -155,
+                476
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5511,88 +3891,28 @@
             {
               "control_type": "ComboBox",
               "name": "Output Channel",
-              "automation_id": "SessionView.Track[2].Mixer.OutputChannel",
+              "automation_id": "ArrangementView.Track[2].Mixer.OutputChannel",
               "class_name": "",
               "bounding_rect": [
-                -1055,
-                514,
-                -952,
-                531
+                -240,
+                478,
+                -155,
+                496
               ],
               "is_enabled": false,
               "is_visible": true,
               "children": []
             },
             {
-              "control_type": "Slider",
-              "name": "A-Reverb",
-              "automation_id": "SessionView.Track[2].Mixer.Send[0]",
-              "class_name": "",
-              "bounding_rect": [
-                -1041,
-                541,
-                -1009,
-                579
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Slider",
-              "name": "B-Delay",
-              "automation_id": "SessionView.Track[2].Mixer.Send[1]",
-              "class_name": "",
-              "bounding_rect": [
-                -1002,
-                561,
-                -970,
-                599
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Button",
-              "name": "Peak, −∞dB",
-              "automation_id": "SessionView.Track[2].Mixer.PeakLevel",
-              "class_name": "",
-              "bounding_rect": [
-                -1052,
-                610,
-                -1008,
-                628
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Slider",
-              "name": "Track Pan",
-              "automation_id": "SessionView.Track[2].Mixer.Pan",
-              "class_name": "",
-              "bounding_rect": [
-                -1046,
-                631,
-                -1014,
-                669
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "CheckBox",
               "name": "Track Activator",
-              "automation_id": "SessionView.Track[2].Mixer.Activator",
+              "automation_id": "ArrangementView.Track[2].Mixer.Activator",
               "class_name": "",
               "bounding_rect": [
-                -1044,
-                671,
-                -1015,
-                700
+                -150,
+                398,
+                -93,
+                416
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5601,13 +3921,13 @@
             {
               "control_type": "CheckBox",
               "name": "Solo/Cue",
-              "automation_id": "SessionView.Track[2].Mixer.Solo",
+              "automation_id": "ArrangementView.Track[2].Mixer.Solo",
               "class_name": "",
               "bounding_rect": [
-                -1044,
-                702,
-                -1015,
-                720
+                -91,
+                398,
+                -64,
+                416
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5616,13 +3936,13 @@
             {
               "control_type": "CheckBox",
               "name": "Arm Recording",
-              "automation_id": "SessionView.Track[2].Mixer.Arm",
+              "automation_id": "ArrangementView.Track[2].Mixer.Arm",
               "class_name": "",
               "bounding_rect": [
-                -1044,
-                723,
-                -1015,
-                740
+                -62,
+                398,
+                -34,
+                416
               ],
               "is_enabled": false,
               "is_visible": true,
@@ -5631,13 +3951,58 @@
             {
               "control_type": "Slider",
               "name": "Track Volume",
-              "automation_id": "SessionView.Track[2].Mixer.Volume",
+              "automation_id": "ArrangementView.Track[2].Mixer.Volume",
               "class_name": "",
               "bounding_rect": [
-                -1007,
-                609,
-                -956,
-                741
+                -150,
+                418,
+                -93,
+                436
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "Track Pan",
+              "automation_id": "ArrangementView.Track[2].Mixer.Pan",
+              "class_name": "",
+              "bounding_rect": [
+                -91,
+                418,
+                -34,
+                436
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "A-Reverb",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -150,
+                438,
+                -112,
+                456
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "B-Delay",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -111,
+                438,
+                -73,
+                456
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5648,57 +4013,27 @@
         {
           "control_type": "Group",
           "name": "4-Audio",
-          "automation_id": "SessionView.Track[3].Mixer",
+          "automation_id": "ArrangementView.Track[3].Mixer",
           "class_name": "",
           "bounding_rect": [
-            -947,
-            377,
-            -837,
-            756
+            -243,
+            501,
+            -11,
+            605
           ],
           "is_enabled": true,
           "is_visible": true,
           "children": [
             {
-              "control_type": "Button",
-              "name": "Clip Stop",
-              "automation_id": "SessionView.Track[3].Mixer.Stop",
-              "class_name": "",
-              "bounding_rect": [
-                -944,
-                379,
-                -929,
-                395
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Text",
-              "name": "Audio From",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -943,
-                402,
-                -840,
-                415
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "ComboBox",
               "name": "Input Type",
-              "automation_id": "SessionView.Track[3].Mixer.InputType",
+              "automation_id": "ArrangementView.Track[3].Mixer.InputType",
               "class_name": "",
               "bounding_rect": [
-                -943,
-                415,
-                -840,
-                432
+                -240,
+                502,
+                -155,
+                520
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5707,28 +4042,13 @@
             {
               "control_type": "ComboBox",
               "name": "Input Channel",
-              "automation_id": "SessionView.Track[3].Mixer.InputChannel",
+              "automation_id": "ArrangementView.Track[3].Mixer.InputChannel",
               "class_name": "",
               "bounding_rect": [
-                -943,
-                433,
-                -840,
-                451
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Text",
-              "name": "Monitor",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -943,
-                451,
-                -840,
-                464
+                -240,
+                522,
+                -155,
+                540
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5737,13 +4057,13 @@
             {
               "control_type": "Group",
               "name": "Monitoring",
-              "automation_id": "SessionView.Track[3].Mixer.Monitoring",
+              "automation_id": "ArrangementView.Track[3].Mixer.Monitoring",
               "class_name": "",
               "bounding_rect": [
-                -943,
-                464,
-                -840,
-                482
+                -240,
+                542,
+                -155,
+                560
               ],
               "is_enabled": false,
               "is_visible": true,
@@ -5751,13 +4071,13 @@
                 {
                   "control_type": "RadioButton",
                   "name": "In",
-                  "automation_id": "SessionView.Track[3].Mixer.Monitoring.Buttons[0]",
+                  "automation_id": "ArrangementView.Track[3].Mixer.Monitoring.Buttons[0]",
                   "class_name": "",
                   "bounding_rect": [
-                    -943,
-                    464,
-                    -921,
-                    482
+                    -240,
+                    542,
+                    -217,
+                    560
                   ],
                   "is_enabled": false,
                   "is_visible": true,
@@ -5766,13 +4086,13 @@
                 {
                   "control_type": "RadioButton",
                   "name": "Auto",
-                  "automation_id": "SessionView.Track[3].Mixer.Monitoring.Buttons[1]",
+                  "automation_id": "ArrangementView.Track[3].Mixer.Monitoring.Buttons[1]",
                   "class_name": "",
                   "bounding_rect": [
-                    -919,
-                    464,
-                    -885,
-                    482
+                    -216,
+                    542,
+                    -182,
+                    560
                   ],
                   "is_enabled": false,
                   "is_visible": true,
@@ -5781,13 +4101,13 @@
                 {
                   "control_type": "RadioButton",
                   "name": "Off",
-                  "automation_id": "SessionView.Track[3].Mixer.Monitoring.Buttons[2]",
+                  "automation_id": "ArrangementView.Track[3].Mixer.Monitoring.Buttons[2]",
                   "class_name": "",
                   "bounding_rect": [
-                    -884,
-                    464,
-                    -858,
-                    482
+                    -181,
+                    542,
+                    -155,
+                    560
                   ],
                   "is_enabled": false,
                   "is_visible": true,
@@ -5796,30 +4116,15 @@
               ]
             },
             {
-              "control_type": "Text",
-              "name": "Audio To",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -943,
-                482,
-                -840,
-                495
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "ComboBox",
               "name": "Output Type",
-              "automation_id": "SessionView.Track[3].Mixer.OutputType",
+              "automation_id": "ArrangementView.Track[3].Mixer.OutputType",
               "class_name": "",
               "bounding_rect": [
-                -943,
-                495,
-                -840,
-                512
+                -240,
+                562,
+                -155,
+                580
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5828,88 +4133,28 @@
             {
               "control_type": "ComboBox",
               "name": "Output Channel",
-              "automation_id": "SessionView.Track[3].Mixer.OutputChannel",
+              "automation_id": "ArrangementView.Track[3].Mixer.OutputChannel",
               "class_name": "",
               "bounding_rect": [
-                -943,
-                514,
-                -840,
-                531
+                -240,
+                582,
+                -155,
+                600
               ],
               "is_enabled": false,
               "is_visible": true,
               "children": []
             },
             {
-              "control_type": "Slider",
-              "name": "A-Reverb",
-              "automation_id": "SessionView.Track[3].Mixer.Send[0]",
-              "class_name": "",
-              "bounding_rect": [
-                -929,
-                541,
-                -897,
-                579
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Slider",
-              "name": "B-Delay",
-              "automation_id": "SessionView.Track[3].Mixer.Send[1]",
-              "class_name": "",
-              "bounding_rect": [
-                -890,
-                561,
-                -858,
-                599
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Button",
-              "name": "Peak, −∞dB",
-              "automation_id": "SessionView.Track[3].Mixer.PeakLevel",
-              "class_name": "",
-              "bounding_rect": [
-                -939,
-                610,
-                -896,
-                628
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Slider",
-              "name": "Track Pan",
-              "automation_id": "SessionView.Track[3].Mixer.Pan",
-              "class_name": "",
-              "bounding_rect": [
-                -934,
-                631,
-                -902,
-                669
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "CheckBox",
               "name": "Track Activator",
-              "automation_id": "SessionView.Track[3].Mixer.Activator",
+              "automation_id": "ArrangementView.Track[3].Mixer.Activator",
               "class_name": "",
               "bounding_rect": [
-                -932,
-                671,
-                -903,
-                700
+                -150,
+                502,
+                -93,
+                520
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5918,13 +4163,13 @@
             {
               "control_type": "CheckBox",
               "name": "Solo/Cue",
-              "automation_id": "SessionView.Track[3].Mixer.Solo",
+              "automation_id": "ArrangementView.Track[3].Mixer.Solo",
               "class_name": "",
               "bounding_rect": [
-                -932,
-                702,
-                -903,
-                720
+                -91,
+                502,
+                -64,
+                520
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5933,13 +4178,13 @@
             {
               "control_type": "CheckBox",
               "name": "Arm Recording",
-              "automation_id": "SessionView.Track[3].Mixer.Arm",
+              "automation_id": "ArrangementView.Track[3].Mixer.Arm",
               "class_name": "",
               "bounding_rect": [
-                -932,
-                723,
-                -903,
-                740
+                -62,
+                502,
+                -34,
+                520
               ],
               "is_enabled": false,
               "is_visible": true,
@@ -5948,13 +4193,58 @@
             {
               "control_type": "Slider",
               "name": "Track Volume",
-              "automation_id": "SessionView.Track[3].Mixer.Volume",
+              "automation_id": "ArrangementView.Track[3].Mixer.Volume",
               "class_name": "",
               "bounding_rect": [
-                -895,
-                609,
-                -844,
-                741
+                -150,
+                522,
+                -93,
+                540
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "Track Pan",
+              "automation_id": "ArrangementView.Track[3].Mixer.Pan",
+              "class_name": "",
+              "bounding_rect": [
+                -91,
+                522,
+                -34,
+                540
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "A-Reverb",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -150,
+                542,
+                -112,
+                560
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "B-Delay",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -111,
+                542,
+                -73,
+                560
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -5965,42 +4255,27 @@
         {
           "control_type": "Group",
           "name": "A-Reverb",
-          "automation_id": "SessionView.ReturnTrack[0].Mixer",
+          "automation_id": "ArrangementView.ReturnTrack[0].Mixer",
           "class_name": "",
           "bounding_rect": [
-            -334,
-            377,
-            -224,
-            756
+            -243,
+            661,
+            -11,
+            684
           ],
           "is_enabled": true,
           "is_visible": true,
           "children": [
             {
-              "control_type": "Text",
-              "name": "Audio To",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -331,
-                482,
-                -228,
-                495
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "ComboBox",
               "name": "Output Type",
-              "automation_id": "SessionView.ReturnTrack[0].Mixer.OutputType",
+              "automation_id": "ArrangementView.ReturnTrack[0].Mixer.OutputType",
               "class_name": "",
               "bounding_rect": [
-                -331,
-                495,
-                -228,
-                512
+                -240,
+                645,
+                -155,
+                662
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -6009,88 +4284,28 @@
             {
               "control_type": "ComboBox",
               "name": "Output Channel",
-              "automation_id": "SessionView.ReturnTrack[0].Mixer.OutputChannel",
+              "automation_id": "ArrangementView.ReturnTrack[0].Mixer.OutputChannel",
               "class_name": "",
               "bounding_rect": [
-                -331,
-                514,
-                -228,
-                531
+                -240,
+                665,
+                -155,
+                682
               ],
               "is_enabled": false,
               "is_visible": true,
               "children": []
             },
             {
-              "control_type": "Slider",
-              "name": "A-Reverb",
-              "automation_id": "SessionView.ReturnTrack[0].Mixer.Send[0]",
-              "class_name": "",
-              "bounding_rect": [
-                -316,
-                541,
-                -285,
-                579
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Slider",
-              "name": "B-Delay",
-              "automation_id": "SessionView.ReturnTrack[0].Mixer.Send[1]",
-              "class_name": "",
-              "bounding_rect": [
-                -277,
-                561,
-                -246,
-                599
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Button",
-              "name": "Peak, −∞dB",
-              "automation_id": "SessionView.ReturnTrack[0].Mixer.PeakLevel",
-              "class_name": "",
-              "bounding_rect": [
-                -327,
-                610,
-                -283,
-                628
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Slider",
-              "name": "Track Pan",
-              "automation_id": "SessionView.ReturnTrack[0].Mixer.Pan",
-              "class_name": "",
-              "bounding_rect": [
-                -321,
-                631,
-                -289,
-                669
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "CheckBox",
               "name": "Track Activator",
-              "automation_id": "SessionView.ReturnTrack[0].Mixer.Activator",
+              "automation_id": "ArrangementView.ReturnTrack[0].Mixer.Activator",
               "class_name": "",
               "bounding_rect": [
-                -320,
-                671,
-                -290,
-                700
+                -150,
+                665,
+                -93,
+                682
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -6099,13 +4314,28 @@
             {
               "control_type": "CheckBox",
               "name": "Solo/Cue",
-              "automation_id": "SessionView.ReturnTrack[0].Mixer.Solo",
+              "automation_id": "ArrangementView.ReturnTrack[0].Mixer.Solo",
               "class_name": "",
               "bounding_rect": [
-                -320,
-                702,
-                -290,
-                720
+                -91,
+                665,
+                -69,
+                682
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Button",
+              "name": "Pre/Post Toggle",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -66,
+                665,
+                -34,
+                682
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -6114,13 +4344,58 @@
             {
               "control_type": "Slider",
               "name": "Track Volume",
-              "automation_id": "SessionView.ReturnTrack[0].Mixer.Volume",
+              "automation_id": "ArrangementView.ReturnTrack[0].Mixer.Volume",
               "class_name": "",
               "bounding_rect": [
-                -282,
-                609,
-                -231,
-                741
+                -150,
+                685,
+                -93,
+                702
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "Track Pan",
+              "automation_id": "ArrangementView.ReturnTrack[0].Mixer.Pan",
+              "class_name": "",
+              "bounding_rect": [
+                -91,
+                685,
+                -34,
+                702
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "A-Reverb",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -150,
+                705,
+                -112,
+                723
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "B-Delay",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -111,
+                705,
+                -73,
+                723
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -6131,42 +4406,27 @@
         {
           "control_type": "Group",
           "name": "B-Delay",
-          "automation_id": "SessionView.ReturnTrack[1].Mixer",
+          "automation_id": "ArrangementView.ReturnTrack[1].Mixer",
           "class_name": "",
           "bounding_rect": [
-            -222,
-            377,
-            -112,
-            756
+            -243,
+            684,
+            -11,
+            706
           ],
           "is_enabled": true,
           "is_visible": true,
           "children": [
             {
-              "control_type": "Text",
-              "name": "Audio To",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -218,
-                482,
-                -116,
-                495
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "ComboBox",
               "name": "Output Type",
-              "automation_id": "SessionView.ReturnTrack[1].Mixer.OutputType",
+              "automation_id": "ArrangementView.ReturnTrack[1].Mixer.OutputType",
               "class_name": "",
               "bounding_rect": [
-                -218,
-                495,
-                -116,
-                512
+                -240,
+                667,
+                -155,
+                685
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -6175,88 +4435,28 @@
             {
               "control_type": "ComboBox",
               "name": "Output Channel",
-              "automation_id": "SessionView.ReturnTrack[1].Mixer.OutputChannel",
+              "automation_id": "ArrangementView.ReturnTrack[1].Mixer.OutputChannel",
               "class_name": "",
               "bounding_rect": [
-                -218,
-                514,
-                -116,
-                531
+                -240,
+                687,
+                -155,
+                705
               ],
               "is_enabled": false,
               "is_visible": true,
               "children": []
             },
             {
-              "control_type": "Slider",
-              "name": "A-Reverb",
-              "automation_id": "SessionView.ReturnTrack[1].Mixer.Send[0]",
-              "class_name": "",
-              "bounding_rect": [
-                -204,
-                541,
-                -172,
-                579
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Slider",
-              "name": "B-Delay",
-              "automation_id": "SessionView.ReturnTrack[1].Mixer.Send[1]",
-              "class_name": "",
-              "bounding_rect": [
-                -165,
-                561,
-                -133,
-                599
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Button",
-              "name": "Peak, −∞dB",
-              "automation_id": "SessionView.ReturnTrack[1].Mixer.PeakLevel",
-              "class_name": "",
-              "bounding_rect": [
-                -215,
-                610,
-                -171,
-                628
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Slider",
-              "name": "Track Pan",
-              "automation_id": "SessionView.ReturnTrack[1].Mixer.Pan",
-              "class_name": "",
-              "bounding_rect": [
-                -209,
-                631,
-                -177,
-                669
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "CheckBox",
               "name": "Track Activator",
-              "automation_id": "SessionView.ReturnTrack[1].Mixer.Activator",
+              "automation_id": "ArrangementView.ReturnTrack[1].Mixer.Activator",
               "class_name": "",
               "bounding_rect": [
-                -208,
-                671,
-                -178,
-                700
+                -150,
+                687,
+                -93,
+                705
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -6265,13 +4465,28 @@
             {
               "control_type": "CheckBox",
               "name": "Solo/Cue",
-              "automation_id": "SessionView.ReturnTrack[1].Mixer.Solo",
+              "automation_id": "ArrangementView.ReturnTrack[1].Mixer.Solo",
               "class_name": "",
               "bounding_rect": [
-                -208,
-                702,
-                -178,
-                720
+                -91,
+                687,
+                -69,
+                705
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Button",
+              "name": "Pre/Post Toggle",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -66,
+                687,
+                -34,
+                705
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -6280,13 +4495,58 @@
             {
               "control_type": "Slider",
               "name": "Track Volume",
-              "automation_id": "SessionView.ReturnTrack[1].Mixer.Volume",
+              "automation_id": "ArrangementView.ReturnTrack[1].Mixer.Volume",
               "class_name": "",
               "bounding_rect": [
-                -170,
-                609,
-                -119,
-                741
+                -150,
+                707,
+                -93,
+                725
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "Track Pan",
+              "automation_id": "ArrangementView.ReturnTrack[1].Mixer.Pan",
+              "class_name": "",
+              "bounding_rect": [
+                -91,
+                707,
+                -34,
+                725
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "A-Reverb",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -150,
+                727,
+                -112,
+                745
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "B-Delay",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -111,
+                727,
+                -73,
+                745
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -6297,102 +4557,27 @@
         {
           "control_type": "Group",
           "name": "Main",
-          "automation_id": "SessionView.MainTrack.Mixer",
+          "automation_id": "ArrangementView.MainTrack.Mixer",
           "class_name": "",
           "bounding_rect": [
-            -110,
-            377,
+            -243,
+            706,
             -11,
-            756
+            728
           ],
           "is_enabled": true,
           "is_visible": true,
           "children": [
             {
-              "control_type": "Button",
-              "name": "Stop All Clips",
-              "automation_id": "SessionView.MainTrack.Mixer.Stop",
-              "class_name": "",
-              "bounding_rect": [
-                -108,
-                379,
-                -92,
-                395
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "CheckBox",
-              "name": "Enable Follow Actions Globally",
-              "automation_id": "SessionView.MainTrack.Mixer.EnableFollowActions",
-              "class_name": "",
-              "bounding_rect": [
-                -60,
-                378,
-                -43,
-                396
-              ],
-              "is_enabled": false,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "CheckBox",
-              "name": "Back to Arrangement",
-              "automation_id": "SessionView.MainTrack.Mixer.BackToArrangement",
-              "class_name": "",
-              "bounding_rect": [
-                -40,
-                378,
-                -14,
-                396
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Text",
-              "name": "Cue Out",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -106,
-                464,
-                -14,
-                477
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
               "control_type": "ComboBox",
               "name": "Cue Out",
-              "automation_id": "SessionView.MainTrack.Mixer.CueOut",
+              "automation_id": "ArrangementView.MainTrack.Mixer.OutputChannel",
               "class_name": "",
               "bounding_rect": [
-                -106,
-                477,
-                -14,
-                495
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Text",
-              "name": "Main Out",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -106,
-                495,
-                -14,
-                514
+                -240,
+                690,
+                -155,
+                707
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -6401,103 +4586,13 @@
             {
               "control_type": "ComboBox",
               "name": "Main Out",
-              "automation_id": "SessionView.MainTrack.Mixer.OutputChannel",
+              "automation_id": "ArrangementView.MainTrack.Mixer.OutputChannel",
               "class_name": "",
               "bounding_rect": [
-                -106,
-                514,
-                -14,
-                531
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Button",
-              "name": "A-Reverb",
-              "automation_id": "SessionView.MainTrack.Mixer.SendPrePost[0]",
-              "class_name": "",
-              "bounding_rect": [
-                -96,
-                550,
-                -63,
-                568
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Button",
-              "name": "B-Delay",
-              "automation_id": "SessionView.MainTrack.Mixer.SendPrePost[1]",
-              "class_name": "",
-              "bounding_rect": [
-                -56,
-                570,
-                -23,
-                588
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Button",
-              "name": "Peak, −∞dB",
-              "automation_id": "SessionView.MainTrack.Mixer.PeakLevel",
-              "class_name": "",
-              "bounding_rect": [
-                -98,
-                610,
-                -54,
-                628
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Slider",
-              "name": "Main Pan",
-              "automation_id": "SessionView.MainTrack.Mixer.Pan",
-              "class_name": "",
-              "bounding_rect": [
-                -92,
-                631,
-                -60,
-                669
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Button",
-              "name": "Solo/Cue",
-              "automation_id": "SessionView.MainTrack.Mixer.SoloCueSwitch",
-              "class_name": "",
-              "bounding_rect": [
-                -92,
-                682,
-                -60,
-                700
-              ],
-              "is_enabled": false,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "Slider",
-              "name": "Preview/Cue Volume",
-              "automation_id": "SessionView.MainTrack.Mixer.PreviewVolume",
-              "class_name": "",
-              "bounding_rect": [
-                -92,
-                702,
-                -60,
-                740
+                -240,
+                710,
+                -155,
+                727
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -6506,13 +4601,149 @@
             {
               "control_type": "Slider",
               "name": "Track Volume",
-              "automation_id": "SessionView.MainTrack.Mixer.Volume",
+              "automation_id": "ArrangementView.MainTrack.Mixer.Volume",
               "class_name": "",
               "bounding_rect": [
-                -53,
-                609,
-                -19,
-                741
+                -150,
+                710,
+                -93,
+                727
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "Preview/Cue Volume",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -91,
+                710,
+                -34,
+                727
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Slider",
+              "name": "Track Pan",
+              "automation_id": "ArrangementView.MainTrack.Mixer.Pan",
+              "class_name": "",
+              "bounding_rect": [
+                -91,
+                730,
+                -34,
+                747
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            }
+          ]
+        },
+        {
+          "control_type": "CheckBox",
+          "name": "Waveform Vertical Zoom",
+          "automation_id": "ArrangementView.IsWaveformVerticalZoomActiveView",
+          "class_name": "",
+          "bounding_rect": [
+            -354,
+            734,
+            -334,
+            752
+          ],
+          "is_enabled": true,
+          "is_visible": true,
+          "children": []
+        },
+        {
+          "control_type": "Slider",
+          "name": "Waveform Vertical Zoom Level",
+          "automation_id": "ArrangementView.WaveformVerticalZoomFactorView",
+          "class_name": "",
+          "bounding_rect": [
+            -333,
+            734,
+            -289,
+            752
+          ],
+          "is_enabled": true,
+          "is_visible": true,
+          "children": []
+        },
+        {
+          "control_type": "CheckBox",
+          "name": "Optimize Arrangement Height",
+          "automation_id": "",
+          "class_name": "",
+          "bounding_rect": [
+            -285,
+            734,
+            -264,
+            752
+          ],
+          "is_enabled": true,
+          "is_visible": true,
+          "children": []
+        },
+        {
+          "control_type": "CheckBox",
+          "name": "Optimize Arrangement Width",
+          "automation_id": "",
+          "class_name": "",
+          "bounding_rect": [
+            -263,
+            734,
+            -243,
+            752
+          ],
+          "is_enabled": true,
+          "is_visible": true,
+          "children": []
+        },
+        {
+          "control_type": "Group",
+          "name": "Loop Brace",
+          "automation_id": "ArrangementView.ArrangerLoopBar",
+          "class_name": "",
+          "bounding_rect": [
+            -1283,
+            160,
+            -208,
+            731
+          ],
+          "is_enabled": true,
+          "is_visible": true,
+          "children": [
+            {
+              "control_type": "Group",
+              "name": "3, Arrangement Loop Start",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -1246,
+                160,
+                -1233,
+                731
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": []
+            },
+            {
+              "control_type": "Group",
+              "name": "7, Arrangement Loop End",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -1184,
+                160,
+                -1171,
+                731
               ],
               "is_enabled": true,
               "is_visible": true,

@@ -1098,7 +1098,7 @@
             -1887,
             143
           ],
-          "is_enabled": false,
+          "is_enabled": true,
           "is_visible": true,
           "children": []
         },
@@ -2345,7 +2345,7 @@
             -1629,
             169,
             -1293,
-            301
+            235
           ],
           "is_enabled": true,
           "is_visible": true,
@@ -2353,12 +2353,12 @@
         },
         {
           "control_type": "Tree",
-          "name": "Sounds List, 1001 Items",
+          "name": "MIDI Effects List, 15 Items",
           "automation_id": "",
           "class_name": "",
           "bounding_rect": [
             -1629,
-            304,
+            238,
             -1293,
             674
           ],
@@ -2372,812 +2372,238 @@
               "class_name": "",
               "bounding_rect": [
                 -1626,
-                304,
+                238,
                 -1319,
-                326
+                260
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "3D Reso Percussion.adg",
+              "control_type": "TreeItem",
+              "name": "Arpeggiator",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                326,
+                260,
                 -1293,
-                348
+                282
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "3D Reso Percussion.adg",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    326,
-                    -1305,
-                    347
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "3D Reso Percussion.adg",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        330,
-                        -1448,
-                        343
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "5ths Detuned Pad.adv",
+              "control_type": "TreeItem",
+              "name": "CC Control",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                348,
+                282,
                 -1293,
-                371
+                305
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "5ths Detuned Pad.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    348,
-                    -1305,
-                    370
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "5ths Detuned Pad.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        352,
-                        -1457,
-                        365
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "5ths Filter Sweep Pad.adv",
+              "control_type": "TreeItem",
+              "name": "Chord",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                371,
+                305,
                 -1293,
-                393
+                327
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "5ths Filter Sweep Pad.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    371,
-                    -1305,
-                    392
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "5ths Filter Sweep Pad.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        374,
-                        -1436,
-                        387
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "5ths Glass Motion Pad.adv",
+              "control_type": "TreeItem",
+              "name": "Envelope MIDI",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                393,
+                327,
                 -1293,
-                416
+                350
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "5ths Glass Motion Pad.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    393,
-                    -1305,
-                    415
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "5ths Glass Motion Pad.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        397,
-                        -1434,
-                        410
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "12 CC's and Counting.adv",
+              "control_type": "TreeItem",
+              "name": "Expression Control",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                416,
+                350,
                 -1293,
-                438
+                372
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "12 CC's and Counting.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    416,
-                    -1305,
-                    437
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "12 CC's and Counting.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        419,
-                        -1437,
-                        432
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "12 String Chorus Guitar.adv",
+              "control_type": "TreeItem",
+              "name": "MIDI Effect Rack",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                438,
+                372,
                 -1293,
-                461
+                395
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "12 String Chorus Guitar.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    438,
-                    -1305,
-                    459
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "12 String Chorus Guitar.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        442,
-                        -1426,
-                        455
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "12 String Guitar.adv",
+              "control_type": "TreeItem",
+              "name": "MIDI Monitor",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                461,
+                395,
                 -1293,
-                483
+                417
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "12 String Guitar.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    461,
-                    -1305,
-                    482
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "12 String Guitar.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        464,
-                        -1469,
-                        477
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "37th Street.adv",
+              "control_type": "TreeItem",
+              "name": "MPE Control",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                483,
+                417,
                 -1293,
-                505
+                439
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "37th Street.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    483,
-                    -1305,
-                    504
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "37th Street.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        487,
-                        -1494,
-                        500
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "80s Tape.adv",
+              "control_type": "TreeItem",
+              "name": "Note Echo",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                505,
+                439,
                 -1293,
-                528
+                462
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "80s Tape.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    505,
-                    -1305,
-                    527
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "80s Tape.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        509,
-                        -1511,
-                        522
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "80s VCO Brass.adv",
+              "control_type": "TreeItem",
+              "name": "Note Length",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                528,
+                462,
                 -1293,
-                550
+                484
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "80s VCO Brass.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    528,
-                    -1305,
-                    549
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "80s VCO Brass.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        531,
-                        -1479,
-                        544
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "808 Drifter.adg",
+              "control_type": "TreeItem",
+              "name": "Pitch",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                550,
+                484,
                 -1293,
-                573
+                507
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "808 Drifter.adg",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    550,
-                    -1305,
-                    571
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "808 Drifter.adg",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        554,
-                        -1496,
-                        567
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "808 Pure.adg",
+              "control_type": "TreeItem",
+              "name": "Random",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                573,
+                507,
                 -1293,
-                595
+                529
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "808 Pure.adg",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    573,
-                    -1305,
-                    594
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "808 Pure.adg",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        576,
-                        -1508,
-                        589
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "808 Selector Rack.adg",
+              "control_type": "TreeItem",
+              "name": "Scale",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                595,
+                529,
                 -1293,
-                618
+                551
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "808 Selector Rack.adg",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    595,
-                    -1305,
-                    616
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "808 Selector Rack.adg",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        599,
-                        -1456,
-                        612
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "808 Slapping.adg",
+              "control_type": "TreeItem",
+              "name": "Shaper MIDI",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                618,
+                551,
                 -1293,
-                640
+                574
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "808 Slapping.adg",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    618,
-                    -1305,
-                    639
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "808 Slapping.adg",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        621,
-                        -1486,
-                        634
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             },
             {
-              "control_type": "DataItem",
-              "name": "A Brief History of Chime.adv",
+              "control_type": "TreeItem",
+              "name": "Velocity",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
                 -1629,
-                640,
+                574,
                 -1293,
-                662
+                596
               ],
               "is_enabled": true,
               "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "A Brief History of Chime.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    640,
-                    -1305,
-                    661
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "A Brief History of Chime.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        643,
-                        -1423,
-                        656
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "DataItem",
-              "name": "A Degree Of Synth.adv",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                662,
-                -1293,
-                685
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "A Degree Of Synth.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    662,
-                    -1305,
-                    684
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "A Degree Of Synth.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        666,
-                        -1455,
-                        679
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "control_type": "DataItem",
-              "name": "A Soft Chord.adv",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                685,
-                -1293,
-                707
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": [
-                {
-                  "control_type": "DataItem",
-                  "name": "A Soft Chord.adv",
-                  "automation_id": "",
-                  "class_name": "",
-                  "bounding_rect": [
-                    -1629,
-                    685,
-                    -1305,
-                    706
-                  ],
-                  "is_enabled": true,
-                  "is_visible": true,
-                  "children": [
-                    {
-                      "control_type": "Text",
-                      "name": "A Soft Chord.adv",
-                      "automation_id": "",
-                      "class_name": "",
-                      "bounding_rect": [
-                        -1586,
-                        688,
-                        -1487,
-                        701
-                      ],
-                      "is_enabled": true,
-                      "is_visible": true,
-                      "children": []
-                    }
-                  ]
-                }
-              ]
+              "children": []
             }
           ]
         },
@@ -3191,21 +2617,6 @@
             679,
             -1607,
             697
-          ],
-          "is_enabled": true,
-          "is_visible": true,
-          "children": []
-        },
-        {
-          "control_type": "Text",
-          "name": "1 item selected",
-          "automation_id": "ContentBrowser.KeywordEditorSplitter.SidebarSplitter.ContentPane.TreeContentView.FooterCell.Container.SelectionInfoCell.SelectionInfoText",
-          "class_name": "",
-          "bounding_rect": [
-            -1505,
-            681,
-            -1415,
-            694
           ],
           "is_enabled": true,
           "is_visible": true,

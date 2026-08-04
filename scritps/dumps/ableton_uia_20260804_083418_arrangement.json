@@ -1098,7 +1098,7 @@
             -1887,
             143
           ],
-          "is_enabled": true,
+          "is_enabled": false,
           "is_visible": true,
           "children": []
         },
@@ -2337,13 +2337,28 @@
           ]
         },
         {
-          "control_type": "Tree",
-          "name": "Instruments List, 23 Items",
+          "control_type": "Group",
+          "name": "Filters",
           "automation_id": "",
           "class_name": "",
           "bounding_rect": [
             -1629,
             169,
+            -1293,
+            206
+          ],
+          "is_enabled": true,
+          "is_visible": true,
+          "children": []
+        },
+        {
+          "control_type": "Tree",
+          "name": "Plug-Ins List, 0 Items",
+          "automation_id": "",
+          "class_name": "",
+          "bounding_rect": [
+            -1629,
+            208,
             -1293,
             674
           ],
@@ -2357,354 +2372,24 @@
               "class_name": "",
               "bounding_rect": [
                 -1626,
-                169,
-                -1319,
-                192
+                208,
+                -1378,
+                230
               ],
               "is_enabled": true,
               "is_visible": true,
               "children": []
             },
             {
-              "control_type": "TreeItem",
-              "name": "Analog",
+              "control_type": "Text",
+              "name": "Size",
               "automation_id": "",
               "class_name": "",
               "bounding_rect": [
-                -1629,
-                192,
-                -1293,
-                214
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Collision",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                214,
-                -1293,
-                236
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Drift",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                236,
-                -1293,
-                259
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Drum Rack",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                259,
-                -1293,
-                281
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Drum Sampler",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                281,
-                -1293,
-                304
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "DS Clang",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                304,
-                -1293,
-                326
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "DS Clap",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                326,
-                -1293,
-                348
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "DS Cymbal",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                348,
-                -1293,
-                371
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "DS FM",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                371,
-                -1293,
-                393
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "DS HH",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                393,
-                -1293,
-                416
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "DS Kick",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                416,
-                -1293,
-                438
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "DS Snare",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                438,
-                -1293,
-                461
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "DS Tom",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                461,
-                -1293,
-                483
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Electric",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                483,
-                -1293,
-                505
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "External Instrument",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                505,
-                -1293,
-                528
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Impulse",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                528,
-                -1293,
-                550
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Instrument Rack",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                550,
-                -1293,
-                573
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Meld",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                573,
-                -1293,
-                595
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Operator",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                595,
-                -1293,
-                618
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Sampler",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                618,
-                -1293,
-                640
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Simpler",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                640,
-                -1293,
-                662
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Tension",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                662,
-                -1293,
-                685
-              ],
-              "is_enabled": true,
-              "is_visible": true,
-              "children": []
-            },
-            {
-              "control_type": "TreeItem",
-              "name": "Wavetable",
-              "automation_id": "",
-              "class_name": "",
-              "bounding_rect": [
-                -1629,
-                685,
-                -1293,
-                707
+                -1362,
+                208,
+                -1309,
+                230
               ],
               "is_enabled": true,
               "is_visible": true,
@@ -2722,21 +2407,6 @@
             679,
             -1607,
             697
-          ],
-          "is_enabled": true,
-          "is_visible": true,
-          "children": []
-        },
-        {
-          "control_type": "Text",
-          "name": "1 item selected",
-          "automation_id": "ContentBrowser.KeywordEditorSplitter.SidebarSplitter.ContentPane.TreeContentView.FooterCell.Container.SelectionInfoCell.SelectionInfoText",
-          "class_name": "",
-          "bounding_rect": [
-            -1505,
-            681,
-            -1415,
-            694
           ],
           "is_enabled": true,
           "is_visible": true,

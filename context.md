@@ -22,7 +22,7 @@ Claude proposes.
 |---|---|---|
 | `dump_ableton_pywinauto.py` | Read-only tree dump. Canonical `find_ableton_window()` + `ensure_window_ready()`, imported by the other two. | CONFIRMED |
 | `automate_ableton_task.py` | Live deliverable — acts on Live (click/type). Source of `build_automation_id_index()`. | CONFIRMED (solo_tour path); `click_by_id()` and `task_arm_track` baseline handling NOT hardened yet (see Open Items) |
-| `dump_ableton_states.py` | Switches Ableton between named states, dumps each. | Session/Arrangement: CONFIRMED. Browser categories `sounds`/`instruments`: CONFIRMED (both directions, forced transition). `drums`/`audio_effects`/`midi_effects`/`plugins`: UNVERIFIED (same code path, untested target strings). |
+| `dump_ableton_states.py` | Switches Ableton between named states, dumps each. | CONFIRMED — Session/Arrangement, and all six Browser categories (`sounds`, `instruments`, `drums`, `audio_effects`, `midi_effects`, `plugins`), verified via `--states all` in one run: each category's `Tree: "<Category> List, N Items"` label + item content matched the requested category. `--states all` preset also confirmed working. |
 | `grep_dump.py` | Stdlib substring search over a JSON dump. | CONFIRMED |
 
 ### automation_id scheme (confirmed structural IDs)
@@ -50,10 +50,6 @@ clickable target.
   just inconsistent rigor.
 - `task_arm_track` doesn't capture/print a baseline the way `solo_tour`
   does. Unchecked whether it needs to (Arm may not require restoration).
-- Browser categories `drums`, `audio_effects`, `midi_effects`, `plugins`
-  untested — run `dump_ableton_states.py --states drums audio_effects
-  midi_effects plugins` and check each `Tree: "<Category> List, N Items"`
-  label + content.
 - Clip launching (`SessionView.Track[N].Slot[M]`) — visible in tree dumps,
   never clicked/exercised.
 - Device parameters — not started.
@@ -110,6 +106,21 @@ transition both ways; tree label + item count + content all changed
 correctly in both directions. **Lesson: a test where the starting state
 already matches the target proves nothing — always force a state change
 before calling a transition confirmed.**
+
+**dump_ableton_states.py, `--states all` preset added and CONFIRMED (this
+session).** Added an `ALL_STATES` constant + `--states all` CLI shortcut
+expanding to every known state in one command, since the user wanted a
+loop over all states without listing them by hand. Ran it against the
+real app: all 8 dumps written (session, arrangement, all 6 browser
+categories) with no crash, and each browser category's `Tree: "<Category>
+List, N Items"` label + item content matched the requested category --
+`drums`/`audio_effects`/`midi_effects`/`plugins` (previously untested)
+are now genuinely confirmed alongside `sounds`/`instruments`. Minor
+observation, not a bug: `drums` and `sounds` happened to show the same
+item count (1001) -- coincidental, confirmed by content (drum kit names
+vs. sound preset names), not a stale-count issue. **The whole
+`dump_ableton_states.py` file is now fully confirmed, no remaining
+unverified paths in it.**
 
 **Verified pixel-accuracy of an early uiautomation-based (non-pywinauto)
 dump against a screenshot** — closed, no issues, not revisited since.

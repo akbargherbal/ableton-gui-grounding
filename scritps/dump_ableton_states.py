@@ -69,6 +69,8 @@ Usage
     python dump_ableton_states.py --states session arrangement
     python dump_ableton_states.py --states session --label-suffix before-edit
     python dump_ableton_states.py --states sounds instruments
+    python dump_ableton_states.py --states all   # every known state, one command
+    python dump_ableton_states.py --states all --label-suffix before-edit
 """
 
 from __future__ import annotations
@@ -109,6 +111,15 @@ BROWSER_CATEGORY_NAMES: dict[str, str] = {
     "midi_effects": "MIDI Effects",
     "plugins": "Plug-Ins",
 }
+
+# Full preset for `--states all`. Fixed, explicit order (not just dict
+# insertion order left implicit) so re-runs are reproducible and the
+# order is visible at a glance here rather than only in BROWSER_CATEGORY_NAMES.
+# Session/Arrangement first since those are CONFIRMED; browser categories
+# after, in the order they were verified (sounds/instruments first --
+# CONFIRMED this session -- then the rest, which remain UNVERIFIED as of
+# this writing; see context.md STATE table for current status per item).
+ALL_STATES: list[str] = ["session", "arrangement"] + list(BROWSER_CATEGORY_NAMES)
 
 
 def find_control_by_name(control: UIAWrapper, control_type: str, name: str,
@@ -239,9 +250,12 @@ def main() -> None:
     )
     parser.add_argument(
         "--states", nargs="+", required=True,
-        choices=["session", "arrangement"] + list(BROWSER_CATEGORY_NAMES),
-        help="Which states to dump, in order. Browser categories are "
-        "UNVERIFIED -- see module docstring.",
+        choices=["all", "session", "arrangement"] + list(BROWSER_CATEGORY_NAMES),
+        help="Which states to dump, in order. Pass 'all' by itself as a "
+        "preset for every known state (session, arrangement, every "
+        "browser category), instead of listing them out. Browser "
+        "categories are UNVERIFIED except sounds/instruments -- see "
+        "module docstring.",
     )
     parser.add_argument("--max-depth", type=int, default=10)
     parser.add_argument("--out-dir", type=str, default="dumps")
@@ -253,12 +267,24 @@ def main() -> None:
     parser.add_argument("--no-print", action="store_true")
     args = parser.parse_args()
 
+    if "all" in args.states:
+        if len(args.states) > 1:
+            print(
+                "'all' was given alongside other --states values; ignoring "
+                "the rest and running the full preset instead.",
+                file=sys.stderr,
+            )
+        states = ALL_STATES
+        print(f"--states all -> expanding to: {', '.join(states)}\n", file=sys.stderr)
+    else:
+        states = args.states
+
     window = find_ableton_window()
     if window is None:
         print("Could not find the Ableton Live window. Is it running?", file=sys.stderr)
         sys.exit(1)
 
-    for state in args.states:
+    for state in states:
         print(f"\n=== {state} ===", file=sys.stderr)
         if state in ("session", "arrangement"):
             goto_view(window, state)

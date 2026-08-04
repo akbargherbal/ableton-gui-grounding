@@ -1098,7 +1098,7 @@
             -1887,
             143
           ],
-          "is_enabled": false,
+          "is_enabled": true,
           "is_visible": true,
           "children": []
         },
@@ -3185,6 +3185,194 @@
                         688,
                         -1487,
                         701
+                      ],
+                      "is_enabled": true,
+                      "is_visible": true,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "control_type": "DataItem",
+              "name": "A Thick Wave.adv",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -1629,
+                707,
+                -1293,
+                730
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": [
+                {
+                  "control_type": "DataItem",
+                  "name": "A Thick Wave.adv",
+                  "automation_id": "",
+                  "class_name": "",
+                  "bounding_rect": [
+                    -1629,
+                    707,
+                    -1305,
+                    728
+                  ],
+                  "is_enabled": true,
+                  "is_visible": true,
+                  "children": [
+                    {
+                      "control_type": "Text",
+                      "name": "A Thick Wave.adv",
+                      "automation_id": "",
+                      "class_name": "",
+                      "bounding_rect": [
+                        -1586,
+                        711,
+                        -1485,
+                        724
+                      ],
+                      "is_enabled": true,
+                      "is_visible": true,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "control_type": "DataItem",
+              "name": "A Wobble Modwheel.adv",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -1629,
+                730,
+                -1293,
+                752
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": [
+                {
+                  "control_type": "DataItem",
+                  "name": "A Wobble Modwheel.adv",
+                  "automation_id": "",
+                  "class_name": "",
+                  "bounding_rect": [
+                    -1629,
+                    730,
+                    -1305,
+                    751
+                  ],
+                  "is_enabled": true,
+                  "is_visible": true,
+                  "children": [
+                    {
+                      "control_type": "Text",
+                      "name": "A Wobble Modwheel.adv",
+                      "automation_id": "",
+                      "class_name": "",
+                      "bounding_rect": [
+                        -1586,
+                        733,
+                        -1443,
+                        746
+                      ],
+                      "is_enabled": true,
+                      "is_visible": true,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "control_type": "DataItem",
+              "name": "Aaghra Keys.adv",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -1629,
+                752,
+                -1293,
+                774
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": [
+                {
+                  "control_type": "DataItem",
+                  "name": "Aaghra Keys.adv",
+                  "automation_id": "",
+                  "class_name": "",
+                  "bounding_rect": [
+                    -1629,
+                    752,
+                    -1305,
+                    773
+                  ],
+                  "is_enabled": true,
+                  "is_visible": true,
+                  "children": [
+                    {
+                      "control_type": "Text",
+                      "name": "Aaghra Keys.adv",
+                      "automation_id": "",
+                      "class_name": "",
+                      "bounding_rect": [
+                        -1586,
+                        756,
+                        -1488,
+                        769
+                      ],
+                      "is_enabled": true,
+                      "is_visible": true,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "control_type": "DataItem",
+              "name": "Abdominal Bass.adv",
+              "automation_id": "",
+              "class_name": "",
+              "bounding_rect": [
+                -1629,
+                774,
+                -1293,
+                797
+              ],
+              "is_enabled": true,
+              "is_visible": true,
+              "children": [
+                {
+                  "control_type": "DataItem",
+                  "name": "Abdominal Bass.adv",
+                  "automation_id": "",
+                  "class_name": "",
+                  "bounding_rect": [
+                    -1629,
+                    774,
+                    -1305,
+                    796
+                  ],
+                  "is_enabled": true,
+                  "is_visible": true,
+                  "children": [
+                    {
+                      "control_type": "Text",
+                      "name": "Abdominal Bass.adv",
+                      "automation_id": "",
+                      "class_name": "",
+                      "bounding_rect": [
+                        -1586,
+                        778,
+                        -1469,
+                        791
                       ],
                       "is_enabled": true,
                       "is_visible": true,
