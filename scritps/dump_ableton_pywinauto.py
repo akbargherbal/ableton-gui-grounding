@@ -18,11 +18,26 @@ Usage
     python dump_ableton_pywinauto.py --max-depth 6     # limit recursion depth
     python dump_ableton_pywinauto.py --json out.json   # custom output path
     python dump_ableton_pywinauto.py --diagnose        # list all top-level windows pywinauto can see
+    python dump_ableton_pywinauto.py --no-maximize     # dump at current window size (see note below)
 
 Output
 ------
 Prints an indented tree to stdout (control_type, name, automation_id) and
 writes the same structure as JSON.
+
+Window readiness (important)
+-----------------------------
+Ableton's Session View is UI-virtualized: controls that aren't actually
+rendered on screen (window minimized, too small, unfocused) don't exist
+as UIA elements at all yet, even though their automation_id is
+well-defined once they ARE visible. A dump taken against a backgrounded
+or restored-size window can silently return far fewer elements with no
+error -- confirmed in practice (~60 vs ~201 automation_ids on the same
+project, depending only on window state). By default this script
+restores/focuses/maximizes the window before every dump
+(`ensure_window_ready()`) so you get the full tree; pass --no-maximize
+only if you deliberately want to capture the window at its current size
+and are aware the result may be incomplete.
 """
 
 from __future__ import annotations
@@ -215,6 +230,47 @@ def find_ableton_window(
     return None
 
 
+def ensure_window_ready(window: UIAWrapper, maximize: bool = True) -> None:
+    """Best-effort: make sure Live's window is restored/foregrounded (and,
+    by default, maximized) before we read its UIA tree.
+
+    This matters even for a read-only dump: Ableton's Session View is
+    UI-virtualized -- controls that aren't actually rendered on screen
+    (window minimized, too small, not focused) simply don't exist as UIA
+    elements yet, even though their automation_id is well-defined once
+    they ARE visible. Confirmed in practice while developing
+    automate_ableton_task.py: the same window went from ~60 indexed
+    automation_ids to ~201 depending only on whether it was maximized/
+    focused, with no error or warning either way -- a dump taken against
+    a backgrounded window looks completely valid, just silently
+    incomplete. This is the single canonical copy of this function;
+    automate_ableton_task.py imports it from here rather than keeping
+    its own copy, so the two scripts can't drift apart on this.
+
+    Pass maximize=False if you deliberately want to inspect the window
+    at its current (non-maximized) size/position -- e.g. to capture what
+    a dialog looks like docked in a specific layout -- but be aware the
+    resulting dump may then be missing off-screen/virtualized controls,
+    same as any other non-maximized capture.
+    """
+    try:
+        if window.is_minimized():
+            print("Window is minimized; restoring...", file=sys.stderr)
+            window.restore()
+    except Exception:
+        pass
+    try:
+        window.set_focus()
+    except Exception:
+        pass
+    if maximize:
+        try:
+            window.maximize()
+        except Exception:
+            pass
+    time.sleep(0.3)  # give the redraw a moment before we walk the tree
+
+
 def rect_to_tuple(rect) -> Optional[tuple]:
     try:
         return (rect.left, rect.top, rect.right, rect.bottom)
@@ -340,6 +396,15 @@ def main() -> None:
         "Ableton's title format differs on your system/version.",
     )
     parser.add_argument(
+        "--no-maximize",
+        action="store_true",
+        help="Skip restoring/focusing/maximizing the window before the "
+        "dump. Off by default because Session View is UI-virtualized -- "
+        "a non-maximized window can expose far fewer automation_ids with "
+        "no warning that the dump is incomplete. Only use this if you "
+        "specifically want to capture the window at its current size.",
+    )
+    parser.add_argument(
         "--diagnose",
         action="store_true",
         help="Instead of searching for Ableton, dump raw info on every "
@@ -368,6 +433,8 @@ def main() -> None:
 
     print(f"Found window: \"{window.window_text()}\" -- walking tree "
           f"(max depth {args.max_depth})...", file=sys.stderr)
+
+    ensure_window_ready(window, maximize=not args.no_maximize)
 
     tree = walk(window, max_depth=args.max_depth)
 

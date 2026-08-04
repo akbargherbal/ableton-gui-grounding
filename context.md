@@ -1,246 +1,237 @@
-# Context: Grounding Text-Based LLMs in Ableton's Actual UI
+# Context handoff: Ableton Session View UI-automation project
 
-For future-me picking this up in a fresh session. This is the **sixth**
-working document for this project — it supersedes the fifth draft. This
-session executed the fifth draft's two-part goal (build+validate the UIA
-wrapper, draft the AGENTS.md diff), found and fixed one blocker the fifth
-draft didn't know about, and did a repo-structure pass against a series of
-real `tree` outputs. **The user is now going to live-test the current
-setup and will report back next session what worked and what didn't** —
-that report is this project's next real input, more than any further
-unprompted work on the open items below.
+## Goal
+User (Python dev) is building toward an AI-agent-controllable Ableton Live
+via Windows UI Automation (pywinauto). Work so far: (1) validate an existing
+UIA JSON dump against a screenshot, (2) write a script that *acts* on Live
+using that data, (3) debug it against the real, running app on the user's
+Windows machine. **I (Claude) cannot run pywinauto/Ableton myself — this
+sandbox is Linux with no Windows/Live access.** All real-world testing is
+done by the user, who pastes back terminal output.
 
-Everything from prior drafts not explicitly revisited below is still
-intact: the problem statement (version drift, not live customization), the
-target user (total beginner, first ~4 weeks), the version range (12.x
-only), the consumption mechanism (manifest entry -> LLM instruction +
-bbox-on-screenshot), and the still-open scope question (does the manifest
-need to stay narrow now that UIA removes the original cost constraint —
-parked, not forgotten, not touched this session).
+## Files involved
+- `/mnt/user-data/outputs/dump_ableton_pywinauto.py` — originally the
+  user's read-only tree-dump script, now also under active maintenance.
+  Exposes `find_ableton_window()` AND `ensure_window_ready()`; both are
+  imported by `automate_ableton_task.py` rather than duplicated there.
+  This is the canonical source of truth for both "how do we find Live"
+  and "how do we make sure its window is fully rendered before we read
+  it" -- see "Robustness pass" below.
+- `/mnt/user-data/uploads/ableton_uia_20260804_062848_session-view_01.json`
+  — a prior full tree dump (from a *different*, uiautomation-based sibling
+  script, not the pywinauto one) — used to discover the automation_id
+  naming scheme documented below. Verified pixel-accurate against
+  `/mnt/user-data/uploads/session_view_1.png` (see bounding-box overlay
+  work earlier in this conversation — that part is done/closed, no issues).
+- `/mnt/user-data/outputs/automate_ableton_task.py` — the script under
+  active development. **This is the live deliverable; keep iterating on
+  this file, don't restart from scratch.**
+- `/mnt/user-data/outputs/dump_ableton_states.py` — **NEW, UNTESTED.**
+  Orchestrates switching Ableton between named states (Session/
+  Arrangement so far) and writing a labeled dump for each, so the user
+  doesn't have to manually alt-tab + switch view + rerun the dump script
+  per state. See "Untested assumptions" section below before trusting
+  anything it does.
+- `/mnt/user-data/outputs/grep_dump.py` — pure-stdlib helper, no
+  pywinauto/Ableton dependency. Searches an existing JSON dump for nodes
+  by substring match on name/automation_id/class_name, to help discover
+  new automation_ids (e.g. Browser panel categories) without re-deriving
+  them from scratch. **This one IS verified** — tested in this sandbox
+  against a hand-built synthetic dump (not real Ableton data, but the
+  logic itself doesn't touch Ableton at all, so that test is
+  representative).
 
-## NEW this session: both required files reviewed in full, prior audit confirmed
+## Key discovery: automation_id scheme
+Ableton exposes stable, structural automation_ids (NOT just repeated
+visible names like "In"/"Auto"/"Off"):
+```
+SessionView.Track[N].Mixer.Arm                     CheckBox
+SessionView.Track[N].Mixer.Activator                CheckBox (mute)
+SessionView.Track[N].Mixer.Solo                      CheckBox
+SessionView.Track[N].Mixer.Monitoring.Buttons[0..2]  RadioButton (In/Auto/Off)
+SessionView.Track[N].Mixer.Stop                      Button (clip stop)
+SessionView.Track[N].Slot[M]                         Group (clip slot)
+SessionView.ReturnTrack[N].Mixer.*                    same shape, return tracks
+Transport.Tempo                                      Slider
+Transport.Play / Transport.Stop                      (assumed by pattern,
+                                                        not yet independently
+                                                        confirmed missing in
+                                                        this session)
+```
+Track[0..3] = MIDI/Audio tracks, ReturnTrack[0..1] = A-Reverb/B-Delay, in
+the user's current test project (4 tracks + 2 returns).
 
-`AGENTS.md` was read in full this session (a prior session's `view` call
-truncated the middle section; that was a tooling artifact, not a real
-document gap — the file itself was never actually short a section). The
-full read confirmed the fifth draft's audit table was accurate: Rule 6
-step 5 (`the agent does not interpret or describe [screenshot] visual
-contents`) is about screenshot pixels specifically, not UIA, and correctly
-verdicted "no change." Rule 3, Rule 10, and the color rule all read
-exactly as the audit described.
+## Bugs found and fixed this session, in order
+1. **`descendants(auto_id=...)` doesn't exist.** Confirmed by downloading
+   pywinauto 0.6.9 source: `IUIA.build_condition()` only accepts `process,
+   class_name, title, control_type, content_only`. Fixed by building our
+   own `automation_id -> control` index via manual recursive
+   `control.children()` walk (mirrors what the user's dump script already
+   does reliably).
+2. **`descendants(control_type=...)` (single FindAll-style query) silently
+   returned nothing** against Ableton's deep custom-drawn tree, even though
+   manual recursive `.children()` walking works fine. Confirmed indirectly
+   — never went back to prove FindAll is *always* broken here, just that
+   the manual-walk replacement works.
+3. **UI virtualization / focus dependency.** Indexed automation_id count
+   varied 51/60/201 across runs depending on whether Ableton's window was
+   maximized/foregrounded. Missing controls (e.g. `Track[0].Mixer.Solo`)
+   simply don't exist in the tree when not visible/focused — not a lookup
+   bug. Fixed with `ensure_window_ready()`: restore-if-minimized, set_focus,
+   maximize, before every run.
+4. **RESOLVED & CONFIRMED — was not a click/timing bug.** `solo_tour`
+   reliably left track 1 soloed at the end. Root cause, found via a new
+   `probe_solo_transport` diagnostic that replays solo-on → Play → sleep
+   → Stop → solo-off for one track with a state print after every step:
+   **track 1 was already soloed *before* `solo_tour` ran** (leftover from
+   an earlier broken run). `solo_tour` captures `original_state` at the
+   very start and restores to *that* at the end — so it faithfully
+   "restored" track 1 right back to the bad `on` state it found, every
+   time. The toggle read (`get_toggle_state`) and the click
+   (`click_input`) are both completely reliable on their own — confirmed
+   twice, once by `probe_toggle` (4 clicks in isolation, clean
+   off/on/off/on, identical rect) and again by `probe_solo_transport`
+   (clean off/on across a full solo/Play/sleep/Stop/unsolo cycle). Neither
+   original hypothesis (misread toggle state / click missing the control)
+   was the cause. Fixed by: (a) `solo_tour` now prints the captured
+   `original_state` up front, so a bad baseline is visible immediately
+   instead of silently trusted; (b) added `read_solo_states` task — pure
+   read, no clicks, no dry-run/live distinction needed — to sanity-check
+   solo state on any tracks before trusting them as a baseline.
+   **Confirmed fixed**: with a manually-restored clean `off/off` baseline
+   (verified via `read_solo_states`), `solo_tour --tracks 0 1 --live`
+   printed `original_state` as all `off` and ended with both tracks
+   `off` — exact expected behavior, user-verified on the real running
+   app. No further action needed on this bug.
 
-`dump_ableton_pywinauto.py` was read in full, resolving item 2 from the
-fifth draft's "files needed" list:
-- **Parameterizable**: yes (`--max-depth`, `--json`, `--label`,
-  `--out-dir`, `--title-contains`, `--no-print`).
-- **Not headless**: requires a title-substring window match via
-  `Desktop(backend="uia").windows()`; no PID/handle targeting option.
-  Has an elevation-mismatch failure mode (`is_elevated()`) that can
-  silently return near-nothing if the script and Ableton run at
-  different privilege levels.
-- **Zero filtering built in**: confirmed by inspection. `walk()` is a
-  raw recursive dump — no normalization, no de-dup, no bounds-check.
-  All three had to be added fresh in the wrapper (below).
-- **Output-path inconsistency vs. `take_shot.sh`**: `--out-dir` defaults
-  to a bare relative `"dumps"`, resolved from wherever the script happens
-  to be *run from* — unlike `take_shot.sh`, which anchors to its own
-  script location (`BASH_SOURCE`) regardless of cwd. Not fixed this
-  session; flagged as a real inconsistency, relevant if the two scripts
-  ever get merged (see fifth draft's secondary item, still undecided).
+## Current state of automate_ableton_task.py (as of last edit)
+- Uses `find_control()` / `resolve()` — always-fresh, no cross-call caching
+  of `UIAWrapper` objects.
+- `set_checkbox_by_id()` **verifies after clicking**: re-resolves, re-reads
+  state, retries once, and **raises loudly** if the click didn't actually
+  produce the expected state.
+- `task_solo_tour()` now **prints the captured `original_state` up front**,
+  before doing anything else, so a bad baseline (e.g. a track already
+  wrongly soloed from a prior run) is visible immediately instead of being
+  silently trusted as "the state to restore to."
+- Diagnostics available (all always live-click except `read_solo_states`,
+  regardless of `--live` — see their docstrings):
+  - `--task probe_toggle --tracks N` — clicks Solo 4x in isolation,
+    prints before/after state + rect each time.
+  - `--task probe_solo_transport --tracks N` — replays solo-on → Play →
+    sleep → Stop → solo-off for one track, printing state after every
+    single step. This is what found the real cause of the stuck-soloed
+    bug (see bug #4 above).
+  - `--task read_solo_states --tracks N [M ...]` — pure read, no clicks,
+    prints current Solo state for the given tracks. Use before
+    `solo_tour` to sanity-check the baseline it's about to trust.
+- **Not yet done:** apply the same "print/verify the assumption instead of
+  silently trusting it" fix to `task_arm_track` if it has an analogous
+  baseline-capture pattern (it currently doesn't capture prior state at
+  all, so probably not applicable — worth a quick check, not a known bug).
 
-## NEW this session: the three re-supplied dumps, cross-checked against prior claims
+## Untested assumptions in dump_ableton_states.py -- READ BEFORE TRUSTING IT
+Written in this session with **zero real dump data from Arrangement
+View, and no confirmation the Tab-switch even works via pywinauto's `uia`
+backend against this app** -- no JSON was shared by the user this
+session at all. This script is a hypothesis, built the same way the
+original "two hypotheses" for the solo bug were: reasoned from what we
+already know, not yet checked against ground truth. Specifically:
 
-The `baseline`, `sounds-pane`, and `arrangement-view` dumps (already
-characterized in the fifth draft) were re-supplied and machine-checked
-against that draft's specific claims, not just re-read.
+1. **Tab actually switches Session ⇄ Arrangement via
+   `window.type_keys("{TAB}")`.** Known as Live's default shortcut from
+   general knowledge; never confirmed working through pywinauto's `uia`
+   backend / `type_keys()` against this specific app in this project.
+2. **`is_session_view()` heuristic**: assumes `SessionView.*`
+   automation_ids disappear from the tree once you're in Arrangement
+   View, the same way they disappear when the window isn't maximized/
+   focused (bug #3 above). That's a reasonable extrapolation from
+   confirmed virtualization behavior, but "different view entirely" was
+   never actually checked against "just not visible on screen" --
+   they could behave differently. No Arrangement View dump exists to
+   verify this against.
 
-**Confirmed exactly as claimed:**
-- Node counts: 384 / 434 / 729 respectively.
-- `DataItem` counts in the non-arrangement dumps: 51 / 89.
-- The MIDI-vs-Audio mixer gap: `Track[0]`/`Track[1]` (MIDI) genuinely lack
-  `Pan`/`PeakLevel`/`Send[0]`/`Send[1]`/`Volume` automation_ids that
-  `Track[2]`/`Track[3]` (Audio) have. **Still an open question** — real,
-  not a fluke, but MIDI-vs-Audio vs. render-state isn't resolved.
-- The 3-level nested chain: `DataItem -> DataItem -> Text`, verified
-  directly on `3D Reso Percussion.adg` in arrangement-view.
-- Zero out-of-bounds `DataItem`s in baseline/sounds-pane.
-- `take_shot.sh`'s seven error codes all match AGENTS.md's table exactly.
+**Do not treat this script as working until the user runs**
+`python dump_ableton_states.py --states session arrangement`,
+watches the actual window throughout, and confirms: (a) Tab visibly
+switched views both times, (b) the script's own "currently in X View"
+detection matched what was on screen, (c) the two output JSON files
+look like genuinely different content when spot-checked (e.g. via
+`grep_dump.py`). Until that happens, treat every claim this script
+makes about "which view we're in" as unverified.
 
-**One correction to a "confirmed consistent" claim:** the fifth draft
-said all four dumps were "confirmed consistent... by track count and
-title-bar text." Track *count* (4) is consistent. Title-bar *text* is
-not: `Track[0]` reads `"1-MIDI"` in baseline/sounds-pane but
-`"1-Arr Matey Lead, Armed"` in arrangement-view (a device got loaded and
-the track renamed/armed by that point in the session). Expected, given
-AGENTS.md's own rule that a rename becomes the new anchor — but worth not
-repeating "text is consistent across all four" verbatim again.
+## Robustness pass on dump_ableton_pywinauto.py
+Reviewed the read-only dump script against everything learned building
+`automate_ableton_task.py`. Found one real gap: it found the Ableton
+window and walked its tree immediately, with **no**
+`ensure_window_ready()` step -- so a dump taken against a backgrounded or
+non-maximized window could silently return a far smaller tree (~60 vs
+~201 automation_ids, same failure mode discovered during the solo bug
+investigation) with no warning that anything was wrong. Fixed:
+- Moved `ensure_window_ready()` (restore-if-minimized, set_focus,
+  maximize, small sleep for redraw) into `dump_ableton_pywinauto.py` as
+  the single canonical copy, with a `maximize: bool = True` parameter.
+- Dump script now calls it before every walk. Added `--no-maximize` to
+  opt out, for the rare case of deliberately capturing the window at its
+  current size.
+- `automate_ableton_task.py` now **imports** `ensure_window_ready` from
+  the dump script instead of keeping its own copy -- removes the
+  duplication that existed before and closes off a way the two scripts
+  could've silently drifted apart on this exact behavior.
+- Everything else in the dump script (per-property try/except in
+  `walk()`, elevation diagnostics, the retry loop in
+  `find_ableton_window()`) was already solid; no other changes needed.
+  It was read-only from the start, so the stale-reference and
+  bad-baseline lessons from the solo bug don't apply to it.
 
-**One correction to the virtualized-list numbers themselves:** the fifth
-draft reported "249 sample/preset rows loaded... 84 of 249 (34%) land in
-bounds." The actual dump shows the browser's file-list `Tree` node
-(`"Sounds List, 1001 Items"`) has **84 direct row children**, of which
-**29 are in-bounds and 55 are not**. The bug itself is real and correctly
-described — the fix (bounds-check filter) was still right — but "84"
-appears to have gotten reused between two different meanings (total rows
-vs. in-bounds count) somewhere in the prior session's write-up, and "249"
-doesn't correspond to anything found in this file. **Use this session's
-numbers (84 total / 29 in-bounds / 55 out) as the reference case going
-forward, not the fifth draft's.**
 
-## NEW this session: Part 1 built, validated, and one new blocker found+fixed
+## What to do next session
+1. **Verify `dump_ableton_states.py` before trusting it for anything** —
+   see "Untested assumptions" section above. Run
+   `--states session arrangement`, watch the window, confirm Tab
+   actually switches views and the script detects it correctly. This is
+   now the top priority open item — everything else below was already
+   confirmed working; this wasn't.
+2. Once browser-category automation_ids are discovered (user runs a
+   dump with e.g. "Sounds" selected by hand, then greps it via
+   `grep_dump.py`, per that script's docstring), wire the result into
+   `BROWSER_CATEGORY_IDS` in `dump_ableton_states.py` so
+   `--states session arrangement sounds instruments` becomes one command.
+3. **Stuck-soloed bug is closed** — confirmed via a clean `off/off`
+   baseline + a full `solo_tour --tracks 0 1 --live` run that printed
+   `original_state` as all `off` and ended with both tracks `off`,
+   user-verified against the real running app. Don't reopen this without
+   new contradicting evidence.
+4. Open items, not yet started:
+   - `click_by_id()` (used for `Transport.Play`/`Stop` and monitor
+     RadioButtons) is still "click and trust" — no post-click
+     verification, unlike `set_checkbox_by_id()`. Worth the same
+     verify-after-click treatment now that the checkbox case is fully
+     understood, though nothing has surfaced a concrete bug there yet.
+   - `task_arm_track` doesn't capture/print a baseline the way
+     `solo_tour` now does — check whether an analogous "silently trust
+     current state" pattern applies there, or whether it's not
+     applicable (it may not need one, since Arm doesn't get restored).
+5. Ask the user what's next functionally — likely candidates: clip
+   launching (`SessionView.Track[N].Slot[M]`, not yet exercised beyond
+   being visible in the tree dump), device parameters, or hardening
+   pass over `click_by_id()` per the point above.
+6. Bigger-picture lesson from this whole arc, worth carrying into
+   whatever comes next: a real Ableton-controlling agent needs
+   **verify-after-every-action** AND **print/distrust your own captured
+   baselines**, not open-loop "read once, trust forever." The
+   stuck-soloed bug wasn't a flaky click or a flaky read — both were
+   reliable the entire time — it was trusting a snapshot of state
+   without surfacing it for a sanity check. `dump_ableton_states.py`
+   is itself a live test of whether that lesson was actually absorbed:
+   it was written and handed over *labeled as untested* rather than
+   presented as done, specifically to avoid repeating the mistake.
 
-`uia_wrapper.py` was built implementing the three confirmed-necessary
-transforms, then validated against all three real dumps (not just
-designed against the narrative description of them):
-
-  a. **Window-relative normalization** — see the offset bug below; this
-     step needed a real fix, not just implementation.
-  b. **Innermost-of-chain de-dup** — walks same-name descendant chains
-     (matching on `name`, regardless of `control_type`, since the real
-     chain is `DataItem -> DataItem -> Text`, all three sharing one
-     name) to the innermost node. Verified against `3D Reso Percussion.adg`:
-     raw 3-level chain collapses to one node with `collapsed_levels: 2`.
-  c. **Bounds-check filter** — uses a true rect-intersection test (not a
-     single-corner-in-bounds check), and treats zero-area/degenerate
-     rects (e.g. an empty placeholder `Text` node) as `in_bounds: None`
-     ("no real geometry to judge") rather than a false out-of-bounds flag.
-
-**New blocker, not previously known: a ~75px title-bar/menu-bar origin
-offset.** `dump_ableton_pywinauto.py`'s root node comes from pywinauto's
-`control.rectangle()`, which turns out to report something narrower than
-the full outer window — `take_shot.sh` captures via the native
-`GetWindowRect` Win32 API, which is documented to include title bar, menu
-bar, and borders. Evidence: the `TitleBar` element sits **exactly 75px
-above** the root's own reported top edge, identically, across all three
-dumps — including one dump whose window sits on an entirely different
-monitor at different absolute coordinates. A constant that survives a
-completely different window position isn't coincidence.
-
-**Why it mattered:** left as originally scoped, this would have
-misaligned *every* bbox the wrapper produced by ~75px when drawn on an
-actual `take_shot.sh` screenshot — not just the browser-list rows. This
-is more consequential than the bounds-check bug, since it would have
-silently broken the project's core "highlight box on the real screenshot"
-mechanism rather than just producing some garbage rows.
-
-**Fix applied:** the wrapper now calibrates its origin off the `TitleBar`
-element's own top-left (always present on a real window, immune to the
-virtualized-list staleness problem) instead of hardcoding "75" or trusting
-the root's self-reported rect. Falls back to the root's rect with a
-printed warning if no `TitleBar` is found in a given dump.
-
-**Post-fix validation (final numbers):**
-
-| dump | nodes | chains collapsed | out-of-bounds (final) |
-|---|---|---|---|
-| baseline | 290 | 35 | 0 |
-| sounds-pane | 301 | 54 | 0 |
-| arrangement-view | 464 | 122 | 51 (all genuine `DataItem` rows; 0 chrome false-positives) |
-
-**Not yet done:** `device-loaded.json` (the fourth dump, described in the
-fifth draft but never actually uploaded until this session's repo-tree
-pass put it in `dumps/`) has **not** been run through the wrapper yet —
-worth doing next, since it's the one dump in the regression set the
-wrapper hasn't personally been validated against.
-
-Delivered: `uia_wrapper.py`, CLI (`python uia_wrapper.py <in.json> --out
-<out.json> [--keep-out-of-bounds]`).
-
-## NEW this session: Part 2 diff drafted and delivered
-
-Gated correctly on Part 1 actually working, per the fifth draft's
-ordering. Three changes, verified via `diff` that nothing else moved:
-
-1. **System Constraints** — the "no vision" bullet now scopes the claim
-   to `AbletonMCP` specifically. The old wording ("The agent has zero
-   direct knowledge...") oversold the limitation at the *agent* level,
-   which is no longer true now that a second channel exists; the new
-   wording keeps `AbletonMCP` itself pixel-blind while noting the
-   separate UIA channel.
-2. **Rule 5** — widened from "drawn from an actual MCP response" to "...or
-   a live, filtered UIA query," with **"filtered" made explicit and
-   load-bearing**: raw/unfiltered UIA output must never be cited
-   directly, for two concrete reasons now on record (virtualized-list
-   garbage rects, and the origin-offset bug above) — only the validated
-   wrapper's output counts as verified evidence.
-3. **Rule 3** — added a non-binding "consider adding" line about an
-   optional filtered-UIA cross-check as a second post-change verification
-   step. Explicitly not a required part of the diff, per the fifth
-   draft's instruction.
-
-Rule 6 step 5, the color rule, and Rule 10 confirmed untouched (absent
-from the diff).
-
-Delivered: `AGENTS.diff` (unified diff) and the full patched `AGENTS.md`.
-**Open cosmetic note**: Rule 5's widened text currently describes "the
-validated UIA wrapper" generically rather than naming `uia_wrapper.py` —
-worth tightening once the file's final repo location is settled (see
-below).
-
-## NEW this session: repo-structure pass against real `tree` output
-
-The user pasted several real `tree` outputs over the course of the
-session and iterated live. Current state, as of the last `tree` seen:
-
-- **Fixed, confirmed correct**: `LABS/ableton-live-12-manual-en.pdf`. A
-  real bug was caught here — the actual file was originally named
-  `LABS/ableton-liv-12-manual-en.pdf` (missing the "e" in "live"),
-  which did not match AGENTS.md's reference to
-  `LABS/ableton-live-12-manual-en.pdf`. A first fix attempt produced a
-  botched concatenated name (`LABS/LABSableton-live-12-manual-en.pdf`);
-  the final state now matches AGENTS.md correctly.
-- **`dumps/` now exists and is populated** with `baseline`,
-  `sounds-pane`, `arrangement-view`, and `device-loaded` — the full
-  four-dump regression set the fifth draft called for, finally all
-  physically present in the repo (not just described in a doc).
-- **New, unreviewed file discovered**: `dumps/ableton_uia_20260803_184638_file-menu-open.json`.
-  This does not appear anywhere in any prior draft of this document — it
-  looks like a fifth capture nobody has looked at yet in any session.
-  Not reviewed this session either. Flagged, not forgotten.
-- **Left unresolved, by explicit user choice**: `dump_ableton_pywinauto.py`
-  and `uia_wrapper.py` currently sit at project **root**, not in a
-  `scripts/` directory as this document previously stated they should.
-  The user chose to leave the current flat layout alone for now rather
-  than restructure. Treat this as the actual current state, not a bug to
-  silently "fix" next time — if `scripts/` placement matters later, it
-  needs to be a deliberate decision, not an assumed correction.
-
-## NEXT SESSION GOAL
-
-**Primary: incorporate the user's live-test report.** The user is testing
-the current setup (wrapper + patched AGENTS.md + repo layout) hands-on and
-will come back with what worked and what didn't. That report should drive
-next session's actual priorities more than the list below — don't assume
-the items below still matter in the same shape once real usage data exists.
-
-**Secondary, worth doing opportunistically if the test report leaves room:**
-- Run `device-loaded.json` through `uia_wrapper.py` — the one regression-set
-  dump the wrapper hasn't actually been validated against yet.
-- Review `ableton_uia_20260803_184638_file-menu-open.json` — unreviewed,
-  unknown content, unknown relevance.
-- Resolve the MIDI-vs-Audio mixer-strip open question with a live Ableton
-  check (still unresolved, now three dumps deep).
-- Decide the `scripts/` vs. root placement question for
-  `dump_ableton_pywinauto.py` / `uia_wrapper.py`, and if `scripts/` is
-  chosen, update Rule 5's wrapper reference in AGENTS.md to the concrete
-  filename.
-- Decide whether merging `take_shot.sh` and `dump_ableton_pywinauto.py`
-  into one focus-locked capture call is a co-requisite of trusting Rule
-  5's widened evidence class (raised repeatedly, never yet built).
-
-## Files needed next session, alongside this context.md
-
-1. **Whatever the user's live test surfaces** — most likely to matter of
-   anything on this list.
-2. **`AGENTS.md`, current state** — to confirm the patched version is
-   actually the one in use, and to draft any further diff against it.
-3. **`ableton_uia_20260803_184638_file-menu-open.json`** — if review of
-   the unknown fifth dump gets picked up.
-4. Not strictly needed again, but useful if convenient: the other three
-   dumps already in `dumps/` (`baseline`, `sounds-pane`,
-   `arrangement-view`) — already fully characterized across two
-   sessions now, re-supplying them only matters if something about them
-   is suspected to have changed.
-
-Not needed next session: `gui_grounding_benchmark.py` (still out of
-scope, unchanged from prior drafts).
+## User preferences to keep applying
+- Python developer — code-level detail is welcome, no need to oversimplify.
+- Wants documentation/explanations in Markdown.
+- Has been directly running every script iteration on their own Windows
+  machine and pasting raw terminal output — keep treating that output as
+  ground truth over any theory I propose, and be explicit when a theory
+  gets disproven (as with the stale-reference one) rather than quietly
+  moving on.

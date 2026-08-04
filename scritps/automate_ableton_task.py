@@ -78,38 +78,12 @@ except ImportError:
     print("Missing dependency. Install with:\n    pip install pywinauto\n", file=sys.stderr)
     sys.exit(1)
 
-# Reuse window discovery from the read-only dump script instead of
-# duplicating it -- keep one source of truth for "how do we find Live".
-from dump_ableton_pywinauto import find_ableton_window
-
-
-# --------------------------------------------------------------------------
-# Window readiness
-# --------------------------------------------------------------------------
-
-def ensure_window_ready(window: UIAWrapper) -> None:
-    """Best-effort: make sure Live's window is restored/foregrounded.
-
-    Ableton's Session View appears to be UI-virtualized -- controls that
-    aren't actually rendered on screen (window minimized, too small, not
-    focused) simply don't exist as UIA elements yet, even though their
-    automation_id is well-defined once they ARE visible.
-    """
-    try:
-        if window.is_minimized():
-            print("Window is minimized; restoring...", file=sys.stderr)
-            window.restore()
-    except Exception:
-        pass
-    try:
-        window.set_focus()
-    except Exception:
-        pass
-    try:
-        window.maximize()
-    except Exception:
-        pass
-    time.sleep(0.3)  # give the redraw a moment before we walk the tree
+# Reuse window discovery AND window-readiness handling from the read-only
+# dump script instead of duplicating them -- keep one source of truth for
+# "how do we find Live" and "how do we make sure its tree is fully visible
+# before we touch it" (the latter used to be a local copy here; consolidated
+# so the two scripts can't quietly drift apart on this).
+from dump_ableton_pywinauto import find_ableton_window, ensure_window_ready
 
 
 # --------------------------------------------------------------------------
