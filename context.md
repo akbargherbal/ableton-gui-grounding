@@ -21,9 +21,10 @@ Claude proposes.
 | File | Role | Status |
 |---|---|---|
 | `dump_ableton_pywinauto.py` | Read-only tree dump. Canonical `find_ableton_window()` + `ensure_window_ready()`, imported by the other two. | CONFIRMED |
-| `automate_ableton_task.py` | Live deliverable — acts on Live (click/type). Source of `build_automation_id_index()`. | CONFIRMED (solo_tour path); `click_by_id()` escalation ladder (Mouse → Keyboard → Human instructions, no MCP tier — see below) CONFIRMED against real Ableton (arm_track, Track[1].Monitoring=In verified clean on first click, screenshot-matched). `task_arm_track` baseline handling still NOT hardened (see Open Items). |
+| `automate_ableton_task.py` | Live deliverable — acts on Live (click/type). Source of `build_automation_id_index()`. | CONFIRMED (solo_tour path); `click_by_id()` escalation ladder (Mouse → Keyboard → Human instructions, no MCP tier — see below) CONFIRMED against real Ableton (arm_track, Track[1].Monitoring=In verified clean on first click, screenshot-matched). `task_probe_keyboard_activator` (isolates L2 keyboard path directly, bypassing the ladder) CONFIRMED — see keyboard_shortcuts row below. `task_arm_track` baseline handling still NOT hardened (see Open Items). |
 | `dump_ableton_states.py` | Switches Ableton between named states, dumps each. | CONFIRMED — Session/Arrangement, and all six Browser categories (`sounds`, `instruments`, `drums`, `audio_effects`, `midi_effects`, `plugins`), verified via `--states all` in one run. |
 | `grep_dump.py` | Stdlib substring search over a JSON dump. | CONFIRMED |
+| `keyboard_shortcuts.py` + `.md` | Level-2 (keyboard) escalation reference layer for `click_by_id()` — see "Escalation ladder reference layer" below. Data-only dict (`.py`) kept in lockstep with a human-readable index (`.md`), sourced from Ableton's official manual. `blocked=True` entries guard shortcuts that depend on the unresolved "selected track" blind spot. | `activator_by_position` (F1–F8 → `Track[N].Activator`) CONFIRMED live, session 8 (see automation_id scheme section). All other entries still `blocked=True` (Solo/Arm/deactivate-by-selection) or unconfirmed (`transport_play_stop`, `monitoring_buttons` has no known shortcut at all, `launch_selected_slot` out of scope). |
 
 ### automation_id scheme (confirmed structural IDs)
 ```
@@ -48,6 +49,15 @@ in real verification there was explicitly scoped OUT of session 4 to keep
 the `click_by_id()` hardening isolated and separately testable. Open for a
 future session.
 Test project: Track[0..3] = MIDI/Audio, ReturnTrack[0..1] = A-Reverb/B-Delay.
+
+**Keyboard shortcut confirmed (session 8):** `Track[N].Mixer.Activator`
+responds to positional `F1`–`F8` (F-key `N+1` for 0-indexed `Track[N]`),
+CONFIRMED via `probe_keyboard_activator` at both ends of the tested range
+(`Track[0]`/MIDI via F1, `Track[3]`/Audio via F4) — UIA read-back matched
+before/after, and the user visually cross-checked the live Ableton window
+each time to confirm the correct track flipped, not a neighbor. No
+off-by-one. Full detail and remaining open questions (return tracks,
+index ≥ 8) in `scritps/keyboard_shortcuts.md`.
 
 Browser Sidebar `DataItem` nodes carry **no automation_id** (confirmed via
 grep_dump.py) — matched by `(control_type, name)` instead; DFS returns the
@@ -427,11 +437,14 @@ level itself:**
    framework section above for the 7 findings (density is directional,
    density≠consequence, sliders don't fit the Mouse row's failure mode,
    and a new gap: no "selected track" read exists anywhere in the scheme).
-4. **Build the keyboard-shortcut index** referenced in the escalation
-   ladder's reference layer. Now has a concrete first consumer:
-   `click_by_id()`'s `keyboard_shortcut` param exists and is wired up, but
-   no call site has ever populated it (deliberately — nothing's been
-   confirmed against the manual or an index yet).
+4. ~~Build the keyboard-shortcut index~~ — **DONE, sessions 5+8.** Built as
+   `scritps/keyboard_shortcuts.py`/`.md` (sourced from Ableton's manual,
+   session 5), then the one non-blocked entry (`activator_by_position`,
+   F1–F8) live-confirmed against real Ableton, session 8 — see automation_id
+   scheme section above. `click_by_id()`'s `keyboard_shortcut` param still
+   has no call site populating it from this index yet — that's the
+   remaining wiring step, now unblocked for Activator specifically
+   (Solo/Arm remain blocked on the selected-track gap, item below).
 5. **Broader integration planning** (deferred, lower priority than the
    above): where the two projects overlap/complement beyond the
    verification-layer idea already covered.
@@ -441,13 +454,14 @@ level itself:**
    — next session's actual work is Phase 0 (structured stdout events in
    `automate_ableton_task.py`), per the phased plan above. This is now an
    implementation task, not an open design question.
-7. **F1 probe off-by-one question (session 5, still unresolved):**
-   `probe_keyboard_activator` confirmed Track[0].Activator toggled
-   on→off, but didn't rule out a neighbor track flipping instead. Proposed
-   fix (not yet run): extend the probe to read `Track[0..3].Activator`
-   before/after the F1 press — a bucket-1 structural check per the
-   taxonomy above, no screenshot needed. Still open, pick up whenever the
-   user wants to close it.
+7. ~~F1 probe off-by-one question~~ — **DONE, session 8.** Ran
+   `probe_keyboard_activator --tracks 0` (F1) and `--tracks 3` (F4)
+   against real Ableton; UIA read-back showed the correct control toggling
+   both times, and the user visually cross-checked the actual window
+   (screenshot) confirming Track 1 and Track 4 respectively flipped, no
+   neighbor track affected. No off-by-one across both tested track types
+   (MIDI, Audio) and both ends of the range. Remaining gaps (return
+   tracks, index ≥ 8) logged in `keyboard_shortcuts.md`, not blocking.
 
 User explicitly does not want to commit to one integration approach —
 evaluate each idea on its own merits. **No implementation work on a
@@ -534,6 +548,40 @@ user sharing a real directory tree of project 2's repo (which is where the
 manual PDF's existence was confirmed). Full current-state detail lives in
 the STATE section above — this entry exists only to preserve the order
 ideas were tested/revised in, per the "log the reasoning trail" rule.
+
+---
+
+**Session 8: doc/code gap found and closed; F1–F8 Activator shortcut
+CONFIRMED live.** Session opened by cloning the repo fresh and re-reading
+`context.md` top to bottom — surfaced that `keyboard_shortcuts.py`/`.md`
+and `automate_ableton_task.py`'s `task_probe_keyboard_activator` (all from
+an earlier, uncounted work session, commit `aa6b111`) were completely
+absent from `context.md`'s Files table, Open Items, and LOG, despite
+`context.md` itself having been rewritten *after* that commit
+(chronologically) with no mention of it. Root cause not fully diagnosed —
+likely that session's context handoff was skipped or the rewrite that
+produced the current STATE section drew from an older base. Lesson: when
+in doubt, check the actual file tree against `context.md`'s Files table,
+not just `context.md`'s own narrative — the two had drifted.
+
+With the gap identified, ran the probe that was sitting unexecuted:
+`probe_keyboard_activator --tracks 0` (F1) then `--tracks 3` (F4) against
+real Ableton. Terminal showed a clean on→off UIA state flip both times, no
+`[warn]`. User then supplied a screenshot cross-check for both runs,
+confirming visually that Track 1 (MIDI) and Track 4 (Audio) respectively
+were the ones that toggled — not a neighbor. This closes the F1 off-by-one
+question (former Open Item 7) and the "build + confirm the keyboard
+shortcut index" thread (former Open Item 4, at least for the one
+non-blocked entry) in the same action. Updated `keyboard_shortcuts.py`
+(entry note + `activator_shortcut_for_index()` docstring) and
+`keyboard_shortcuts.md` (status column + open-items list) to match, so the
+code-level docs and `context.md` don't re-drift the way they just did.
+
+Not yet done: wiring `activator_by_position` into an actual
+`click_by_id(..., keyboard_shortcut=...)` call site (the index is
+confirmed correct but still unused by the ladder itself), and Track 1/
+Track 4's Activator were left deactivated (gray) by the test runs —
+cosmetic, user aware, not a data-integrity issue.
 
 ---
 
