@@ -125,6 +125,73 @@ unverified paths in it.**
 **Verified pixel-accuracy of an early uiautomation-based (non-pywinauto)
 dump against a screenshot** — closed, no issues, not revisited since.
 
+---
+
+## RELATED PROJECT (preview only — do not treat as fully known)
+
+The user has a **separate, parallel project**: controlling Ableton Live
+12 via **OpenCode (running in WSL) talking to `ableton-mcp-extended`**
+(https://github.com/uisato/ableton-mcp-extended), an MCP server bridging
+to a Remote Script loaded inside Ableton over a TCP socket. This is a
+different control mechanism entirely from this project's approach
+(Windows UI Automation via pywinauto) — MCP + Remote Script vs. UIA tree
+walking + click simulation.
+
+**Status of my knowledge here: PREVIEW ONLY.** The user has shared one
+setup doc (`opencode-ableton-mcp-setup.md`) and explicitly said more
+detail is coming next session — treat everything below as partial
+context, not the full picture, and don't assume the setup is confirmed
+working just because the doc describes it in detail. No terminal output
+from actually running it has been shared yet in either project's
+sessions.
+
+### What the setup doc describes (unverified by me, not yet run/confirmed this-session)
+- Architecture: OpenCode ↔ MCP server via stdio; MCP server ↔ Ableton via
+  a TCP socket opened by an `AbletonMCP` Remote Script (Control Surface).
+  The WSL/Windows boundary is crossed only at that second hop.
+- Tool surface is much broader than this project's current scope: real
+  device-parameter read/write (EQ, compressor, reverb values), MIDI note
+  transpose/quantize/batch-edit, scene management, clip envelope info,
+  browser-path sample/instrument loading, optional ElevenLabs voice-gen.
+- Known upstream limits per the doc: automation-point placement flagged
+  as not fully working; Arrangement View control listed as planned/
+  incomplete (Session View is the reliable surface there too — same as
+  this project's current focus); it's a community project, not official.
+- Known install gotcha: don't run `pip install -e .` (packaging bug in
+  upstream `pyproject.toml`); install deps directly instead.
+
+### Next session: exploratory comparison (this is the actual next task)
+User wants to combine the best of both projects. When more detail on the
+MCP project arrives, work through:
+- **Where they overlap** — both ultimately want to read/control Session
+  View state; is one strictly more capable, or do they cover different
+  ground (e.g. MCP's device-parameter read/write vs. this project's
+  direct clip-slot/mixer control)?
+- **What each does better** — likely candidates to check: MCP may be
+  faster/more semantic (structured commands vs. simulated clicks) and
+  reach deeper into device internals; pywinauto/UIA may be more general
+  (works on anything with a UIA tree, no Remote Script dependency, no
+  WSL networking layer) and more transparent about *why* something
+  failed (this project's whole verify-after-every-action discipline).
+  Don't assume either of these without checking — confirm from what the
+  user shares next session.
+- **Where they could complement each other** — e.g. MCP for
+  device-parameter/audio-engine-level control, UIA for anything MCP
+  doesn't expose or for validating that an MCP command actually produced
+  the expected UI state (a verification layer, playing to this project's
+  established strength).
+- **Challenges specific to combining them**: two live control channels
+  into the same running Ableton instance could race or conflict if used
+  concurrently; WSL2 networking (mirrored-mode requirement) only affects
+  the MCP path, not this one; different processes own "trust" in each
+  project (verify-after-click here vs. MCP's own correctness) — worth
+  deciding which is authoritative if both act on the same session.
+- Don't start implementation work on a combined approach until the
+  exploratory session has actually happened — this is a planning/
+  comparison task first.
+
+---
+
 ## User preferences to keep applying
 - Python developer — code-level detail welcome, no need to oversimplify.
 - Wants documentation/explanations in Markdown.
