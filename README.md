@@ -82,22 +82,22 @@ against Ableton's deeply nested, custom-drawn tree.
 ### Automation architecture
 
 ```
-                  ┌─────────────┐
-                  │ orchestrate.sh │  Phase 1: coordination
-                  └──────┬──────┘
-                         │ calls
-                  ┌──────▼──────────────────┐
-                  │ automate_ableton_task.py │  Phase 0: emits EVENT: JSON
-                  │  ┌─────────────────────┐ │
-                  │  │ click_by_id()       │ │  L1 Mouse → L2 Keyboard → L3 Human
-                  │  │ set_checkbox_by_id()│ │  post-click verify + retry
-                  │  │ emit_event()        │ │  structured, versioned, greppable
-                  │  └─────────────────────┘ │
-                  └──────┬──────────────────┘
-                         │ stdout (EVENT: lines)
-                  ┌──────▼──────┐
-                  │ take_shot.sh │  labeled screenshots, auto-numbered
-                  └─────────────┘
+                  +---------------------------+
+                  |     orchestrate.sh        |  Phase 1: coordination
+                  +-------------+-------------+
+                                | calls
+                  +-------------v-------------+
+                  |  automate_ableton_task.py |  Phase 0: emits EVENT lines
+                  |   +---------------------+ |
+                  |   | click_by_id()       | |  L1 Mouse -> L2 Keyboard -> L3 Human
+                  |   | set_checkbox_by_id()| |  post-click verify + retry
+                  |   | emit_event()        | |  structured, versioned, greppable
+                  |   +---------------------+ |
+                  +-------------+-------------+
+                                | stdout (EVENT: lines)
+                  +-------------v-------------+
+                  |      take_shot.sh         |  labeled screenshots, auto-numbered
+                  +---------------------------+
 ```
 
 Every action is **verified after clicking**. Checkbox controls (Solo, Arm,
