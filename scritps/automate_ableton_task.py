@@ -64,6 +64,10 @@ Usage
     # own docstrings for why)
     python automate_ableton_task.py --task probe_toggle --tracks 1
     python automate_ableton_task.py --task probe_solo_transport --tracks 1
+
+    # Session 5: test click_by_id()'s L2 keyboard path directly (F1..F8
+    # positional shortcut against Track[N].Activator, N=0..7 only)
+    python automate_ableton_task.py --task probe_keyboard_activator --tracks 0
 """
 
 from __future__ import annotations
@@ -85,6 +89,12 @@ except ImportError:
 # before we touch it" (the latter used to be a local copy here; consolidated
 # so the two scripts can't quietly drift apart on this).
 from dump_ableton_pywinauto import find_ableton_window, ensure_window_ready
+
+# Session 5: canonical F1..F8 lookup for the Activator positional-shortcut
+# test below. Kept in its own module (keyboard_shortcuts.py) rather than
+# hardcoded here -- see that file for the full index, sourcing, and which
+# other shortcuts are still BLOCKED on the "no selected-track read" gap.
+from keyboard_shortcuts import activator_shortcut_for_index
 
 
 # --------------------------------------------------------------------------
@@ -486,6 +496,75 @@ def task_read_solo_states(window: UIAWrapper, track_indices: list[int]) -> None:
         print(f"  Track[{i}].Solo = {'on' if state else 'off'}{flag}")
 
 
+def task_probe_keyboard_activator(window: UIAWrapper, track_index: int) -> None:
+    """Diagnostic (session 5): send the F1..F8 positional keyboard shortcut
+    DIRECTLY to Track[track_index]'s Activator (mute), bypassing
+    click_by_id()'s mouse-first ladder entirely, and read state before/after.
+
+    WHY THIS CAN'T JUST BE A click_by_id() CALL: click_by_id() always tries
+    L1 (mouse) first and only escalates to L2 (keyboard) if L1's verify()
+    fails. The mouse click on Activator already works reliably (same shape
+    as the confirmed Monitoring click in session 4), so a normal
+    click_by_id() call would resolve at L1 every single time -- the
+    keyboard path would never actually fire, proving nothing. This probe
+    isolates L2 on purpose, the same way probe_toggle isolates the
+    read-vs-click question for Solo.
+
+    Tests two currently-unverified things at once (see keyboard_shortcuts.py,
+    'activator_by_position' entry, and keyboard_shortcuts.md):
+      1. Does F1..F8, sent via window.type_keys(), actually toggle Track
+         Activator at all -- or is the manual's positional-shortcut
+         description not translating cleanly into a real UIA-level keypress?
+      2. Does 0-indexed Track[track_index] line up with 1-indexed F-key with
+         no off-by-one (track_index=0 -> F1)?
+
+    Only accepts track_index 0..7 (see activator_shortcut_for_index() in
+    keyboard_shortcuts.py) -- 8 keys exist, behavior beyond that is an open
+    question, not something this probe guesses at.
+
+    NOTE: like the other probe_* tasks, this always live-sends the
+    keystroke regardless of --live -- a probe that doesn't act can't tell
+    you anything. main() skips the "*** DRY RUN ***" banner for this task
+    for the same reason it does for the others.
+    """
+    key = activator_shortcut_for_index(track_index)  # raises ValueError if out of range
+    auto_id = track_mixer_id(track_index, "Activator")
+
+    print(f"Probing keyboard L2 path: Track[{track_index}].Activator via {key!r}")
+    print("Watch the Ableton window while this runs.\n")
+
+    control = resolve(window, auto_id)
+    before = get_toggle_state(control)
+    print(f"  before: {'on' if before else 'off'}")
+
+    print(f"  sending {key!r} to the window (window.type_keys, same call "
+          "confirmed correct for UIAWrapper in session 4)...")
+    window.type_keys(key)
+    time.sleep(0.2)  # let the UI redraw before re-reading, same as elsewhere
+
+    control = resolve(window, auto_id)  # fresh handle, never reused across the gap
+    after = get_toggle_state(control)
+    print(f"  after:  {'on' if after else 'off'}")
+
+    if after != before:
+        print(f"\n[result] State changed ({'on' if before else 'off'} -> "
+              f"{'on' if after else 'off'}). Now cross-check against the "
+              f"real Ableton window: did Track[{track_index}]'s activator "
+              "visibly toggle, and was it the RIGHT track (not a "
+              "neighbor)? If both hold, that confirms the F-key/track-index "
+              "mapping cleanly -- if the WRONG track toggled instead, that's "
+              "the off-by-one question answered too, just not the way we'd "
+              "want.")
+    else:
+        print(f"\n[result] State did NOT change. Before concluding the "
+              f"shortcut doesn't work, run --task probe_toggle --tracks "
+              f"{track_index} first to rule out get_toggle_state() "
+              "misreading this control -- if THAT toggles cleanly on mouse "
+              f"clicks, the fault is specifically in {key!r} not reaching "
+              "Ableton (focus stolen by something else?) or the manual's "
+              "positional mapping not applying here.")
+
+
 # --------------------------------------------------------------------------
 # Discovery: what track indices currently exist
 # --------------------------------------------------------------------------
@@ -630,6 +709,7 @@ def main() -> None:
                                       formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--task", choices=["arm_track", "solo_tour", "set_tempo",
                                             "probe_toggle", "probe_solo_transport",
+                                            "probe_keyboard_activator",
                                             "read_solo_states"],
                          help="Which demo task to run")
     parser.add_argument("--tracks", type=int, nargs="+", default=[],
@@ -664,7 +744,7 @@ def main() -> None:
     if not args.task:
         parser.error("--task is required unless --list-tracks is given")
 
-    probe_tasks = ("probe_toggle", "probe_solo_transport")
+    probe_tasks = ("probe_toggle", "probe_solo_transport", "probe_keyboard_activator")
     if args.task == "read_solo_states":
         pass  # pure read, no dry-run/live distinction applies
     elif dry_run and args.task not in probe_tasks:
@@ -691,6 +771,10 @@ def main() -> None:
         if len(args.tracks) != 1:
             parser.error("--task probe_solo_transport needs exactly one --tracks index")
         task_probe_solo_transport(window, args.tracks[0], args.seconds)
+    elif args.task == "probe_keyboard_activator":
+        if len(args.tracks) != 1:
+            parser.error("--task probe_keyboard_activator needs exactly one --tracks index")
+        task_probe_keyboard_activator(window, args.tracks[0])
     elif args.task == "read_solo_states":
         if not args.tracks:
             parser.error("--task read_solo_states needs at least one --tracks index")
