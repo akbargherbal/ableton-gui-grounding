@@ -20,7 +20,7 @@ from types import SimpleNamespace
 def _install_fake_pywinauto() -> None:
     """If real pywinauto is available and importable, do nothing.
     Otherwise (e.g. in Linux sandbox without win32api), register a dummy package
-    structure in sys.modules so imports of UIAWrapper succeed.
+    structure in sys.modules so imports of UIAWrapper and Desktop succeed.
     """
     try:
         from pywinauto.controls.uiawrapper import UIAWrapper  # noqa: F401
@@ -29,8 +29,16 @@ def _install_fake_pywinauto() -> None:
     except Exception:
         pass  # Fall back to fake module below for non-Windows environments
 
+    # The failed import above may have left partially-cached pywinauto
+    # submodules in sys.modules (e.g. if pywinauto is installed but
+    # fails to import win32api). Clear them so the clean fake replaces
+    # them, not a broken partial.
+    stale = [k for k in sys.modules if k == "pywinauto" or k.startswith("pywinauto.")]
+    for k in stale:
+        del sys.modules[k]
+
     fake_pywinauto = types.ModuleType("pywinauto")
-    fake_pywinauto.__path__ = []  # Required so Python treats it as a package
+    fake_pywinauto.__path__ = []
 
     fake_controls = types.ModuleType("pywinauto.controls")
     fake_controls.__path__ = []
@@ -40,9 +48,13 @@ def _install_fake_pywinauto() -> None:
     class UIAWrapper:
         pass
 
+    class Desktop:
+        pass
+
     fake_uiawrapper.UIAWrapper = UIAWrapper
     fake_controls.uiawrapper = fake_uiawrapper
     fake_pywinauto.controls = fake_controls
+    fake_pywinauto.Desktop = Desktop
 
     sys.modules["pywinauto"] = fake_pywinauto
     sys.modules["pywinauto.controls"] = fake_controls

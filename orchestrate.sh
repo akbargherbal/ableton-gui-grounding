@@ -15,7 +15,7 @@
 set -uo pipefail
 
 SINGLE_ACTION_TASKS=(arm_track set_tempo probe_toggle probe_solo_transport
-                      probe_keyboard_activator read_solo_states)
+                      probe_keyboard_activator read_solo_states solo_one)
 
 usage() {
   echo "Usage: $0 <lab_dir> <task> [task-args...]" >&2
@@ -44,9 +44,8 @@ for t in "${SINGLE_ACTION_TASKS[@]}"; do
 done
 if [ "$task_is_allowed" -ne 1 ]; then
   if [ "$TASK" = "solo_tour" ]; then
-    echo "[orchestrator] ERROR: solo_tour is explicitly excluded from orchestrate.sh (Phase 1)." >&2
-    echo "[orchestrator]        It's multi-step internally; this script only gets a before/after" >&2
-    echo "[orchestrator]        screenshot pair, not per-click. See phased_plan.md Phase 2." >&2
+    echo "[orchestrator] ERROR: solo_tour is multi-step; use solo_one instead (Phase 2)." >&2
+    echo "[orchestrator]        See phased_plan.md Phase 2 for details." >&2
   else
     echo "[orchestrator] ERROR: unknown or unsupported task '$TASK'." >&2
   fi
@@ -68,26 +67,6 @@ LAST_SEQ=0
 if [ -f "$SEQ_FILE" ]; then
   LAST_SEQ="$(cat "$SEQ_FILE")"
   case "$LAST_SEQ" in (*[!0-9]*|'') LAST_SEQ=0 ;; esac
-fi
-SEQ=$((LAST_SEQ + 1))
-printf '%s' "$SEQ" > "$SEQ_FILE"
-SEQ_PADDED="$(printf "%02d" "$SEQ")"
-
-EVENTS_TMP="$(mktemp)"
-cleanup() { rm -f "$EVENTS_TMP"; }
-trap cleanup EXIT
-
-log "task=$TASK args=${TASK_ARGS[*]:-<none>} lab_dir=$LAB_DIR seq=$SEQ_PADDED"
-log "running automate task (--live, no dry-run — this is a real action)"
-echo "--- automate_ableton_task.py output ---"
-"$PYTHON_CMD" "$AUTOMATE_SCRIPT" --task "$TASK" --live "${TASK_ARGS[@]:-}" 2>&1 | tee "$EVENTS_TMP"
-AUTOMATE_EXIT="${PIPESTATUS[0]}"
-echo "--- end automate_ableton_task.py output ---"
-
-if [ "$AUTOMATE_EXIT" -eq 0 ]; then
-  log "task succeeded (exit 0)"
-else
-  log "task FAILED (exit $AUTOMATE_EXIT) — not retrying against live Ableton; still capturing a failure screenshot"
 fi
 
 # --- derive <short_description> from EVENT: line ---
@@ -120,43 +99,142 @@ slugify() {
   echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/_/g; s/^_+|_+$//g'
 }
 
-# Prefer the last event line containing a "label" field; fall back to the last event line overall
-LAST_EVENT_LINE="$(grep '^EVENT: ' "$EVENTS_TMP" | grep '"label":' | tail -n 1 || true)"
-if [ -z "$LAST_EVENT_LINE" ]; then
-  LAST_EVENT_LINE="$(grep '^EVENT: ' "$EVENTS_TMP" | tail -n 1 || true)"
-fi
+# --------------------------------------------------------------------------
+# run_one_task — core "run automate script + take screenshot" unit
+# --------------------------------------------------------------------------
+#
+# $1 = seq_padded (e.g. "03"), $2 = fallback label (task name), rest = args
+# to automate_ableton_task.py (must include --live for real action).
+# Returns the worse of automate exit code and screenshot exit code.
 
-RAW_DESC=""
-if [ -n "$LAST_EVENT_LINE" ]; then
-  JSON_BODY="${LAST_EVENT_LINE#EVENT: }"
-  RAW_DESC="$(extract_field "$JSON_BODY" "label")"
-  if [ -z "$RAW_DESC" ]; then
-    RAW_DESC="$(extract_field "$JSON_BODY" "task")"
+run_one_task() {
+  local run_seq_padded="$1"
+  local run_fallback_label="$2"
+  shift 2
+  local auto_args=("$@")
+
+  local events_tmp
+  events_tmp="$(mktemp)"
+
+  log "running: ${auto_args[*]}"
+  echo "--- automate_ableton_task.py output ---"
+  "$PYTHON_CMD" "$AUTOMATE_SCRIPT" "${auto_args[@]}" 2>&1 | tee "$events_tmp"
+  local auto_exit="${PIPESTATUS[0]}"
+  echo "--- end automate_ableton_task.py output ---"
+
+  if [ "$auto_exit" -eq 0 ]; then
+    log "task succeeded (exit 0)"
+  else
+    log "task FAILED (exit $auto_exit) — not retrying against live Ableton; still capturing a failure screenshot"
   fi
-fi
-if [ -z "$RAW_DESC" ]; then
-  RAW_DESC="$TASK"  # no EVENT: line at all
+
+  # derive <short_description> from EVENT: line
+  local last_event_line
+  last_event_line="$(grep '^EVENT: ' "$events_tmp" | grep '"label":' | tail -n 1 || true)"
+  if [ -z "$last_event_line" ]; then
+    last_event_line="$(grep '^EVENT: ' "$events_tmp" | tail -n 1 || true)"
+  fi
+
+  local raw_desc=""
+  if [ -n "$last_event_line" ]; then
+    local json_body
+    json_body="${last_event_line#EVENT: }"
+    raw_desc="$(extract_field "$json_body" "label")"
+    if [ -z "$raw_desc" ]; then
+      raw_desc="$(extract_field "$json_body" "task")"
+    fi
+  fi
+  if [ -z "$raw_desc" ]; then
+    raw_desc="$run_fallback_label"
+  fi
+
+  local desc
+  desc="$(slugify "$raw_desc")"
+  if [ "$auto_exit" -ne 0 ]; then
+    desc="${desc}_FAILED"
+  fi
+
+  rm -f "$events_tmp"
+
+  log "capturing screenshot: seq=$run_seq_padded desc=$desc"
+  echo "--- take_shot.sh output ---"
+  "$TAKE_SHOT" "$LAB_DIR" "$run_seq_padded" "$desc"
+  local shot_exit=$?
+  echo "--- end take_shot.sh output ---"
+
+  if [ "$shot_exit" -ne 0 ]; then
+    log "screenshot capture FAILED (exit $shot_exit)"
+  fi
+
+  log "done. automate_exit=$auto_exit shot_exit=$shot_exit"
+
+  if [ "$auto_exit" -ne 0 ]; then
+    return "$auto_exit"
+  fi
+  return "$shot_exit"
+}
+
+# --------------------------------------------------------------------------
+# solo_one: Phase 2 loop over multiple tracks (one seq + screenshot each)
+# --------------------------------------------------------------------------
+
+if [ "$TASK" = "solo_one" ]; then
+  # Parse --tracks and --seconds from TASK_ARGS
+  solo_tracks=()
+  solo_seconds=3.0
+  parse_mode=""
+  for arg in "${TASK_ARGS[@]}"; do
+    if [ "$arg" = "--tracks" ]; then
+      parse_mode="tracks"
+    elif [ "$arg" = "--seconds" ]; then
+      parse_mode="seconds"
+    elif [ "$parse_mode" = "tracks" ]; then
+      solo_tracks+=("$arg")
+    elif [ "$parse_mode" = "seconds" ]; then
+      solo_seconds="$arg"
+    fi
+  done
+
+  if [ ${#solo_tracks[@]} -eq 0 ]; then
+    echo "[orchestrator] ERROR: solo_one requires at least one --tracks index" >&2
+    usage
+  fi
+
+  log "solo_one loop: ${#solo_tracks[@]} track(s), seconds=$solo_seconds"
+  overall_exit=0
+  for solo_track in "${solo_tracks[@]}"; do
+    SEQ=$((LAST_SEQ + 1))
+    SEQ_PADDED="$(printf "%02d" "$SEQ")"
+
+    log "solo_one: Track[${solo_track}] (seq=$SEQ_PADDED)"
+
+    run_one_task "$SEQ_PADDED" "solo_one" \
+      --task solo_one --tracks "$solo_track" \
+      --seconds "$solo_seconds" --live
+
+    local_exit=$?
+    [ "$local_exit" -ne 0 ] && overall_exit=$local_exit
+
+    printf '%s' "$SEQ" > "$SEQ_FILE"
+    LAST_SEQ=$SEQ
+  done
+
+  log "done. exit=$overall_exit"
+  exit "$overall_exit"
 fi
 
-DESC="$(slugify "$RAW_DESC")"
-if [ "$AUTOMATE_EXIT" -ne 0 ]; then
-  DESC="${DESC}_FAILED"
-fi
+# --------------------------------------------------------------------------
+# Standard single-action path (all tasks except solo_one)
+# --------------------------------------------------------------------------
 
-# --- screenshot (always, success or failure) ---
-log "capturing screenshot: seq=$SEQ_PADDED desc=$DESC"
-echo "--- take_shot.sh output ---"
-"$TAKE_SHOT" "$LAB_DIR" "$SEQ_PADDED" "$DESC"
-SHOT_EXIT=$?
-echo "--- end take_shot.sh output ---"
+SEQ=$((LAST_SEQ + 1))
+SEQ_PADDED="$(printf "%02d" "$SEQ")"
+printf '%s' "$SEQ" > "$SEQ_FILE"
 
-if [ "$SHOT_EXIT" -ne 0 ]; then
-  log "screenshot capture FAILED too (exit $SHOT_EXIT)"
-fi
+log "task=$TASK args=${TASK_ARGS[*]:-<none>} lab_dir=$LAB_DIR seq=$SEQ_PADDED"
+log "running automate task (--live, no dry-run — this is a real action)"
 
-log "done. automate_exit=$AUTOMATE_EXIT shot_exit=$SHOT_EXIT"
+run_one_task "$SEQ_PADDED" "$TASK" \
+  --task "$TASK" --live "${TASK_ARGS[@]:-}"
 
-if [ "$AUTOMATE_EXIT" -ne 0 ]; then
-  exit "$AUTOMATE_EXIT"
-fi
-exit "$SHOT_EXIT"
+exit $?

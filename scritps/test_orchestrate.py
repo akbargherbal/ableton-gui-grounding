@@ -138,7 +138,7 @@ def test_rejects_solo_tour_explicitly():
     with Sandbox() as sb:
         proc = sb.run("LABS/x", "solo_tour")
         assert proc.returncode != 0
-        assert "excluded" in proc.stderr
+        assert "solo_tour" in proc.stderr
         assert sb.automate_call_count() == 0
         assert sb.take_shot_calls() == []
 

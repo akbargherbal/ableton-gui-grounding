@@ -678,55 +678,51 @@ def task_arm_track(window: UIAWrapper, track_index: int, dry_run: bool) -> None:
                 verify=lambda: get_toggle_state(resolve(window, monitor_id)) is True)
 
 
-def task_solo_tour(window: UIAWrapper, track_indices: list[int],
+def task_solo_one(window: UIAWrapper, track_index: int,
                     seconds: float, dry_run: bool) -> None:
-    """Solo each given track in turn, play for `seconds`, then restore.
+    """One solo -> play -> wait -> stop -> unsolo cycle for a single track.
 
-    Demonstrates the pattern that matters most for agent-driven automation:
-    read state -> act -> ALWAYS restore, even on error -- and resolve every
-    control fresh right before touching it, never across a Play/sleep/Stop
-    gap (see module docstring for why that matters here).
+    This is the atomic unit that Phase 2 (phased_plan.md) decomposes
+    solo_tour into, so the orchestrator can regain control between tracks
+    and screenshot each one individually. solo_tour() remains a thin
+    in-process loop over this function so standalone CLI use doesn't regress.
+
+    Restores the track's original solo state in a finally block, the same
+    safety-net pattern as the full solo_tour.
     """
-    solo_ids = {i: track_mixer_id(i, "Solo") for i in track_indices}
+    solo_id = track_mixer_id(track_index, "Solo")
 
     preflight = build_automation_id_index(window)
-    verify_present(preflight, list(solo_ids.values()) + ["Transport.Play", "Transport.Stop"])
+    verify_present(preflight, [solo_id, "Transport.Play", "Transport.Stop"])
 
-    # Snapshot original state via fresh resolves, not the preflight index --
-    # that index is only for the existence check above, we don't reuse its
-    # control references for anything we intend to click later.
-    original_state = {i: get_toggle_state(resolve(window, solo_ids[i])) for i in track_indices}
-    print("Captured original solo state (this is what tracks get 'restored' "
-          "to at the end -- if any of these are unexpectedly 'on', that's "
-          "likely leftover from a previous run, not something this run caused):")
-    for i in track_indices:
-        print(f"  Track[{i}].Solo = {'on' if original_state[i] else 'off'}")
+    original = get_toggle_state(resolve(window, solo_id))
+    print(f"Track[{track_index}].Solo = {'on' if original else 'off'} (saved original)")
 
     try:
-        for i in track_indices:
-            print(f"\nTrack {i}: solo -> play {seconds}s -> stop -> unsolo")
-            set_checkbox_by_id(window, solo_ids[i], desired=True, dry_run=dry_run,
-                                label=f"Track[{i}].Solo")
-            # Transport.Play/Stop deliberately left verify=None this session --
-            # a dump now confirms Transport.Play is a real CheckBox (so it
-            # COULD be verified the same way as Monitoring.Buttons[0] above),
-            # but folding that in here was explicitly scoped OUT of this
-            # session's click_by_id() hardening work, to keep that change
-            # isolated and separately testable. See context.md for the open
-            # item this leaves for next time.
-            click_by_id(window, "Transport.Play", dry_run=dry_run, label="Transport.Play")
-            if not dry_run:
-                time.sleep(seconds)
-            click_by_id(window, "Transport.Stop", dry_run=dry_run, label="Transport.Stop")
-            set_checkbox_by_id(window, solo_ids[i], desired=original_state[i], dry_run=dry_run,
-                                label=f"Track[{i}].Solo")
+        print(f"Track {track_index}: solo -> play {seconds}s -> stop -> unsolo")
+        set_checkbox_by_id(window, solo_id, desired=True, dry_run=dry_run,
+                            label=f"Track[{track_index}].Solo")
+        click_by_id(window, "Transport.Play", dry_run=dry_run, label="Transport.Play")
+        if not dry_run:
+            time.sleep(seconds)
+        click_by_id(window, "Transport.Stop", dry_run=dry_run, label="Transport.Stop")
+        set_checkbox_by_id(window, solo_id, desired=original, dry_run=dry_run,
+                            label=f"Track[{track_index}].Solo")
     finally:
-        # Safety net: whatever happened above, put solo state back exactly
-        # as we found it -- resolved fresh again, not from a stale handle.
-        print("\nRestoring original solo state...")
-        for i in track_indices:
-            set_checkbox_by_id(window, solo_ids[i], desired=original_state[i], dry_run=dry_run,
-                                label=f"Track[{i}].Solo (restore)")
+        set_checkbox_by_id(window, solo_id, desired=original, dry_run=dry_run,
+                            label=f"Track[{track_index}].Solo (restore)")
+
+
+def task_solo_tour(window: UIAWrapper, track_indices: list[int],
+                    seconds: float, dry_run: bool) -> None:
+    """Solo each given track in turn -- thin loop over task_solo_one().
+
+    task_solo_one() is the atomic unit (Phase 2 decomposition). This
+    function is kept as a convenience for standalone CLI use where
+    per-track granularity isn't needed, so existing workflows don't regress.
+    """
+    for i in track_indices:
+        task_solo_one(window, i, seconds, dry_run)
 
 
 def task_set_tempo(window: UIAWrapper, bpm: float, dry_run: bool) -> None:
@@ -790,10 +786,11 @@ def run_task(task_name: str, tracks: list[int], fn: Callable[[], None]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                       formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--task", choices=["arm_track", "solo_tour", "set_tempo",
-                                            "probe_toggle", "probe_solo_transport",
-                                            "probe_keyboard_activator",
-                                            "read_solo_states"],
+    parser.add_argument("--task", choices=["arm_track", "solo_one", "solo_tour",
+                                             "set_tempo",
+                                             "probe_toggle", "probe_solo_transport",
+                                             "probe_keyboard_activator",
+                                             "read_solo_states"],
                          help="Which demo task to run")
     parser.add_argument("--tracks", type=int, nargs="+", default=[],
                          help="Zero-based track indices to act on")
@@ -841,6 +838,11 @@ def main() -> None:
             parser.error("--task arm_track needs exactly one --tracks index")
         run_task("arm_track", args.tracks,
                   lambda: task_arm_track(window, args.tracks[0], dry_run))
+    elif args.task == "solo_one":
+        if len(args.tracks) != 1:
+            parser.error("--task solo_one needs exactly one --tracks index")
+        run_task("solo_one", args.tracks,
+                  lambda: task_solo_one(window, args.tracks[0], args.seconds, dry_run))
     elif args.task == "solo_tour":
         if not args.tracks:
             parser.error("--task solo_tour needs at least one --tracks index")
