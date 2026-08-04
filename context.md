@@ -99,7 +99,11 @@ build a `walkthrough.md`.
 ### Knowledge status
 Read directly (not secondhand): `opencode-ableton-mcp-setup.md`,
 `take_shot.sh`, `EVAL_01.md`, `EVAL_02.md`, `EVAL_03.md`, and a directory
-tree of the live repo. **Confirmed to exist but not yet read:**
+tree of the live repo. **`take_shot.sh` now lives at the root of
+`ableton-gui-grounding` itself (merged in, session 5/6)** — it is no
+longer "Project 2's tool, available on request," it's a real dependency
+of this repo used by the screenshot-orchestration design below.
+**Confirmed to exist but not yet read:**
 `ableton-live-12-manual-en.pdf` (in `LABS/`) — will request its content
 explicitly when a step needs it, not before. **Deliberately withheld by
 the user:** `AGENTS.md` — rewritten many times, considered unreliable;
@@ -120,6 +124,92 @@ Known upstream limits: automation-point placement not fully working;
 Arrangement View control incomplete (Session View is the reliable surface
 here too); community project, not official. Install gotcha: don't run
 `pip install -e .` (upstream packaging bug) — install deps directly.
+
+### Screenshot orchestration design (sessions 5–6, FINALIZED — ready to implement)
+Full reasoning and comparison matrix live in
+`screenshot_orchestration_analysis.md` (repo root, rewritten in session 5
+after a wrong premise was disproven by real terminal output — see its own
+revision note). This section is the actionable summary; treat the doc as
+source of truth for detail, this as the pointer for what to build.
+
+**Key evidence that reshaped the whole design:** `python.exe
+automate_ableton_task.py ...`, run directly from inside a WSL shell, drove
+the real Ableton window successfully via WSL interop — so `take_shot.sh`
+(native WSL bash) and `automate_ableton_task.py` (needs Windows Python)
+are both reachable from **one canonical WSL shell**, no OS-detection
+branching needed. This eliminated a full shortcoming outright (was #5,
+struck through in the doc, not deleted, per the project's "keep the
+reasoning trail" rule).
+
+**Recommended design: Option B — orchestrator script.** A new, disposable
+WSL bash script that calls `python.exe automate_ableton_task.py ...` and
+`./take_shot.sh ...` in sequence, one action → one screenshot. Neither
+existing script is modified; the orchestrator owns 100% of the coupling
+logic and can be deleted with zero impact on either tool.
+
+**Phased implementation plan (do in this order):**
+1. **Phase 0 (highest ROI, do first):** Add structured stdout events to
+   `automate_ableton_task.py` (e.g. `EVENT:<n>:<status>` line or
+   `--json-events`) — small, additive, backward-compatible. Fixes the
+   single highest-leverage shortcoming (fragile stdout-parsing sync) and
+   also de-risks timing/mid-transition captures and cross-script
+   debugging for free.
+2. **Phase 1:** Ship the orchestrator for tasks that are already
+   single-action (`arm_track`, `set_tempo`, `probe_*`) — works cleanly
+   today, no granularity caveats apply yet.
+3. **Phase 2:** For multi-step tasks (`solo_tour` and future equivalents),
+   apply Option A — break them into atomic sub-commands — so the
+   orchestrator can loop over them with a screenshot after each click,
+   not just before/after the whole task.
+4. **Phase 3 (as the toolset grows):** Add `--list-tasks`/`--schema`
+   introspection or a CI smoke test so the orchestrator can detect CLI
+   drift in `automate_ableton_task.py` before it fails silently
+   mid-documentation-run.
+5. **Throughout:** on any screenshot error, log and continue rather than
+   retry-loop against a live Ableton session — avoids leaving
+   automate-side state (armed/soloed tracks, running transport) stuck
+   mid-sequence.
+
+**Two-consumer split — decides *when* a screenshot fires, orthogonal to
+the taxonomy below. Getting this backwards is a real risk (already caught
+once, session 6): the taxonomy narrows the *agent's* screenshot use, and
+does NOT apply to the student-facing trigger policy.**
+
+| Consumer | What decides whether a screenshot happens |
+|---|---|
+| Agent (self-verification, this project's own `click_by_id()`) | Bucket — 1/2 use a text/UIA read, screenshot only for bucket-3 blind spots (cost-driven) |
+| Student (Project 2's `walkthrough.md` documentation) | Every action, unconditionally — the bucket a control falls into is irrelevant to the student's need to see the actual pixels |
+
+Practically: same `take_shot.sh` capture mechanism serves both, but the
+*trigger policy* differs. Project 2's orchestrator (above) fires on every
+action unconditionally. This project's own state-verification code should
+stay text-first per the taxonomy below and only escalate to a screenshot
+for genuine bucket-3 gaps.
+
+### State-verification taxonomy (this project's own concern — agent self-verification only, NOT the student trigger policy above)
+Car-dashboard analogy: some Ableton state is a dedicated gauge, some is
+inferred from other signals, some has no gauge at all.
+
+1. **True gauges — directly readable, no inference.** Confirmed
+   `CheckBox`/`RadioButton` controls via `get_toggle_state()`:
+   `Track[N].Mixer.Arm/Activator/Solo`, `Monitoring.Buttons[0..2]`,
+   `Transport.Play`. `Transport.Tempo` (Slider) is a *continuous* gauge,
+   not boolean. Once a control lands here, no screenshot is ever needed
+   to know its state again.
+2. **Inferred state — no dedicated property, but derivable from other
+   signals.** Session View vs. Arrangement View: no `CurrentView` field
+   exists; `dump_ableton_states.py` infers it from whether a fresh dump
+   contains any `SessionView.*` id at all. `Transport.Stop` is the same
+   pattern — a momentary button with no toggle state of its own, verified
+   indirectly via `Transport.Play` reading `False` afterward.
+3. **Blind spots — no gauge, nothing to derive it from.** Currently-
+   selected track is the confirmed example (already an Open Item above):
+   no `automation_id` anywhere exposes track focus, which is exactly why
+   Keyboard-tier is blocked for `Solo`/`Arm` (scoped to "selected track,"
+   unverifiable beforehand). **This is the only category where a
+   screenshot is the agent's correct fallback** — not because screenshots
+   are the default verification method, but because buckets 1–2 run out
+   here.
 
 ### Eval evidence (3 sessions, objectively scored: 5, 5, 4)
 Scores were materially better than an earlier "unsatisfactory" framing
@@ -345,11 +435,25 @@ level itself:**
 5. **Broader integration planning** (deferred, lower priority than the
    above): where the two projects overlap/complement beyond the
    verification-layer idea already covered.
+6. ~~Screenshot orchestration design for Project 2~~ — **DESIGN FINALIZED,
+   sessions 5–6.** See "Screenshot orchestration design" and "State-
+   verification taxonomy" sections above. **Not yet implemented in code**
+   — next session's actual work is Phase 0 (structured stdout events in
+   `automate_ableton_task.py`), per the phased plan above. This is now an
+   implementation task, not an open design question.
+7. **F1 probe off-by-one question (session 5, still unresolved):**
+   `probe_keyboard_activator` confirmed Track[0].Activator toggled
+   on→off, but didn't rule out a neighbor track flipping instead. Proposed
+   fix (not yet run): extend the probe to read `Track[0..3].Activator`
+   before/after the F1 press — a bucket-1 structural check per the
+   taxonomy above, no screenshot needed. Still open, pick up whenever the
+   user wants to close it.
+
 User explicitly does not want to commit to one integration approach —
 evaluate each idea on its own merits. **No implementation work on a
 combined cross-project approach yet — still evidence-gathering/planning**,
-except for item 1 above, which is scoped to this project's own file (and
-is now done).
+except for item 1 above (scoped to this project's own file, done) and
+item 6 above (design finalized, code work starts next).
 
 ---
 
@@ -474,6 +578,26 @@ one thing the stub tests couldn't prove: that the control-type assumptions
 User explicitly asked to skip item 2 (re-running the eval prompt on more
 Project 2 sessions) this session — not a decision to abandon it, just not
 prioritized right now.
+
+**Sessions 5–6: screenshot orchestration + state-verification taxonomy,
+FINALIZED (compressed — see STATE sections above for the actionable
+result).** Session 5 opened on a WSL/pywinauto dependency failure; the
+user's own back-to-back terminal output (`python` fails, `python.exe`
+works, same WSL shell) disproved the original analysis doc's premise of
+two environments needing active OS-detection bridging — doc rewritten,
+one full shortcoming (cross-OS detection) eliminated by evidence, not
+just mitigated, six of eight original shortcomings preserved unchanged.
+Session 6 (this export) then asked the broader question — is there a
+text-based, dashboard-style way to know Ableton's state at all, car-
+analogy-driven — which produced the 3-bucket taxonomy (true gauges /
+inferred state / blind spots). First pass wrongly framed screenshots as
+narrowing to bucket-3-only across the board; user corrected this
+mid-session: the taxonomy governs *agent* self-verification only, while
+Project 2's student-facing `walkthrough.md` needs a screenshot after
+every action unconditionally, regardless of bucket — an orthogonal
+"who's the consumer" axis, not a refinement of the same rule. Both now
+recorded as separate, clearly-labeled sections in STATE so a future
+session doesn't re-merge them the way this one initially did.
 
 **Session 4 (cont'd): tool-selection table pressure-tested against real
 geometry.** Pulled actual `bounding_rect`s for Activator/Solo/Arm/
