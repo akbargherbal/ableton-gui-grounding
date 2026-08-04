@@ -79,17 +79,37 @@ import time
 from typing import Callable
 
 try:
-    from pywinauto.controls.uiawrapper import UIAWrapper
+    from pywinauto.controls.uiawrapper import UIAWrapper  # type: ignore[assignment]
 except ImportError:
-    print("Missing dependency. Install with:\n    pip install pywinauto\n", file=sys.stderr)
-    sys.exit(1)
+    UIAWrapper = None  # let --list-tasks work without pywinauto; main() guards actions
 
 # Reuse window discovery AND window-readiness handling from the read-only
 # dump script instead of duplicating them -- keep one source of truth for
 # "how do we find Live" and "how do we make sure its tree is fully visible
 # before we touch it" (the latter used to be a local copy here; consolidated
 # so the two scripts can't quietly drift apart on this).
-from dump_ableton_pywinauto import find_ableton_window, ensure_window_ready
+# Lazy import: --list-tasks works without pywinauto / Ableton.
+_find_ableton_window = None
+_ensure_window_ready = None
+
+
+def _lazy_import_dump() -> None:
+    global _find_ableton_window, _ensure_window_ready
+    if _find_ableton_window is not None:
+        return
+    from dump_ableton_pywinauto import find_ableton_window, ensure_window_ready
+    _find_ableton_window = find_ableton_window
+    _ensure_window_ready = ensure_window_ready
+
+
+def find_ableton_window():
+    _lazy_import_dump()
+    return _find_ableton_window()
+
+
+def ensure_window_ready(window):
+    _lazy_import_dump()
+    _ensure_window_ready(window)
 
 # Session 5: canonical F1..F8 lookup for the Activator positional-shortcut
 # test below. Kept in its own module (keyboard_shortcuts.py) rather than
@@ -117,6 +137,41 @@ from keyboard_shortcuts import activator_shortcut_for_index
 # already-written orchestrator.
 
 EVENT_SCHEMA_VERSION = 1
+
+TASK_REGISTRY: dict[str, dict] = {
+    "arm_track": {
+        "required_args": ["tracks"], "optional_args": [], "atomic": True,
+        "description": "Arm a track for recording",
+    },
+    "solo_one": {
+        "required_args": ["tracks", "seconds"], "optional_args": [], "atomic": True,
+        "description": "Solo one track, play, stop, unsolo",
+    },
+    "solo_tour": {
+        "required_args": ["tracks", "seconds"], "optional_args": [], "atomic": False,
+        "description": "Tour through tracks one by one (solo, play, stop, unsolo per track)",
+    },
+    "set_tempo": {
+        "required_args": ["bpm"], "optional_args": [], "atomic": True,
+        "description": "Set the session tempo",
+    },
+    "probe_toggle": {
+        "required_args": ["tracks"], "optional_args": [], "atomic": True,
+        "description": "Diagnostic: probe toggle state reading",
+    },
+    "probe_solo_transport": {
+        "required_args": ["tracks", "seconds"], "optional_args": [], "atomic": True,
+        "description": "Diagnostic: probe solo + transport interaction",
+    },
+    "probe_keyboard_activator": {
+        "required_args": ["tracks"], "optional_args": [], "atomic": True,
+        "description": "Diagnostic: probe keyboard shortcut path",
+    },
+    "read_solo_states": {
+        "required_args": ["tracks"], "optional_args": [], "atomic": True,
+        "description": "Read and report solo states of tracks",
+    },
+}
 
 
 def emit_event(event_type: str, **fields) -> None:
@@ -783,6 +838,22 @@ def run_task(task_name: str, tracks: list[int], fn: Callable[[], None]) -> None:
 # CLI
 # --------------------------------------------------------------------------
 
+def _require_pywinauto(reason: str) -> None:
+    if UIAWrapper is None:
+        print(f"Missing dependency for '{reason}'. Install with:\n"
+              "    pip install pywinauto", file=sys.stderr)
+        sys.exit(1)
+
+
+def _require_ableton_window() -> UIAWrapper:
+    window = find_ableton_window()
+    if window is None:
+        print("Could not find the Ableton Live window. Is it running?", file=sys.stderr)
+        sys.exit(1)
+    ensure_window_ready(window)
+    return window
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                       formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -802,18 +873,17 @@ def main() -> None:
                          help="Actually click/type. Without this flag, only the plan is printed.")
     parser.add_argument("--list-tracks", action="store_true",
                          help="Print discovered track/return-track automation_ids and exit")
+    parser.add_argument("--list-tasks", action="store_true",
+                         help="Print task registry with schema version as JSON and exit")
     args = parser.parse_args()
 
-    dry_run = not args.live
-
-    window = find_ableton_window()
-    if window is None:
-        print("Could not find the Ableton Live window. Is it running?", file=sys.stderr)
-        sys.exit(1)
-
-    ensure_window_ready(window)
+    if args.list_tasks:
+        print(json.dumps({"schema_version": EVENT_SCHEMA_VERSION, "tasks": TASK_REGISTRY}))
+        return
 
     if args.list_tracks:
+        _require_pywinauto("--list-tracks")
+        window = _require_ableton_window()
         print("Indexing controls by automation_id (recursive walk, matches dump script)...",
               file=sys.stderr)
         index = build_automation_id_index(window)
@@ -822,7 +892,12 @@ def main() -> None:
         return
 
     if not args.task:
-        parser.error("--task is required unless --list-tracks is given")
+        parser.error("--task is required unless --list-tracks or --list-tasks is given")
+
+    _require_pywinauto(args.task)
+    window = _require_ableton_window()
+
+    dry_run = not args.live
 
     probe_tasks = ("probe_toggle", "probe_solo_transport", "probe_keyboard_activator")
     if args.task == "read_solo_states":

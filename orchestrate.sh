@@ -17,6 +17,8 @@ set -uo pipefail
 SINGLE_ACTION_TASKS=(arm_track set_tempo probe_toggle probe_solo_transport
                       probe_keyboard_activator read_solo_states solo_one)
 
+EXPECTED_SCHEMA_VERSION=1
+
 usage() {
   echo "Usage: $0 <lab_dir> <task> [task-args...]" >&2
   echo "  <task> must be one of: ${SINGLE_ACTION_TASKS[*]}" >&2
@@ -34,6 +36,47 @@ shift 2
 TASK_ARGS=("$@")
 
 log() { echo "[orchestrator] $*"; }
+
+extract_json_float() {
+  local json="$1" field="$2"
+  local py_bin=""
+  if command -v python3 >/dev/null 2>&1; then
+    py_bin="python3"
+  elif command -v python >/dev/null 2>&1; then
+    py_bin="python"
+  fi
+  if [ -n "$py_bin" ]; then
+    "$py_bin" -c '
+import json, sys
+try:
+    d = json.loads(sys.argv[1])
+    v = d.get(sys.argv[2], "")
+    print(v)
+except Exception:
+    print("")
+' "$json" "$field"
+  fi
+}
+
+# --- drift detection (Phase 3) ---
+drift_check() {
+  local tasks_json
+  tasks_json="$("$PYTHON_CMD" "$AUTOMATE_SCRIPT" --list-tasks 2>/dev/null || true)"
+  if [ -z "$tasks_json" ]; then
+    echo "[orchestrator] FATAL: could not retrieve task list from automate_ableton_task.py" >&2
+    echo "[orchestrator]        Is the script broken or pywinauto missing? (--list-tasks should work even without it)" >&2
+    exit 1
+  fi
+
+  local actual_version
+  actual_version="$(extract_json_float "$tasks_json" "schema_version")"
+  if [ "$actual_version" != "$EXPECTED_SCHEMA_VERSION" ]; then
+    echo "[orchestrator] FATAL: EVENT schema version mismatch (expected $EXPECTED_SCHEMA_VERSION, got $actual_version)" >&2
+    exit 1
+  fi
+
+  log "drift check: schema_version=$actual_version OK"
+}
 
 task_is_allowed=0
 for t in "${SINGLE_ACTION_TASKS[@]}"; do
@@ -60,6 +103,9 @@ LAB_ABS_DIR="$PROJECT_ROOT/$LAB_DIR"
 PYTHON_CMD="${ORCH_PYTHON_CMD:-python.exe}"
 AUTOMATE_SCRIPT="${ORCH_AUTOMATE_SCRIPT:-$SCRIPT_DIR/scritps/automate_ableton_task.py}"
 TAKE_SHOT="${ORCH_TAKE_SHOT:-$SCRIPT_DIR/take_shot.sh}"
+
+# --- Phase 3 drift detection (once per run, before any action) ---
+drift_check
 
 mkdir -p "$LAB_ABS_DIR"
 SEQ_FILE="$LAB_ABS_DIR/.orchestrate_seq"

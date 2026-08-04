@@ -24,8 +24,22 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 ORCHESTRATE_SH = REPO_ROOT / "orchestrate.sh"
 
 FAKE_PYTHON_SRC = r"""#!/usr/bin/env bash
-# Stub for ORCH_PYTHON_CMD. Args: <automate_script_path> --task X --live [...]
+# Stub for ORCH_PYTHON_CMD. Args: <automate_script_path> ...
 set -u
+
+# Phase 3: if --list-tasks is an arg, output task registry JSON and exit
+# (set FAKE_LIST_TASKS_EMPTY=1 to simulate no --list-tasks support)
+for a in "$@"; do
+  if [ "$a" = "--list-tasks" ]; then
+    if [ -n "${FAKE_LIST_TASKS_EMPTY:-}" ]; then
+      exit 0
+    fi
+    _v="${FAKE_LIST_TASKS_SCHEMA_VERSION:-1}"
+    echo '{"schema_version": '"${_v}"', "tasks": {"arm_track":{"required_args":["tracks"],"optional_args":[],"atomic":true,"description":"Arm a track for recording"},"set_tempo":{"required_args":["bpm"],"optional_args":[],"atomic":true,"description":"Set the session tempo"},"probe_toggle":{"required_args":["tracks"],"optional_args":[],"atomic":true,"description":"Diagnostic: probe toggle state reading"},"probe_solo_transport":{"required_args":["tracks","seconds"],"optional_args":[],"atomic":true,"description":"Diagnostic: probe solo + transport interaction"},"probe_keyboard_activator":{"required_args":["tracks"],"optional_args":[],"atomic":true,"description":"Diagnostic: probe keyboard shortcut path"},"read_solo_states":{"required_args":["tracks"],"optional_args":[],"atomic":true,"description":"Read and report solo states of tracks"},"solo_one":{"required_args":["tracks","seconds"],"optional_args":[],"atomic":true,"description":"Solo one track, play, stop, unsolo"},"solo_tour":{"required_args":["tracks","seconds"],"optional_args":[],"atomic":false,"description":"Tour through tracks one by one"}}}'
+    exit 0
+  fi
+done
+
 if [ -n "${FAKE_AUTOMATE_CALLS_FILE:-}" ]; then
   echo "call" >> "$FAKE_AUTOMATE_CALLS_FILE"
 fi
@@ -287,6 +301,43 @@ def test_orchestrator_own_lines_are_tagged_and_wrap_sub_output():
         assert any("done." in l for l in orchestrator_lines)
         assert "--- automate_ableton_task.py output ---" in lines
         assert "--- take_shot.sh output ---" in lines
+
+
+# --------------------------------------------------------------------------
+# Phase 3: drift detection
+# --------------------------------------------------------------------------
+
+
+def test_drift_check_schema_version_mismatch_aborts():
+    with Sandbox() as sb:
+        proc = sb.run(
+            "LABS/x", "arm_track", "--tracks", "0",
+            env_overrides={"FAKE_LIST_TASKS_SCHEMA_VERSION": "99"},
+        )
+        assert proc.returncode != 0
+        assert "version mismatch" in proc.stderr
+        assert sb.automate_call_count() == 0
+
+
+def test_drift_check_no_tasks_output_aborts():
+    with Sandbox() as sb:
+        proc = sb.run(
+            "LABS/x", "arm_track", "--tracks", "0",
+            env_overrides={"FAKE_LIST_TASKS_EMPTY": "1"},
+        )
+        assert proc.returncode != 0
+        assert "could not retrieve task list" in proc.stderr.lower()
+        assert sb.automate_call_count() == 0
+
+
+def test_drift_check_happy_path_passes_and_proceeds():
+    with Sandbox() as sb:
+        proc = sb.run(
+            "LABS/x", "arm_track", "--tracks", "0",
+            env_overrides={"FAKE_LIST_TASKS_SCHEMA_VERSION": "1"},
+        )
+        assert proc.returncode == 0
+        assert sb.automate_call_count() == 1
 
 
 if __name__ == "__main__":
