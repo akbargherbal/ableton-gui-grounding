@@ -61,56 +61,84 @@ the user's current test project (4 tracks + 2 returns).
    simply don't exist in the tree when not visible/focused — not a lookup
    bug. Fixed with `ensure_window_ready()`: restore-if-minimized, set_focus,
    maximize, before every run.
-4. **UNRESOLVED, most important open bug:** `solo_tour` task reliably
-   leaves track 1 soloed at the end of the run (track 0 restores fine,
-   track 1 doesn't). Reproduced **identically** even after eliminating all
-   cross-call control caching (i.e. resolving every control completely
-   fresh, right before each click/read, via `resolve()`/`find_control()` —
-   see current file). This **disproves** the "stale COM reference" theory
-   I had going into that fix. Real cause is still unknown; two live
-   hypotheses:
-   - `get_toggle_state()` isn't reliably reporting this control's true
-     on-screen state (TogglePattern support may be flaky on Ableton's
-     custom-drawn RadioButton-style checkboxes), or
-   - `click_input()` isn't reliably landing on the real control (stale/
-     offset bounding rect at click time), so real Ableton state and our
-     internal bookkeeping silently diverge.
+4. **RESOLVED & CONFIRMED — was not a click/timing bug.** `solo_tour`
+   reliably left track 1 soloed at the end. Root cause, found via a new
+   `probe_solo_transport` diagnostic that replays solo-on → Play → sleep
+   → Stop → solo-off for one track with a state print after every step:
+   **track 1 was already soloed *before* `solo_tour` ran** (leftover from
+   an earlier broken run). `solo_tour` captures `original_state` at the
+   very start and restores to *that* at the end — so it faithfully
+   "restored" track 1 right back to the bad `on` state it found, every
+   time. The toggle read (`get_toggle_state`) and the click
+   (`click_input`) are both completely reliable on their own — confirmed
+   twice, once by `probe_toggle` (4 clicks in isolation, clean
+   off/on/off/on, identical rect) and again by `probe_solo_transport`
+   (clean off/on across a full solo/Play/sleep/Stop/unsolo cycle). Neither
+   original hypothesis (misread toggle state / click missing the control)
+   was the cause. Fixed by: (a) `solo_tour` now prints the captured
+   `original_state` up front, so a bad baseline is visible immediately
+   instead of silently trusted; (b) added `read_solo_states` task — pure
+   read, no clicks, no dry-run/live distinction needed — to sanity-check
+   solo state on any tracks before trusting them as a baseline.
+   **Confirmed fixed**: with a manually-restored clean `off/off` baseline
+   (verified via `read_solo_states`), `solo_tour --tracks 0 1 --live`
+   printed `original_state` as all `off` and ended with both tracks
+   `off` — exact expected behavior, user-verified on the real running
+   app. No further action needed on this bug.
 
 ## Current state of automate_ableton_task.py (as of last edit)
 - Uses `find_control()` / `resolve()` — always-fresh, no cross-call caching
   of `UIAWrapper` objects.
-- `set_checkbox_by_id()` now **verifies after clicking**: re-resolves,
-  re-reads state, retries once, and **raises loudly** if the click didn't
-  actually produce the expected state — this replaces the old "click and
-  trust" behavior that let the track-1-stuck-soloed bug pass silently.
-- Added `--task probe_toggle --tracks N` diagnostic: clicks a track's Solo
-  checkbox 4x with 1s gaps, printing `before -> after` state and the
-  control's `bounding_rect` each time, specifically to let the user compare
-  printed state against what Ableton visibly shows on screen, and to
-  disambiguate the two hypotheses above.
-- **Waiting on:** user has NOT yet run `--task probe_toggle --tracks 1` and
-  reported output. This is the next concrete step — do not guess further
-  without that data.
+- `set_checkbox_by_id()` **verifies after clicking**: re-resolves, re-reads
+  state, retries once, and **raises loudly** if the click didn't actually
+  produce the expected state.
+- `task_solo_tour()` now **prints the captured `original_state` up front**,
+  before doing anything else, so a bad baseline (e.g. a track already
+  wrongly soloed from a prior run) is visible immediately instead of being
+  silently trusted as "the state to restore to."
+- Diagnostics available (all always live-click except `read_solo_states`,
+  regardless of `--live` — see their docstrings):
+  - `--task probe_toggle --tracks N` — clicks Solo 4x in isolation,
+    prints before/after state + rect each time.
+  - `--task probe_solo_transport --tracks N` — replays solo-on → Play →
+    sleep → Stop → solo-off for one track, printing state after every
+    single step. This is what found the real cause of the stuck-soloed
+    bug (see bug #4 above).
+  - `--task read_solo_states --tracks N [M ...]` — pure read, no clicks,
+    prints current Solo state for the given tracks. Use before
+    `solo_tour` to sanity-check the baseline it's about to trust.
+- **Not yet done:** apply the same "print/verify the assumption instead of
+  silently trusting it" fix to `task_arm_track` if it has an analogous
+  baseline-capture pattern (it currently doesn't capture prior state at
+  all, so probably not applicable — worth a quick check, not a known bug).
 
 ## What to do next session
-1. Ask for / read the `probe_toggle` output if not already provided.
-2. If state toggles cleanly and matches the screen → the bug is a timing
-   interaction specifically with Play/Stop or the 3s sleep in `solo_tour`,
-   not toggle reading itself. Test with Play/Stop removed from the loop.
-3. If state doesn't toggle cleanly or disagrees with the screen →
-   `get_toggle_state()`'s TogglePattern-based read is untrustworthy for
-   this control. Try alternatives: `LegacyIAccessible` pattern
-   (`control.legacy_properties()['State']` or similar), or fall back to
-   comparing a screenshot pixel/color at the control's bounding_rect
-   instead of trusting the accessibility toggle property.
-4. Bigger-picture note already given to the user and worth keeping in
-   mind: this whole debugging arc is evidence that a real Ableton-
-   controlling agent needs **verify-after-every-action** as a hard
-   requirement, not open-loop "plan then execute" — exactly the pattern
-   now (partially) implemented in `set_checkbox_by_id`. Consider applying
-   the same verify-after-click discipline to `click_by_id()` (currently
-   still "click and trust", used for Transport.Play/Stop and monitor
-   RadioButtons) once the checkbox case is understood.
+1. **Stuck-soloed bug is closed** — confirmed via a clean `off/off`
+   baseline + a full `solo_tour --tracks 0 1 --live` run that printed
+   `original_state` as all `off` and ended with both tracks `off`,
+   user-verified against the real running app. Don't reopen this without
+   new contradicting evidence.
+2. Open items, not yet started:
+   - `click_by_id()` (used for `Transport.Play`/`Stop` and monitor
+     RadioButtons) is still "click and trust" — no post-click
+     verification, unlike `set_checkbox_by_id()`. Worth the same
+     verify-after-click treatment now that the checkbox case is fully
+     understood, though nothing has surfaced a concrete bug there yet.
+   - `task_arm_track` doesn't capture/print a baseline the way
+     `solo_tour` now does — check whether an analogous "silently trust
+     current state" pattern applies there, or whether it's not
+     applicable (it may not need one, since Arm doesn't get restored).
+3. Ask the user what's next functionally — likely candidates: clip
+   launching (`SessionView.Track[N].Slot[M]`, not yet exercised beyond
+   being visible in the tree dump), device parameters, or hardening
+   pass over `click_by_id()` per the point above.
+4. Bigger-picture lesson from this whole arc, worth carrying into
+   whatever comes next: a real Ableton-controlling agent needs
+   **verify-after-every-action** AND **print/distrust your own captured
+   baselines**, not open-loop "read once, trust forever." The
+   stuck-soloed bug wasn't a flaky click or a flaky read — both were
+   reliable the entire time — it was trusting a snapshot of state
+   without surfacing it for a sanity check.
 
 ## User preferences to keep applying
 - Python developer — code-level detail is welcome, no need to oversimplify.

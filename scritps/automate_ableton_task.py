@@ -402,6 +402,22 @@ def task_probe_solo_transport(window: UIAWrapper, track_index: int, seconds: flo
               "as expected.")
 
 
+def task_read_solo_states(window: UIAWrapper, track_indices: list[int]) -> None:
+    """Pure read, no clicks at all -- print current Solo state for each
+    given track. Use this BEFORE solo_tour if you have any doubt about
+    whether a track was left soloed by a previous run; solo_tour treats
+    whatever it finds at the start as the state to restore back to, so a
+    bad baseline here silently becomes permanent (see the mismatch found
+    via probe_solo_transport in this session).
+    """
+    for i in track_indices:
+        auto_id = track_mixer_id(i, "Solo")
+        control = resolve(window, auto_id)
+        state = get_toggle_state(control)
+        flag = "  <-- currently ON" if state else ""
+        print(f"  Track[{i}].Solo = {'on' if state else 'off'}{flag}")
+
+
 # --------------------------------------------------------------------------
 # Discovery: what track indices currently exist
 # --------------------------------------------------------------------------
@@ -464,6 +480,11 @@ def task_solo_tour(window: UIAWrapper, track_indices: list[int],
     # that index is only for the existence check above, we don't reuse its
     # control references for anything we intend to click later.
     original_state = {i: get_toggle_state(resolve(window, solo_ids[i])) for i in track_indices}
+    print("Captured original solo state (this is what tracks get 'restored' "
+          "to at the end -- if any of these are unexpectedly 'on', that's "
+          "likely leftover from a previous run, not something this run caused):")
+    for i in track_indices:
+        print(f"  Track[{i}].Solo = {'on' if original_state[i] else 'off'}")
 
     try:
         for i in track_indices:
@@ -526,7 +547,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                       formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--task", choices=["arm_track", "solo_tour", "set_tempo",
-                                            "probe_toggle", "probe_solo_transport"],
+                                            "probe_toggle", "probe_solo_transport",
+                                            "read_solo_states"],
                          help="Which demo task to run")
     parser.add_argument("--tracks", type=int, nargs="+", default=[],
                          help="Zero-based track indices to act on")
@@ -561,7 +583,9 @@ def main() -> None:
         parser.error("--task is required unless --list-tracks is given")
 
     probe_tasks = ("probe_toggle", "probe_solo_transport")
-    if dry_run and args.task not in probe_tasks:
+    if args.task == "read_solo_states":
+        pass  # pure read, no dry-run/live distinction applies
+    elif dry_run and args.task not in probe_tasks:
         print("*** DRY RUN -- nothing will be clicked. Pass --live to actually execute. ***\n")
     elif args.task in probe_tasks:
         print(f"*** {args.task} always live-clicks regardless of --live -- "
@@ -585,6 +609,10 @@ def main() -> None:
         if len(args.tracks) != 1:
             parser.error("--task probe_solo_transport needs exactly one --tracks index")
         task_probe_solo_transport(window, args.tracks[0], args.seconds)
+    elif args.task == "read_solo_states":
+        if not args.tracks:
+            parser.error("--task read_solo_states needs at least one --tracks index")
+        task_read_solo_states(window, args.tracks)
 
 
 if __name__ == "__main__":
