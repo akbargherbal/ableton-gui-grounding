@@ -11,17 +11,32 @@ Currently supported states
 ---------------------------
     session        Session View
     arrangement    Arrangement View
+    sounds, instruments, drums, audio_effects, midi_effects, plugins
+                   Browser panel categories (see note below -- less
+                   verified than session/arrangement)
 
-Not yet supported: Browser panel categories (sounds, instruments, ...)
-------------------------------------------------------------------------
-Every automation_id used anywhere in this project so far ("SessionView.
-Track[N].Mixer.Solo" etc.) was found by inspecting a real dump, never
-predicted from a naming convention -- guessing browser-category IDs isn't
-worth the risk of silently clicking the wrong thing. To add one:
-    1. In Ableton, open the Browser panel and select the category by hand.
-    2. python dump_ableton_pywinauto.py --label browser-sounds
-    3. python grep_dump.py dumps/..._browser-sounds.json sound
-    4. Add the automation_id you find to BROWSER_CATEGORY_IDS below.
+Browser panel categories: how selection works, and what's verified
+----------------------------------------------------------------------
+CONFIRMED via grep_dump.py against a real dump: these DataItem tree
+nodes carry an EMPTY automation_id ("Sounds" and "Instruments" both
+checked directly). Unlike the Session View mixer controls, there's no
+stable structural ID to click by here, so this falls back to matching on
+(control_type, name) instead -- see find_control_by_name().
+
+The real dump also showed the category label THREE levels deep with the
+same name at each level (e.g. Library > Sounds > Sounds > Sounds, going
+DataItem > DataItem > Text). find_control_by_name() matches depth-first
+and returns on the first hit, so it lands on the OUTERMOST node --
+almost certainly the real clickable list item, with the inner two being
+its own label sub-elements. That's inferred, not proven: clicking the
+outer DataItem hasn't actually been confirmed to change the selected
+category yet.
+
+Only "sounds" and "instruments" were independently checked via
+grep_dump.py. The rest of BROWSER_CATEGORY_NAMES below (drums,
+audio_effects, etc.) were added by pattern -- same DataItem structure,
+visible in the same dump's Browser Sidebar tree -- but NOT individually
+grep-verified. More likely to work than a guess, still unconfirmed.
 
 How Session/Arrangement switching works
 ------------------------------------------
@@ -35,8 +50,12 @@ Session View's tree exposes SessionView.* automation_ids only while it's
 actually rendered on screen (same UI-virtualization behavior documented
 in dump_ableton_pywinauto.py) -- Arrangement View doesn't. So "are we in
 Session View" reduces to "does a fresh index contain any SessionView.*
-id", a check we get for free from behavior already characterized, no new
-discovery needed for this half of the problem.
+id", a check we get for free from behavior already characterized.
+**CONFIRMED WORKING** -- user ran this against the real app; log showed
+the Tab press landing and the resulting dumps had genuinely different
+content (Session dump has a "Session" group with Track Headers/Slots/
+Scenes; Arrangement dump has an "Arrangement" group with Timeline/
+Loop Brace).
 
 Requirements
 ------------
@@ -49,6 +68,7 @@ Usage
 -----
     python dump_ableton_states.py --states session arrangement
     python dump_ableton_states.py --states session --label-suffix before-edit
+    python dump_ableton_states.py --states sounds instruments
 """
 
 from __future__ import annotations
@@ -76,11 +96,83 @@ from automate_ableton_task import build_automation_id_index
 
 SESSION_PREFIX = "SessionView."
 
-# Fill in once discovered -- see module docstring for how.
-BROWSER_CATEGORY_IDS: dict[str, str] = {
-    # "sounds": "???",
-    # "instruments": "???",
+# Browser Sidebar category labels -- matched by (control_type, name) since
+# these DataItem nodes carry no automation_id (confirmed via grep_dump.py).
+# "sounds" and "instruments" independently grep-verified to exist with this
+# exact name text; the rest added by the same visible tree structure but
+# not individually re-checked -- see module docstring.
+BROWSER_CATEGORY_NAMES: dict[str, str] = {
+    "sounds": "Sounds",
+    "instruments": "Instruments",
+    "drums": "Drums",
+    "audio_effects": "Audio Effects",
+    "midi_effects": "MIDI Effects",
+    "plugins": "Plug-Ins",
 }
+
+
+def find_control_by_name(control: UIAWrapper, control_type: str, name: str,
+                          max_depth: int = 20) -> UIAWrapper | None:
+    """DFS for the first control matching (control_type, name) exactly --
+    same recursive-.children() approach as automate_ableton_task.py's
+    find_control(), just matching on name instead of automation_id since
+    these Browser nodes don't have one. Checks the node itself before
+    recursing, so given nested identically-named nodes (e.g. Library >
+    Sounds > Sounds > Sounds), this returns the OUTERMOST match.
+    """
+    found: list[UIAWrapper] = []
+
+    def _walk(ctrl: UIAWrapper, depth: int) -> None:
+        if found:
+            return
+        try:
+            ctype = ctrl.element_info.control_type
+            cname = (ctrl.window_text() or "").strip()
+        except Exception:
+            ctype, cname = None, None
+        if ctype == control_type and cname == name:
+            found.append(ctrl)
+            return
+        if depth >= max_depth:
+            return
+        try:
+            children = ctrl.children()
+        except Exception:
+            children = []
+        for child in children:
+            _walk(child, depth + 1)
+            if found:
+                return
+
+    _walk(control, 0)
+    return found[0] if found else None
+
+
+def goto_browser_category(window: UIAWrapper, category: str) -> None:
+    """Click a Browser Sidebar category by name. UNVERIFIED against the
+    real app -- see module docstring. No before/after check like
+    goto_view() has, because there's no known cheap signal yet for "which
+    category is currently selected" the way SessionView.* ids give us for
+    view detection. Confirm by eye, and by checking the resulting dump's
+    printed tree for a line like 'Tree: "<Category> List, N Items"'
+    (matches the 'Sounds List, 1001 Items' pattern already seen).
+    """
+    if category not in BROWSER_CATEGORY_NAMES:
+        raise ValueError(f"Unknown browser category: {category!r}")
+    target_name = BROWSER_CATEGORY_NAMES[category]
+
+    ensure_window_ready(window)
+    control = find_control_by_name(window, "DataItem", target_name)
+    if control is None:
+        raise LookupError(
+            f"No DataItem named {target_name!r} found in a fresh tree walk. "
+            "The Browser panel may not be open/docked, or Ableton's "
+            "wording for this category differs from what's hardcoded here."
+        )
+    print(f"  Clicking Browser category {target_name!r} (unverified -- "
+          "check the resulting dump/screen by eye)...", file=sys.stderr)
+    control.click_input()
+    time.sleep(0.3)
 
 
 def is_session_view(window: UIAWrapper) -> bool:
@@ -147,8 +239,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--states", nargs="+", required=True,
-        choices=["session", "arrangement"] + list(BROWSER_CATEGORY_IDS),
-        help="Which states to dump, in order.",
+        choices=["session", "arrangement"] + list(BROWSER_CATEGORY_NAMES),
+        help="Which states to dump, in order. Browser categories are "
+        "UNVERIFIED -- see module docstring.",
     )
     parser.add_argument("--max-depth", type=int, default=10)
     parser.add_argument("--out-dir", type=str, default="dumps")
@@ -170,10 +263,7 @@ def main() -> None:
         if state in ("session", "arrangement"):
             goto_view(window, state)
         else:
-            raise NotImplementedError(
-                f"Browser category '{state}' needs its automation_id wired "
-                "into BROWSER_CATEGORY_IDS first -- see module docstring."
-            )
+            goto_browser_category(window, state)
         label = state if not args.label_suffix else f"{state}-{args.label_suffix}"
         dump_state(window, label, args.max_depth, args.out_dir, args.no_print)
 

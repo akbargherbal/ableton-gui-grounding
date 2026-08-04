@@ -26,12 +26,11 @@ done by the user, who pastes back terminal output.
 - `/mnt/user-data/outputs/automate_ableton_task.py` — the script under
   active development. **This is the live deliverable; keep iterating on
   this file, don't restart from scratch.**
-- `/mnt/user-data/outputs/dump_ableton_states.py` — **NEW, UNTESTED.**
-  Orchestrates switching Ableton between named states (Session/
-  Arrangement so far) and writing a labeled dump for each, so the user
-  doesn't have to manually alt-tab + switch view + rerun the dump script
-  per state. See "Untested assumptions" section below before trusting
-  anything it does.
+- `/mnt/user-data/outputs/dump_ableton_states.py` — **CONFIRMED WORKING**
+  (see "dump_ableton_states.py verification" below). Orchestrates
+  switching Ableton between named states (Session/Arrangement so far)
+  and writing a labeled dump for each, so the user doesn't have to
+  manually alt-tab + switch view + rerun the dump script per state.
 - `/mnt/user-data/outputs/grep_dump.py` — pure-stdlib helper, no
   pywinauto/Ableton dependency. Searches an existing JSON dump for nodes
   by substring match on name/automation_id/class_name, to help discover
@@ -130,35 +129,33 @@ the user's current test project (4 tracks + 2 returns).
   baseline-capture pattern (it currently doesn't capture prior state at
   all, so probably not applicable — worth a quick check, not a known bug).
 
-## Untested assumptions in dump_ableton_states.py -- READ BEFORE TRUSTING IT
-Written in this session with **zero real dump data from Arrangement
-View, and no confirmation the Tab-switch even works via pywinauto's `uia`
-backend against this app** -- no JSON was shared by the user this
-session at all. This script is a hypothesis, built the same way the
-original "two hypotheses" for the solo bug were: reasoned from what we
-already know, not yet checked against ground truth. Specifically:
+## dump_ableton_states.py verification -- CONFIRMED WORKING
+Both assumptions this script was built on were unverified when written
+(no dump data existed from Arrangement View, no confirmation Tab-switch
+worked via pywinauto's `uia` backend against this app). User then ran
+`python dump_ableton_states.py --states session arrangement` on the real
+app and pasted back the full output. Both are now confirmed:
 
-1. **Tab actually switches Session ⇄ Arrangement via
-   `window.type_keys("{TAB}")`.** Known as Live's default shortcut from
-   general knowledge; never confirmed working through pywinauto's `uia`
-   backend / `type_keys()` against this specific app in this project.
-2. **`is_session_view()` heuristic**: assumes `SessionView.*`
-   automation_ids disappear from the tree once you're in Arrangement
-   View, the same way they disappear when the window isn't maximized/
-   focused (bug #3 above). That's a reasonable extrapolation from
-   confirmed virtualization behavior, but "different view entirely" was
-   never actually checked against "just not visible on screen" --
-   they could behave differently. No Arrangement View dump exists to
-   verify this against.
+1. **Tab switches Session ⇄ Arrangement via `window.type_keys("{TAB}")`**
+   — log shows `Currently in Session View; pressing Tab to reach
+   Arrangement View` immediately followed by `Already in Arrangement
+   View` on the very next check. The switch landed.
+2. **`is_session_view()` heuristic holds** — the two dumps have visibly
+   different content at the point that matters: Session dump has
+   `Group: "Session"` with Track Headers/Slots/Scenes; Arrangement dump
+   has `Group: "Arrangement"` with Timeline/Arrangement Controls/Loop
+   Brace. The script's own view-detection decisions were all correct
+   throughout the run (skipped a redundant switch, pressed Tab exactly
+   once when needed, correctly reported "already there" both times it
+   actually was).
 
-**Do not treat this script as working until the user runs**
-`python dump_ableton_states.py --states session arrangement`,
-watches the actual window throughout, and confirms: (a) Tab visibly
-switched views both times, (b) the script's own "currently in X View"
-detection matched what was on screen, (c) the two output JSON files
-look like genuinely different content when spot-checked (e.g. via
-`grep_dump.py`). Until that happens, treat every claim this script
-makes about "which view we're in" as unverified.
+Bonus finding from this same run: the Browser panel (Sounds, Drums,
+Instruments, etc. as `DataItem`s under a `Tree: "Browser Sidebar"`) is
+**docked and visible by default** in both dumps captured — no separate
+manual "open the browser and select a category" step was needed to
+capture that data. Whether those `DataItem`s carry a usable
+`automation_id` (vs. being empty, which many non-interactive tree nodes
+are) is still unchecked -- that's the next concrete step, see below.
 
 ## Robustness pass on dump_ableton_pywinauto.py
 Reviewed the read-only dump script against everything learned building
@@ -186,17 +183,26 @@ investigation) with no warning that anything was wrong. Fixed:
 
 
 ## What to do next session
-1. **Verify `dump_ableton_states.py` before trusting it for anything** —
-   see "Untested assumptions" section above. Run
-   `--states session arrangement`, watch the window, confirm Tab
-   actually switches views and the script detects it correctly. This is
-   now the top priority open item — everything else below was already
-   confirmed working; this wasn't.
-2. Once browser-category automation_ids are discovered (user runs a
-   dump with e.g. "Sounds" selected by hand, then greps it via
-   `grep_dump.py`, per that script's docstring), wire the result into
-   `BROWSER_CATEGORY_IDS` in `dump_ableton_states.py` so
-   `--states session arrangement sounds instruments` becomes one command.
+1. **`dump_ableton_states.py` is confirmed working** — see "verification"
+   section above. Session/Arrangement switching is done, don't reopen it
+   without new contradicting evidence.
+2. **Immediate next step — waiting on grep output.** User's first attempt
+   at `grep_dump.py` omitted the required `query` argument (usage error,
+   not a script bug -- it needs two positional args: json_path AND
+   query). Correct form, against dumps already captured (Browser panel
+   is docked/visible by default, no new dump needed):
+   ```
+   python .\grep_dump.py .\dumps\ableton_uia_..._arrangement.json sound
+   python .\grep_dump.py .\dumps\ableton_uia_..._arrangement.json instrument
+   ```
+   Once that output comes back: if the `DataItem` nodes for "Sounds" /
+   "Instruments" carry a non-empty `automation_id`, wire it into
+   `BROWSER_CATEGORY_IDS` in `dump_ableton_states.py`. If
+   `automation_id` is empty (plausible -- many non-interactive tree
+   nodes are), we'll need a different selection strategy (e.g. typing
+   into the Browser's `Edit: "Search"` field instead of clicking a tree
+   item directly) -- don't guess which case it is, wait for the actual
+   grep output.
 3. **Stuck-soloed bug is closed** — confirmed via a clean `off/off`
    baseline + a full `solo_tour --tracks 0 1 --live` run that printed
    `original_state` as all `off` and ended with both tracks `off`,
@@ -222,10 +228,14 @@ investigation) with no warning that anything was wrong. Fixed:
    baselines**, not open-loop "read once, trust forever." The
    stuck-soloed bug wasn't a flaky click or a flaky read — both were
    reliable the entire time — it was trusting a snapshot of state
-   without surfacing it for a sanity check. `dump_ableton_states.py`
-   is itself a live test of whether that lesson was actually absorbed:
-   it was written and handed over *labeled as untested* rather than
-   presented as done, specifically to avoid repeating the mistake.
+   without surfacing it for a sanity check. `dump_ableton_states.py` was
+   a live test of whether that lesson was actually absorbed: it was
+   handed over *labeled as untested hypothesis*, not presented as done,
+   and only marked confirmed after the user ran it and pasted back real
+   output showing both underlying assumptions held. Keep applying that
+   same discipline to anything new (e.g. clip launching, browser
+   selection) -- write it, say plainly what's unverified about it, then
+   wait for real terminal output before calling it done.
 
 ## User preferences to keep applying
 - Python developer — code-level detail is welcome, no need to oversimplify.
