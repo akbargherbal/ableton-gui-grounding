@@ -93,6 +93,14 @@ clickable target.
   don't assume it's absent from the UIA tree entirely, just absent from
   what's been indexed/dumped so far.
 
+**Screenshot orchestration implementation plan — see "RELATED PROJECT"
+section below** (`### Screenshot orchestration design`), which is the
+single canonical location for this (kept there, not duplicated here,
+specifically to avoid re-creating the doc/code drift session 8 already
+caught once). Session 9 expanded that section's phase list into
+implementation-ready detail. **STATUS as of session 9: plan written, no
+code changes made yet.** Next action: implement Phase 0.
+
 ---
 
 ## RELATED PROJECT (Project 2: Ableton via OpenCode + `ableton-mcp-extended`)
@@ -135,12 +143,23 @@ Arrangement View control incomplete (Session View is the reliable surface
 here too); community project, not official. Install gotcha: don't run
 `pip install -e .` (upstream packaging bug) — install deps directly.
 
-### Screenshot orchestration design (sessions 5–6, FINALIZED — ready to implement)
+### Screenshot orchestration design (sessions 5–6 FINALIZED; session 9 turned into an implementation-ready plan — NO CODE YET)
 Full reasoning and comparison matrix live in
 `screenshot_orchestration_analysis.md` (repo root, rewritten in session 5
 after a wrong premise was disproven by real terminal output — see its own
 revision note). This section is the actionable summary; treat the doc as
-source of truth for detail, this as the pointer for what to build.
+source of truth for the *reasoning*, this section as source of truth for
+the *current plan* (session 9 made this section itself more detailed
+than the doc's §6 — if they ever disagree, trust this section, update the
+doc later, don't silently let them drift).
+
+**Session 9 finding, not in the analysis doc:** `task_arm_track`'s `Arm`
+checkbox and `solo_tour`'s `Solo` checkbox go through
+`set_checkbox_by_id()` — an older click path, separate from
+`click_by_id()`'s escalation ladder, with no ladder and (pre-Phase-0) no
+events. Phase 0 below accounts for this; a plan that only instrumented
+`click_by_id()` would miss roughly half of this script's actual click
+traffic.
 
 **Key evidence that reshaped the whole design:** `python.exe
 automate_ableton_task.py ...`, run directly from inside a WSL shell, drove
@@ -157,28 +176,65 @@ WSL bash script that calls `python.exe automate_ableton_task.py ...` and
 existing script is modified; the orchestrator owns 100% of the coupling
 logic and can be deleted with zero impact on either tool.
 
-**Phased implementation plan (do in this order):**
-1. **Phase 0 (highest ROI, do first):** Add structured stdout events to
-   `automate_ableton_task.py` (e.g. `EVENT:<n>:<status>` line or
-   `--json-events`) — small, additive, backward-compatible. Fixes the
-   single highest-leverage shortcoming (fragile stdout-parsing sync) and
-   also de-risks timing/mid-transition captures and cross-script
-   debugging for free.
-2. **Phase 1:** Ship the orchestrator for tasks that are already
-   single-action (`arm_track`, `set_tempo`, `probe_*`) — works cleanly
-   today, no granularity caveats apply yet.
-3. **Phase 2:** For multi-step tasks (`solo_tour` and future equivalents),
-   apply Option A — break them into atomic sub-commands — so the
-   orchestrator can loop over them with a screenshot after each click,
-   not just before/after the whole task.
-4. **Phase 3 (as the toolset grows):** Add `--list-tasks`/`--schema`
-   introspection or a CI smoke test so the orchestrator can detect CLI
-   drift in `automate_ableton_task.py` before it fails silently
-   mid-documentation-run.
+**Phased implementation plan (do in this order) — expanded to
+implementation-ready detail, session 9:**
+
+1. **Phase 0 (highest ROI, do first). STATUS: not started.** Add one
+   `emit_event(type, **fields)` helper to `automate_ableton_task.py`,
+   printing single-line JSON prefixed `EVENT:` (schema-versioned via a
+   `"v"` field) — additive alongside the existing human-readable
+   `print()` lines, not replacing them. Vocabulary: `task_start`/
+   `task_done`, `action_start`/`action_result` (with `level`: L1/L2/L3),
+   `escalate`. **Must wire into BOTH `click_by_id()` and
+   `set_checkbox_by_id()`** (see finding above) or the two click paths
+   stay structurally incomparable. Fixes the single highest-leverage
+   shortcoming (fragile stdout-parsing sync); also de-risks
+   timing/mid-transition captures and cross-script debugging for free.
+2. **Phase 1. STATUS: not started. Depends on Phase 0.** Ship
+   `orchestrate.sh` (new file, repo root) for tasks that are already
+   single-action: `arm_track`, `set_tempo`, `probe_toggle`,
+   `probe_solo_transport`, `probe_keyboard_activator`,
+   `read_solo_states`. Explicitly excludes `solo_tour`. Flow: run
+   automate → capture stdout → on automate-failure OR screenshot-failure,
+   log and continue, never retry against a live Ableton session (applies
+   the Phase-5/"throughout" rule below symmetrically to both failure
+   sources) → auto-derive `take_shot.sh`'s description arg from the last
+   `EVENT:` line instead of requiring it hand-typed → own the per-lab
+   `<seq>` counter → tag orchestrator's own lines `[orchestrator]` →
+   never re-derive WSL↔Windows paths, always pass `<lab_dir>` straight
+   through to `take_shot.sh` unchanged.
+3. **Phase 2. STATUS: not started, blocked on an open scope question
+   (below). Depends on Phase 0/1.** For `solo_tour`, apply Option A: add
+   `--task solo_one --tracks N --seconds S` (one full solo→play→wait→
+   stop→unsolo cycle for a single track, then return). `solo_tour` stays
+   a thin in-process loop over `solo_one` so standalone CLI use doesn't
+   regress; the orchestrator calls `solo_one` per-track in its own loop
+   instead, regaining control between tracks to screenshot each one.
+   **Open scope question — asked, not yet answered by the user:** is
+   per-track granularity enough, or does `solo_one` itself need further
+   splitting into `solo_click`/`play_click`/`stop_click`/`unsolo_click`
+   for true per-click screenshots even within one track's cycle?
+4. **Phase 3 (as the toolset grows). STATUS: not started. Depends on
+   Phase 0.** Add `--list-tasks`/`--schema` introspection (JSON: task
+   names, required/optional args, atomic-vs-multi-step, current `EVENT`
+   schema version). Orchestrator checks this once per lab run (not
+   per-call) against its own known task list, fails loudly and early on
+   mismatch instead of mid-sequence. Optional stretch: a no-Ableton smoke
+   test asserting `--list-tasks` output matches the Phase 0 schema.
 5. **Throughout:** on any screenshot error, log and continue rather than
    retry-loop against a live Ableton session — avoids leaving
    automate-side state (armed/soloed tracks, running transport) stuck
    mid-sequence.
+
+**Verification split (per this project's own methodology):** Phase 0 and
+Phase 1's control-flow logic can be stub-tested in the sandbox (fake
+`UIAWrapper`, fake `automate`/`take_shot` scripts — same pattern as
+session 4's ladder tests) without Windows. The real acceptance test for
+any phase — that `EVENT:` lines/orchestrator behavior match what actually
+happens against live Ableton — still needs the user's machine, same as
+every other claim in this project.
+
+**Next action, agreed session 9:** implement Phase 0.
 
 **Two-consumer split — decides *when* a screenshot fires, orthogonal to
 the taxonomy below. Getting this backwards is a real risk (already caught
@@ -449,11 +505,14 @@ level itself:**
    above): where the two projects overlap/complement beyond the
    verification-layer idea already covered.
 6. ~~Screenshot orchestration design for Project 2~~ — **DESIGN FINALIZED,
-   sessions 5–6.** See "Screenshot orchestration design" and "State-
-   verification taxonomy" sections above. **Not yet implemented in code**
-   — next session's actual work is Phase 0 (structured stdout events in
-   `automate_ableton_task.py`), per the phased plan above. This is now an
-   implementation task, not an open design question.
+   sessions 5–6; IMPLEMENTATION PLAN WRITTEN, session 9.** See "Screenshot
+   orchestration — implementation plan (session 9)" above for the full
+   4-phase breakdown (Phase 0: structured events → Phase 1: orchestrator
+   script for atomic tasks → Phase 2: `solo_tour` decomposition → Phase 3:
+   introspection/drift detection). **No code written yet as of session 9
+   — the plan itself is the only session-9 deliverable.** Next actual work
+   is Phase 0, agreed as the starting point. Phase 2 has an open scope
+   question (per-track vs per-click granularity) not yet answered.
 7. ~~F1 probe off-by-one question~~ — **DONE, session 8.** Ran
    `probe_keyboard_activator --tracks 0` (F1) and `--tracks 3` (F4)
    against real Ableton; UIA read-back showed the correct control toggling
@@ -667,6 +726,38 @@ track-scoped action, not just unused — added as a new Open Item; (7) the
 MCP row couldn't be tested with this project's own data (no MCP here) but
 is cross-validated by Project 2's already-confirmed track-indexing bug
 pattern.
+
+---
+
+**Session 9: agenda proposed; orchestration implementation plan written
+(no code yet).** Opened by cloning the repo fresh and re-reading
+`context.md` — caught that the user's own guess ("this is session 8") was
+off by one, since session 8's work (F1–F8 Activator confirmation,
+doc/code gap fix) was already logged as done; corrected to session 9
+before proposing an agenda, rather than silently going along with the
+user's count. Proposed agenda drew directly from the "Next session — open
+threads" list already in STATE at the time (items 1, 3, and the
+Phase-0-is-next note under item 6), plus the still-open `task_arm_track`
+baseline and selected-track blind-spot items.
+
+User chose to start on orchestration specifically, pointing at
+`screenshot_orchestration_analysis.md`. Read that file plus the actual
+`automate_ableton_task.py` and `take_shot.sh` source (not just the
+analysis doc's abstractions) before proposing a plan — this surfaced one
+thing the analysis doc doesn't mention: `task_arm_track`'s `Arm` checkbox
+and `solo_tour`'s `Solo` checkbox go through `set_checkbox_by_id()`, a
+second, older click path with no escalation ladder and no events yet,
+separate from `click_by_id()`. Folded that into Phase 0 (must instrument
+both paths) rather than only instrumenting the ladder and missing half
+the click traffic. Turned the analysis doc's §6 "Recommended Path
+Forward" into four implementation-ready phases (see STATE section above
+for the current, authoritative version — this LOG entry is the narrative,
+STATE is the truth). Flagged one genuine open question rather than
+deciding it unilaterally: whether Phase 2's `solo_tour` decomposition
+needs to go all the way to per-click granularity within one track's
+cycle, or per-track is enough — left for the user to answer, not assumed.
+
+No code written this session. Next action agreed: implement Phase 0.
 
 ---
 
