@@ -71,6 +71,7 @@ from __future__ import annotations
 import argparse
 import sys
 import time
+from typing import Callable
 
 try:
     from pywinauto.controls.uiawrapper import UIAWrapper
@@ -270,11 +271,104 @@ def set_checkbox_by_id(window: UIAWrapper, auto_id: str, desired: bool,
     )
 
 
-def click_by_id(window: UIAWrapper, auto_id: str, dry_run: bool, label: str) -> None:
+class EscalationExhausted(RuntimeError):
+    """Raised when click_by_id()'s full ladder fails to verify the action.
+    Distinct from a plain RuntimeError so a caller could one day catch this
+    specifically and treat it as 'needs a human', not 'code bug'."""
+
+
+def click_by_id(window: UIAWrapper, auto_id: str, dry_run: bool, label: str,
+                 verify: "Callable[[], bool] | None" = None,
+                 keyboard_shortcut: str | None = None,
+                 max_attempts: int = 2) -> None:
+    """Click a control via an escalation ladder: Mouse -> Keyboard shortcut
+    -> explicit human instructions.
+
+    NO MCP/LOM TIER HERE. The escalation-ladder design (see context.md,
+    RELATED PROJECT section) has a 4th level for a direct MCP/LOM call --
+    that tier doesn't exist in this codebase. This project deliberately
+    has no MCP/Remote Script/MIDI bridge at all (see README, "A note on
+    scope"); padding in a level that could never fire would be dead code,
+    not a real design. This ladder is scoped to what this file actually
+    has: 3 levels.
+
+    verify: zero-arg callable returning bool, called after each attempt to
+    confirm the action actually landed -- NOT "was a click sent," per the
+    project's core lesson (see set_checkbox_by_id and the stuck-solo bug
+    in context.md LOG). Pass None ONLY for a control with no known
+    structural signal of success. That is a documented gap at the call
+    site, not a silent one -- e.g. SessionView.Track[N].Mixer.Stop (clip
+    stop) has no automation_id exposing "is this slot playing," so there
+    is currently nothing to verify against.
+
+    keyboard_shortcut: optional pywinauto key sequence (e.g. "{VK_SPACE}").
+    Only pass one that's been independently confirmed unambiguous for
+    THIS control -- per the reference-layer rule (context.md: "checked the
+    manual, no alternate path, escalating" -- evidence-based, not a
+    memory-based guess). No call site in this file passes one yet: the
+    keyboard-shortcut index that's supposed to back this (context.md,
+    "Next session" item 4) hasn't been built, and the manual PDF hasn't
+    been read. Leaving this None everywhere for now is deliberate, not an
+    oversight -- filling it in with a plausible-sounding shortcut here
+    would be exactly the kind of guess the project's standing rule
+    ("don't guess about anything unseen, ask for the file") exists to
+    prevent.
+    """
+    if verify is None:
+        print(f"  [warn] {label}: no verification available for this control -- "
+              "click-and-trust (a documented gap, not a silent one). Add a "
+              "verify callable once this control exposes a readable outcome.")
+
+    # --- Level 1: mouse ---
     control = resolve(window, auto_id)
-    print(f"  {'[dry-run] would click' if dry_run else '[click]'} {label}")
-    if not dry_run:
+    print(f"  {'[dry-run] would click' if dry_run else '[click L1/mouse]'} {label}")
+    if dry_run:
+        return
+    for attempt in range(1, max_attempts + 1):
         control.click_input()
+        time.sleep(0.15)  # let the UI redraw before re-checking, same as set_checkbox_by_id
+        if verify is None:
+            return  # nothing to check against; trust by necessity, not by default
+        if verify():
+            return
+        print(f"  [warn] {label}: L1 mouse click did not verify "
+              f"(attempt {attempt}/{max_attempts})")
+        control = resolve(window, auto_id)  # fresh handle for the retry, never reused
+
+    # --- Level 2: keyboard shortcut ---
+    if keyboard_shortcut is None:
+        print(f"  [escalate] {label}: L1 (mouse) exhausted. No confirmed keyboard "
+              "shortcut supplied for this control -- not the same as 'none exists'; "
+              "check ableton-live-12-manual-en.pdf or the (not-yet-built) "
+              "keyboard-shortcut index before assuming there isn't one.")
+    else:
+        print(f"  [click L2/keyboard] {label}: sending {keyboard_shortcut!r}")
+        # type_keys() (BaseWrapper) is the correct call for UIAWrapper --
+        # verified against pywinauto 0.6.9 source directly, not assumed.
+        # send_keystrokes() is a real pywinauto method too, but it lives on
+        # HwndWrapper (the older win32 backend) and doesn't exist on
+        # UIAWrapper, which is what this project uses throughout.
+        window.type_keys(keyboard_shortcut)
+        time.sleep(0.15)
+        if verify is not None and verify():
+            return
+        print(f"  [warn] {label}: L2 keyboard shortcut did not verify either")
+
+    # --- Level 3: explicit human instructions (last resort) ---
+    # Per the escalation-ladder design: named menu paths/states only, never
+    # relative/visual description, and must end with an explicit request
+    # for confirmation. This function can't hold a live conversation --
+    # it prints to the terminal, which the user pastes back -- so it
+    # raises with the instruction text ready to relay verbatim, rather
+    # than a generic failure message.
+    raise EscalationExhausted(
+        f"{label}: automated levels exhausted (mouse"
+        + (", keyboard" if keyboard_shortcut else "")
+        + ") without verifying the action landed.\n"
+        f"  MANUAL STEP: please click the '{label}' control directly in "
+        "Ableton Live, then confirm here whether it changed, or tell me "
+        "if you hit a problem."
+    )
 
 
 def task_probe_toggle(window: UIAWrapper, track_index: int) -> None:
@@ -432,8 +526,15 @@ def task_arm_track(window: UIAWrapper, track_index: int, dry_run: bool) -> None:
     print(f"Task: arm track {track_index} + set monitor to In")
     set_checkbox_by_id(window, arm_id, desired=True, dry_run=dry_run,
                         label=f"Track[{track_index}].Arm")
+    # Monitoring.Buttons[0] ("In") is a confirmed RadioButton (dumps/
+    # ableton_uia_..._session.json), so get_toggle_state() is a real
+    # structural check here -- not the "click and trust" default.
+    # keyboard_shortcut stays None: no shortcut for this control has been
+    # confirmed against the manual or a shortcut index yet (neither exists
+    # yet -- see click_by_id docstring), so nothing is passed here.
     click_by_id(window, monitor_id, dry_run=dry_run,
-                label=f"Track[{track_index}].Monitoring=In")
+                label=f"Track[{track_index}].Monitoring=In",
+                verify=lambda: get_toggle_state(resolve(window, monitor_id)) is True)
 
 
 def task_solo_tour(window: UIAWrapper, track_indices: list[int],
@@ -465,6 +566,13 @@ def task_solo_tour(window: UIAWrapper, track_indices: list[int],
             print(f"\nTrack {i}: solo -> play {seconds}s -> stop -> unsolo")
             set_checkbox_by_id(window, solo_ids[i], desired=True, dry_run=dry_run,
                                 label=f"Track[{i}].Solo")
+            # Transport.Play/Stop deliberately left verify=None this session --
+            # a dump now confirms Transport.Play is a real CheckBox (so it
+            # COULD be verified the same way as Monitoring.Buttons[0] above),
+            # but folding that in here was explicitly scoped OUT of this
+            # session's click_by_id() hardening work, to keep that change
+            # isolated and separately testable. See context.md for the open
+            # item this leaves for next time.
             click_by_id(window, "Transport.Play", dry_run=dry_run, label="Transport.Play")
             if not dry_run:
                 time.sleep(seconds)

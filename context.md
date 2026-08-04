@@ -21,7 +21,7 @@ Claude proposes.
 | File | Role | Status |
 |---|---|---|
 | `dump_ableton_pywinauto.py` | Read-only tree dump. Canonical `find_ableton_window()` + `ensure_window_ready()`, imported by the other two. | CONFIRMED |
-| `automate_ableton_task.py` | Live deliverable — acts on Live (click/type). Source of `build_automation_id_index()`. | CONFIRMED (solo_tour path); `click_by_id()` and `task_arm_track` baseline handling NOT hardened yet (see Open Items — **this is the priority target for next session**) |
+| `automate_ableton_task.py` | Live deliverable — acts on Live (click/type). Source of `build_automation_id_index()`. | CONFIRMED (solo_tour path); `click_by_id()` escalation ladder (Mouse → Keyboard → Human instructions, no MCP tier — see below) CONFIRMED against real Ableton (arm_track, Track[1].Monitoring=In verified clean on first click, screenshot-matched). `task_arm_track` baseline handling still NOT hardened (see Open Items). |
 | `dump_ableton_states.py` | Switches Ableton between named states, dumps each. | CONFIRMED — Session/Arrangement, and all six Browser categories (`sounds`, `instruments`, `drums`, `audio_effects`, `midi_effects`, `plugins`), verified via `--states all` in one run. |
 | `grep_dump.py` | Stdlib substring search over a JSON dump. | CONFIRMED |
 
@@ -37,6 +37,16 @@ SessionView.ReturnTrack[N].Mixer.*                   same shape, return tracks
 Transport.Tempo                                      Slider
 Transport.Play / Transport.Stop                      assumed by pattern, not independently confirmed
 ```
+**Correction (session 4, from a real dump already in `scritps/dumps/`):**
+`Transport.Play` is a confirmed `CheckBox` (toggle-readable, same as Solo/
+Arm); `Transport.Stop` is a confirmed plain `Button` (momentary, no toggle
+state of its own — only indirectly verifiable via `Transport.Play` reading
+`False` afterward). `Monitoring.Buttons[0..2]` also independently confirmed
+`RadioButton` from the same dump. Not yet acted on: `task_solo_tour`'s
+`Transport.Play`/`Stop` calls still pass `verify=None` deliberately — folding
+in real verification there was explicitly scoped OUT of session 4 to keep
+the `click_by_id()` hardening isolated and separately testable. Open for a
+future session.
 Test project: Track[0..3] = MIDI/Audio, ReturnTrack[0..1] = A-Reverb/B-Delay.
 
 Browser Sidebar `DataItem` nodes carry **no automation_id** (confirmed via
@@ -45,12 +55,20 @@ outermost of 3 identically-named nested nodes, confirmed to be the real
 clickable target.
 
 ### Open items (not started / not hardened)
-- **`click_by_id()` has no post-click verification, unlike
-  `set_checkbox_by_id()` — PRIORITY FOR NEXT SESSION.** The fix is not
-  just "add a verification call" — it should implement the escalation-
-  ladder design worked out this session (see RELATED PROJECT section
-  below, "Escalation ladder"), so this becomes the first real
-  implementation of that design, not just a patch to one function.
+- ~~`click_by_id()` has no post-click verification~~ — **DONE, session 4.**
+  Implemented as a 3-level escalation ladder (Mouse → Keyboard shortcut →
+  Human instructions). No MCP/LOM tier: this codebase has no MCP bridge at
+  all (that's Project 2's mechanism, not this one's), so a 4th level would
+  be dead code, not real design — see LOG for the full reasoning. Verified
+  two ways: (1) stub/mock control-flow tests (retry-then-succeed, exhaust-
+  then-raise, dry-run no-ops, keyboard level actually invoked) — all pass;
+  (2) real run against Ableton (`arm_track --live`), Track[1].Monitoring=In
+  verified clean on the first click, cross-checked against a screenshot
+  (Monitor="In" highlighted, Arm lit, matching the terminal's silence on
+  warnings). `keyboard_shortcut` param exists but no call site populates it
+  yet — deliberately, since neither the manual PDF nor a keyboard-shortcut
+  index has been consulted yet (see item 4 below); filling one in from
+  memory would violate the project's own "don't guess" rule.
 - `task_arm_track` doesn't capture/print a baseline the way `solo_tour`
   does. Unchecked whether it needs to (Arm may not require restoration).
 - Clip launching (`SessionView.Track[N].Slot[M]`) — visible in tree dumps,
@@ -263,24 +281,27 @@ level itself:**
   it, not rediscover it.
 
 ### Next session — open threads, ask the user which, don't assume
-1. **Finish the escalation-ladder implementation for `click_by_id()`** —
-   explicitly flagged priority, see Open Items and Escalation ladder
-   above.
-2. **Run the eval prompt on more archived sessions** to check whether the
-   track-indexing pattern recurs beyond the one session it's currently
-   confirmed in.
+1. ~~Finish the escalation-ladder implementation for `click_by_id()`~~ —
+   **DONE, session 4** (see Open Items above).
+2. Run the eval prompt on more archived sessions — **user explicitly said
+   skip this, not needed** (session 4). Not being pursued unless the user
+   raises it again.
 3. **Apply the tool-selection decision table to this project's real
    `automation_id` scheme** (Solo/Mute/Arm/Tempo/Slot) to pressure-test it
    against real layouts, not hypotheticals.
 4. **Build the keyboard-shortcut index** referenced in the escalation
-   ladder's reference layer.
+   ladder's reference layer. Now has a concrete first consumer:
+   `click_by_id()`'s `keyboard_shortcut` param exists and is wired up, but
+   no call site has ever populated it (deliberately — nothing's been
+   confirmed against the manual or an index yet).
 5. **Broader integration planning** (deferred, lower priority than the
    above): where the two projects overlap/complement beyond the
    verification-layer idea already covered.
 User explicitly does not want to commit to one integration approach —
 evaluate each idea on its own merits. **No implementation work on a
 combined cross-project approach yet — still evidence-gathering/planning**,
-except for item 1 above, which is scoped to this project's own file.
+except for item 1 above, which is scoped to this project's own file (and
+is now done).
 
 ---
 
@@ -361,6 +382,50 @@ user sharing a real directory tree of project 2's repo (which is where the
 manual PDF's existence was confirmed). Full current-state detail lives in
 the STATE section above — this entry exists only to preserve the order
 ideas were tested/revised in, per the "log the reasoning trail" rule.
+
+---
+
+**Session 4: `click_by_id()` escalation ladder implemented and CONFIRMED.**
+Scoped as a 3-level ladder (Mouse → Keyboard shortcut → Human
+instructions), deliberately with NO MCP/LOM tier — this codebase has no
+MCP bridge at all (only Project 2 does), so a 4th level would be dead
+code padding out the design, not a real one. Verify callback added as a
+first-class param (`verify: Callable[[], bool] | None`); `verify=None` now
+prints an explicit `[warn]` instead of silently clicking-and-trusting.
+`task_arm_track`'s `Monitoring.Buttons[0]` call given a real `verify` using
+`get_toggle_state()`, since a dump already in the repo confirmed it's a
+genuine `RadioButton`. `task_solo_tour`'s `Transport.Play`/`Stop` calls
+deliberately left `verify=None` — explicitly scoped out of this session to
+keep the change isolated, even though the same dump also showed
+`Transport.Play` is a real `CheckBox` and could be upgraded the same way
+later (see automation_id scheme section above).
+
+Caught one real mistake before shipping: first draft used
+`window.send_keystrokes(...)` for the keyboard level. That's a real
+pywinauto method, but on `HwndWrapper` (the old win32 backend) — not
+`UIAWrapper`, which this project uses throughout. Downloaded pywinauto
+0.6.9's actual source (matches the version already confirmed elsewhere in
+this project) rather than trusting memory, confirmed `type_keys()`
+(`BaseWrapper`) is correct, fixed it before it reached the user. Direct
+instance of the project's own "verify, don't guess" principle applied to
+writing the automation code itself, not just to Ableton's state.
+
+Verified two ways, in order: (1) stub/mock tests here in the sandbox —
+faked `resolve()` and a fake control object, proved retry-then-succeed,
+exhaust-then-raise (`EscalationExhausted`), dry-run no-ops, and L2 actually
+invoking `type_keys()` all work — pure control-flow, no pywinauto needed;
+(2) real run on the user's Windows machine (`arm_track --tracks 1 --live`),
+terminal showed `[click L1/mouse] Track[1].Monitoring=In` with no `[warn]`
+following it, then a screenshot cross-check showed Track 2 (index 1) with
+Monitor="In" highlighted and Arm lit — screen, `verify()`, and terminal all
+agreed. This is the strongest confirmation this project's methodology can
+produce (real UIA read-back matched against a real screenshot), closing the
+one thing the stub tests couldn't prove: that the control-type assumptions
+(RadioButton, toggle-readable) hold against the live tree, not just on paper.
+
+User explicitly asked to skip item 2 (re-running the eval prompt on more
+Project 2 sessions) this session — not a decision to abandon it, just not
+prioritized right now.
 
 ---
 
