@@ -55,8 +55,8 @@ problem, not a mechanism problem.
 | File | Role |
 |---|---|
 | `AGENTS.md` | Agent instructions (Python version, file roles, automation_id scheme, source-of-truth for confirmed status). |
-| `phased_plan.md` | The phased implementation plan that drove Phases 0–3. |
-| `screenshot_orchestration_analysis.md` | Initial analysis of screenshot capture strategies and shortcomings. |
+| `docs/phased_plan.md` | Archived: the phased implementation plan that drove Phases 0–3. |
+| `docs/screenshot_orchestration_analysis.md` | Archived: initial analysis of screenshot capture strategies and shortcomings. |
 
 ## How it works
 
