@@ -147,20 +147,61 @@ is evidence for, not just theory about, this project's UIA tree serving as
 a verification layer for MCP's write-only/blind-to-rendered-UI actions —
 see RELATED PROJECT for what's still pending before pursuing that.
 
-**To keep evaluation of further archived sessions cheap:** built a
-reusable LLM-eval prompt (delivered to user as `session_eval_prompt.md`,
-not part of this repo) that scores one transcript at a time against a
-fixed rubric (task completion, verification discipline, model-vs-reality
-grounding, pedagogical clarity, error recovery, efficiency, internal
-consistency) and outputs a comparable structured summary — so future
-sessions get evaluated by a separate LLM call instead of full reads in
-this context window. User is running it now against the three sessions
-above (with the "unsatisfactory" label stripped from the transcript first,
-to keep that one's evaluation unbiased) and will bring back the outputs.
+**RELATED PROJECT: eval prompt results received and reviewed (this
+session).** The 3 sessions from last session's eval-prompt handoff came
+back scored 5, 5, 4 — the "unsatisfactory" framing didn't hold up under
+blind, evidence-based scoring. Reviewed the outputs and updated the
+failure-pattern theory: the eval surfaced a track-indexing bug I'd missed
+on my own read (agent itself, not just the user, acted on an unverified
+`track_index` after `create_midi_track(index=-1)` and hit a wrong-track
+error 3 screenshots deep) — this **sharpens** the verification-layer case
+rather than just repeating it, since it shows the same root-cause bug
+occurring on the agent's side, not only the user-replication side. The
+"no read-back for clip notes" theory was downgraded — the eval found it
+wasn't a live issue, just a disclosed limitation. See RELATED PROJECT
+section for full detail and current next-step options.
+
+**RELATED PROJECT: integration design discussion (this session, no code,
+no approach committed).** User raised two observations from using this
+project vs. watching the MCP one: (1) liked watching the mouse actually
+move/click, questioned whether keyboard shortcuts might be faster — this
+reframed into a spatial-vs-non-spatial distinction (a keyboard shortcut is
+just as screen-invisible as an MCP call; the pedagogical value was never
+"mouse specifically," it's a visible on-screen locus for spatially
+addressable actions); (2) felt the MCP agent was "driving blind," no real
+feedback loop — matches the track-indexing pattern already confirmed in
+LOG above. Worked out a two-tier verification proposal (UIA read after any
+index-targeted MCP write; vision-model+screenshot fallback only for
+per-note clip content, which has no automation_id at all) scoped narrowly
+to avoid re-introducing the efficiency cost the eval already flagged once.
+Confirmed this design is serial (UIA as a sensor after MCP's write, same
+agent turn) so it does NOT trigger the earlier-logged "two channels could
+race" concern — that concern would only apply to a concurrent design, not
+proposed. User was explicit: **do not commit to one integration approach**
+— treat this as one candidate among possibly several, evaluated per-idea,
+not a decision. See RELATED PROJECT section for full detail.
+
+**RELATED PROJECT: priority framework for action quality/safety (this
+session, no code).** User proposed evaluating any action (click, MCP
+call, keyboard shortcut) on priority tiers, worst-consequence-first:
+Safety > Accuracy > Pedagogy, asked what else belongs. Expanded to six
+tentative tiers — Safety (reweighted to factor in reversibility, not
+treated as binary damage/no-damage) > Verifiability (new — can the system
+cheaply confirm an action landed, distinct from whether it happened to
+land correctly; ties directly to the tier-1 UIA-verification design
+above) > Transparency-in-the-moment (new — did the human know what was
+about to happen before it happened; distinct from Pedagogy, reframes part
+of the "MCP panel appears out of nowhere" complaint) > Accuracy > Pedagogy
+> Cost (new — latency/tokens, kept explicit rather than omitted so it
+can't silently win by default). Ordering is explicitly tentative, not
+stress-tested — e.g. Transparency vs. Accuracy ranking still open. Applies
+generally, not scoped to one project — a lens for judging both this
+project's own click actions and the MCP integration design. See RELATED
+PROJECT section for full detail.
 
 ---
 
-## RELATED PROJECT (preview only — do not treat as fully known)
+## RELATED PROJECT (partial, evidence-backed — see status note below)
 
 The user has a **separate, parallel project**: controlling Ableton Live
 12 via **OpenCode (running in WSL) talking to `ableton-mcp-extended`**
@@ -205,49 +246,171 @@ live verification step during teaching.
 - Known install gotcha: don't run `pip install -e .` (packaging bug in
   upstream `pyproject.toml`); install deps directly instead.
 
-### Confirmed real failure patterns (from transcript post-mortem, this session)
-Three concrete instances, all with transcript evidence, all the same root
-cause — **MCP writes to/reads from the Live Object Model; nothing confirms
-the rendered UI matches, and the human's manual actions happen in the
-actual UI, which can diverge from the data model:**
-1. `add_notes_to_clip` has no read-back tool — agent explicitly stated
-   contents were "as-written, not re-queried."
-2. User manually double-clicked a drum kit in the browser to replicate an
-   MCP-driven step; Ableton spawned a **new track** instead of loading
-   onto the selected one. Went undetected for ~700 transcript lines across
-   multiple user messages ("I can't hear anything") before `get_track_info`
-   on the intended track showed `devices: []`.
-3. Agent narrated in raw MIDI pitch numbers (36/38/42) instead of the
-   pad names actually rendered on a Drum Rack — user confusion until
-   corrected.
-This is now evidence for, not just a theory about, this project's UIA tree
-(`automation_id`s, structural and checkable without a screenshot) serving
-as a **verification layer** for case 2 specifically — a UIA dump of
-`SessionView.Track[N]` right after `load_drum_kit` would show immediately
-whether a device landed on the intended track. Cases 1 and 3 are softer
-fits (1 may not be UIA-checkable at all — individual clip notes are
-custom-drawn, likely no per-note automation_id; 3 is a prompting issue,
-not an automation gap).
+### Objective eval results (3 sessions scored via the LLM-eval prompt, this session)
+Ratings came back **5, 5, 4** — materially better than the "unsatisfactory"
+label suggested once evaluated blind, on evidence, without that framing.
+This reframes (doesn't discard) the failure-pattern theory below:
 
-### Next session: pending, waiting on user
-Built a reusable LLM-eval prompt (given to the user directly, not stored in
-this repo) that scores one archived session transcript at a time against a
-fixed rubric, to evaluate the rest of the user's archived sessions cheaply
-without full reads in this context window. **User is running it now** on
-the three sessions already read (transcript pre-scrubbed of the
-"unsatisfactory" label for an unbiased read) and will bring back the
-structured outputs. When that happens:
-- Read the eval outputs (not raw transcripts) to check whether the three
-  failure patterns above generalize across more sessions, or whether
-  those three were unusual.
-- Only then resume the actual planning task: where the two projects
-  overlap, what each does better, where they complement (the verification-
-  layer idea above is the leading candidate, not yet a conclusion), and
-  integration challenges (two live control channels into one Ableton
-  instance could race; WSL2 mirrored-networking only affects the MCP path;
-  whose "trust" is authoritative if both act on the same session).
-- Do not start implementation work on a combined approach yet — still in
-  the evidence-gathering/planning phase.
+- **Confirmed and sharpened — track-indexing verification gap.** The eval
+  on session 043d surfaced a bug I'd missed on my own read: during a
+  tutorial redo, the **agent itself** called `create_midi_track(index=-1)`,
+  assumed the new track landed at index 3, then ran `set_track_name` /
+  `load_instrument_or_effect` against `track_index: 1` — an audio track —
+  for three screenshots before `create_clip` errored out. This is not the
+  user-replication mismatch I'd originally flagged (drum kit double-click
+  spawning a wrong track) — it's a **second, distinct instance of the same
+  root cause, this time self-inflicted by the agent, not the user.** Two
+  independent incidents in one session, same shape: act on `track_index N`
+  without confirming what's actually at N first. This is now the strongest,
+  best-evidenced case for a UIA verification layer — a `SessionView.Track[N]`
+  read after any index-based targeting (agent's own or a user's) would catch
+  both variants, not just the user-replication one.
+- **Downgraded — "no read-back for clip notes."** The eval did not flag this
+  as an issue at all: the agent explicitly disclosed the limitation in
+  writing rather than silently trusting it, so it's a documented constraint,
+  not a live silent-trust bug. Lower priority than the track-indexing cases.
+- **Confirmed, minor — MIDI numbers vs. pad names.** Rated MINOR in the eval
+  for session 036c, resolved in 1 turn. Consistent with my original read.
+- **New, unrelated to the MCP/UIA theme:** `take_shot.sh` was called once
+  with a missing 3rd argument (`short_description`), hit its own `Usage:`
+  error, cost a retry turn. An invocation slip, not a design gap in either
+  project.
+
+Overall: two of three original theories held up under objective scoring
+(track-indexing, MIDI-number jargon); one (no-read-back-for-notes) turned
+out to be a non-issue because it was self-disclosed. The track-indexing
+pattern is the one worth testing for recurrence across more sessions before
+treating it as a settled argument for the verification-layer integration.
+
+### Integration design space (exploratory, this session — no approach committed)
+User explicitly does not want to commit to one integration approach yet —
+different ideas may suit different situations, evaluate each on its own
+merits rather than picking a single unifying design. Two threads opened
+this session:
+
+**1. Spatial vs. non-spatial actions — reframes the user's "mouse felt
+better, why not test keyboard shortcuts too" question.** The pedagogical
+value the user liked in this project (watching the cursor travel to and
+click a real element) isn't really "mouse vs. keyboard" — it's that a
+*spatially addressable* action (arm this track, click this clip slot) has
+a visible on-screen locus the student can learn from and later repeat by
+hand. A keyboard shortcut has the same blindness problem MCP has: no
+visible screen locus, nothing to watch. This is why MCP's UI "panels
+appearing out of nowhere" bothered the user — MCP never simulates any
+click/keypress at all; it writes straight into the Live Object Model and
+the UI just re-renders. Working principle (not yet implemented): teach
+spatially-addressable actions via a real simulated click the student can
+watch and repeat; treat non-spatial or setup-only actions (tempo via API,
+Spacebar for play/stop) as fair game for a faster, invisible path. Spacebar
+specifically flagged as universal enough to hardcode as a shortcut even in
+this project, since "seeing where it lives" adds nothing there.
+
+**2. "Driving blind" — the agent has near-zero feedback loop.** MCP's loop
+today is: write action → JSON describes the *data-model* result → agent
+trusts it, moves on. Nothing sensors "what's actually rendered on screen."
+In the 043d session, the only such sensor in the loop was the human,
+reporting failures after the fact in natural language the agent then had
+to reinterpret — the slowest possible feedback path, and the direct cause
+of the ~700-line debugging spiral already logged above.
+
+**Proposed (not committed) fix: two-tier verification, narrowly scoped —**
+- **Tier 1 (cheap, structural):** after any MCP write that targets
+  something by index (`track_index`, `clip_index` — the exact pattern
+  behind both confirmed track-indexing incidents), read the corresponding
+  UIA region (e.g. `SessionView.Track[N]`: name, is_midi/is_audio, device
+  presence) before the agent claims success. No vision model needed —
+  `automation_id`s already give structural ground truth.
+- **Tier 2 (expensive, only when tier 1 can't see it):** individual clip
+  notes are custom-drawn with no per-note `automation_id` — structurally
+  unverifiable through the UIA tree. For that narrow case only, fall back
+  to `take_shot.sh` + a vision-model read of the piano roll.
+- **Explicitly NOT proposed:** verifying every action. That would hurt the
+  bite-sized pacing and re-introduce the "Efficiency: some waste" problem
+  the eval already flagged once for an unrelated reason (session 043d).
+  Scope verification to the one confirmed high-risk category
+  (index-targeted actions); leave low-risk actions (tempo change, view
+  switch, a parameter tweak on an already-verified track) as trust-the-
+  response, same as today.
+- **Resolves an earlier open question, not a new risk:** this design is
+  *serial* (MCP writes, then the same agent turn triggers a UIA read as
+  its next step) not concurrent, so the "two live control channels could
+  race" risk noted earlier doesn't apply here — UIA acts as a sensor, not
+  a second simultaneous driver. A real concurrency question would only
+  arise under a different design where both act independently at the same
+  time; not proposed.
+- **Not yet pressure-tested:** what happens if the window isn't
+  focused/maximized at verification time — this project already hardened
+  that exact failure mode once (`ensure_window_ready()`, LOG above); the
+  verification-layer design needs to reuse that, not rediscover it.
+
+### Priority framework for action quality/safety (this session, proposed by user, tentative ordering)
+User proposed evaluating any action (click, MCP call, keyboard shortcut)
+along priority tiers, worst-consequence-first. Started with Safety >
+Accuracy > Pedagogy; expanded this session to six, in tentative order:
+
+1. **Safety** — clicking/calling X while meaning Y, causing damage.
+   **Refined this session: not binary — weight by reversibility.**
+   Score as (probability of wrong action) × (cost, weighted by how hard
+   it is to undo). A wrong Solo click (already logged as a real bug,
+   `solo_tour`) is a trivial one-click undo; a wrong `Save`/`Delete Track`
+   is not. Same class of indexing mistake, very different severity — the
+   current codebase doesn't yet distinguish these.
+2. **Verifiability** — new tier, argued to outrank Accuracy. Not just "did
+   the click land right" but "can the system tell whether it landed right,
+   cheaply, without a human." An action that's usually accurate but
+   unverifiable is more dangerous long-run than one that's less accurate
+   but self-checking, because the accurate-but-unverifiable one fails
+   silently and compounds — this is exactly the shape of the 043d
+   track-indexing incident (three wasted screenshots before the error
+   surfaced). Directly the argument for the tier-1 UIA-read-after-
+   index-write design above.
+3. **Transparency to the human, in the moment** — new tier, distinct from
+   Pedagogy ("did they learn") — this is "did they know what was about to
+   happen before it happened." Reframes the "MCP panel appears out of
+   nowhere" complaint as partly this, not only the spatial-click gap
+   already logged. Proposed as cheap to satisfy (narrate intent before
+   acting) and worth ranking near Safety, since a surprised human can't
+   intervene in time if something's about to go wrong.
+4. **Accuracy** (user's original P2) — clicking X for Y, no damage done.
+5. **Pedagogy** (user's original P3) — method A vs. more-effective method B.
+6. **Cost** (latency/tokens) — new tier, deliberately last but explicit
+   rather than omitted, so it doesn't silently win by default (that's how
+   "driving blind" happens — skipping verification because it's cheaper).
+
+**Tentative ordering, not yet stress-tested:** Safety (× reversibility) >
+Verifiability > Transparency > Accuracy > Pedagogy > Cost. Explicitly
+flagged as tentative — e.g. still open whether Transparency really
+outranks Accuracy, or whether a silent-but-correct action should beat a
+narrated-but-slower one. Applies across both this project's own actions
+(clicks) and the MCP integration design above (verification tiers) — a
+general lens, not scoped to one project.
+
+
+### Next session
+Eval results for the first 3 sessions are in (see the eval-results
+subsection above). Design space and priority framework above are both
+exploratory only — **user explicitly does not want to commit to
+one approach yet**, so don't collapse the ideas above into a single
+plan; keep pressure-testing each on its own (e.g. the not-yet-tested
+window-focus case for tier 1, whether spatial/non-spatial is the right
+split for every action type, or whether the priority ordering itself
+holds — e.g. Transparency vs. Accuracy) and let different ideas serve
+different situations rather than forcing one unifying design. Open
+threads, ask the user which to pursue rather than assuming:
+- **Run the eval prompt on more archived sessions** to check whether the
+  track-indexing pattern (agent or user acting on an unverified track
+  index) recurs, before treating it as a settled argument.
+- **Or move to the actual planning task now**, treating track-indexing
+  verification as the leading (but singular, 1-session) integration
+  candidate: where the two projects overlap, what each does better, where
+  they complement (UIA read-after-index-action as the verification layer),
+  and remaining integration challenges (WSL2 mirrored-networking only
+  affects the MCP path, not this one; whose "trust" is authoritative if
+  both act on the same session — the race-condition risk itself is
+  resolved for the serial tier-1/tier-2 design above, but would resurface
+  under a different, concurrent design).
+Do not start implementation work on a combined approach yet either way —
+still evidence-gathering/planning.
 
 ---
 
