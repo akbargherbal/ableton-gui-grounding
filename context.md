@@ -88,7 +88,7 @@ _(`AGENTS.md` states the resulting rules tersely. This section is where the full
 
 **Open (Ordered Easiest → Hardest):**
 
-1. **Wire `keyboard_shortcuts.py` into `click_by_id()` Call Sites (Item #5):** Pass `load_shortcut()` at unblocked call sites so L2 of the escalation ladder is active in production tasks.
-2. **Baseline-Test OpenCode Routing (Item #6):** Prompt OpenCode with a scenario without `AGENTS.md` present to establish baseline tool selection behavior (orchestrator vs raw Python vs MCP), for comparison now that `AGENTS.md` exists.
-3. **Implement Per-Click Screenshots (Item #7):** Modify `orchestrate.sh` to parse the `EVENT:` stream and take a screenshot after each `action_start`/`action_result`, not just once per task. Needs: a `seq` counter that increments per sub-step (not per task), and `desc` derivation that keys off each event as it fires rather than grepping the last labeled line.
-4. **Finalize UIA-vs-MCP Arbitration Policy in `AGENTS.md` (Item #8):** Baseline routing rule is already codified (see `AGENTS.md`); this item is to revisit and refine it once #5–#7 land and more MCP edge cases are observed.
+5. **Wire `keyboard_shortcuts.py` into `click_by_id()` Call Sites (Item #5):** Pass `load_shortcut()` at unblocked call sites so L2 of the escalation ladder is active in production tasks.
+6. **Baseline-Test OpenCode Routing (Item #6):** Prompt OpenCode with a scenario without `AGENTS.md` present to establish baseline tool selection behavior (orchestrator vs raw Python vs MCP), for comparison now that `AGENTS.md` exists.
+7. **Implement Per-Click Screenshots (Item #7):** Modify `orchestrate.sh` to parse the `EVENT:` stream and take a screenshot after each `action_start`/`action_result`, not just once per task. Needs: a `seq` counter that increments per sub-step (not per task), and `desc` derivation that keys off each event as it fires rather than grepping the last labeled line.
+8. **Finalize UIA-vs-MCP Arbitration Policy in `AGENTS.md` (Item #8):** Baseline routing rule is already codified (see `AGENTS.md`); this item is to revisit and refine it once #5–#7 land and more MCP edge cases are observed.
