@@ -32,6 +32,7 @@ session already open, not freshly restarted):
    1 exactly.
 
 **Conclusions:**
+
 - The historical "solo_tour bug" referenced in the probe docstrings
   (solo state not restored correctly) **did not reproduce**. The
   `solo_one` atomic split + its `finally`-block restore appears to have
@@ -96,7 +97,7 @@ abstract.
   all**. Grepped `automate_ableton_task.py` and `dump_ableton_states.py`
   for `drag`, `drop`, browser item selection, and any interaction with
   `SessionView.Track[N].Slot[M]` — the only hit is that automation_id
-  string appearing in a docstring's *reference list* of the ID scheme,
+  string appearing in a docstring's _reference list_ of the ID scheme,
   never actually touched by any function.
 - This matches — and is now confirmed at the code level, not just
   taken from — the README's own Status table: "Browser item selection /
@@ -117,7 +118,7 @@ abstract.
     so the student sees each take isolated in its own captured image.
   - Direct `automate_ableton_task.py --task solo_tour --tracks A B --live`
     — works (verified live, item 1), but **zero screenshots** — useless
-    for a teaching flow where the student needs to *see* each take.
+    for a teaching flow where the student needs to _see_ each take.
 - Chain: clean **only if the orchestrator's `solo_one` loop path is
   used**; the standalone `solo_tour` CLI path is a trap for this use
   case specifically — it looks like the "compare tracks" primitive by
@@ -130,8 +131,8 @@ abstract.
 
 ### Root-cause follow-up — why the gaps exist, and whether avoidable
 
-Prompted by a direct question: not just *what's* possible/impossible, but
-*where exactly* the shortfall is in the code, and whether it could have
+Prompted by a direct question: not just _what's_ possible/impossible, but
+_where exactly_ the shortfall is in the code, and whether it could have
 been avoided. Verified by inspecting an actual dump file
 (`scritps/dumps/ableton_uia_20260804_083419_sounds.json`), not just
 reading function bodies.
@@ -147,7 +148,7 @@ reading function bodies.
   control-lookup mechanism, `resolve()` in `automate_ableton_task.py`,
   is built exclusively around looking up controls **by `automation_id`**
   (see its docstring: `"Resolve one control by automation_id, right
-  now, freshly"`). Browser items structurally cannot be found this way —
+now, freshly"`). Browser items structurally cannot be found this way —
   a name-matching lookup strategy would be needed instead, and none
   exists in the codebase.
 - Compounding factor: the list's own label says "Sounds List, 1001
@@ -157,12 +158,12 @@ reading function bodies.
   item would additionally require scroll-and-rescan logic that doesn't
   exist yet either.
 - **Was it avoidable?** Split judgment:
-  - *Item selection* (click/select a specific browser item) looks
+  - _Item selection_ (click/select a specific browser item) looks
     plausibly buildable using the project's existing patterns (fresh
     resolve, verify-after-action, virtualization-aware rescan) — it just
     needs a name-based lookup function that doesn't exist yet. Not
     fundamentally hard, just never attempted.
-  - *Drag-and-drop placement onto a track/slot* is a genuinely harder
+  - _Drag-and-drop placement onto a track/slot_ is a genuinely harder
     problem on top of that: `pywinauto`'s drag simulation is known to be
     unreliable against custom-drawn, virtualized UI like Ableton's, and
     the drop target (`Track[N].Slot[M]`) has the same virtualization
@@ -173,7 +174,7 @@ reading function bodies.
     `opencode-ableton-mcp-setup.md`) for any mention of browser item
     selection or drag-drop scope — **zero hits everywhere.** This was
     never a deliberate, documented scope decision (unlike, say, the
-    Phase 2 solo_one/solo_click granularity question, which *was*
+    Phase 2 solo_one/solo_click granularity question, which _was_
     explicitly raised and deferred in `phased_plan.md`). It was simply
     never reached, not consciously excluded.
 

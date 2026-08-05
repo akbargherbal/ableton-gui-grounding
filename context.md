@@ -14,12 +14,12 @@ theory the AI Assistant proposes.
 V2 of this project adds `scritps/` (automate_ableton_task.py, orchestrate.sh,
 take_shot.sh v6, tests) on top of the V1 stack (MCP server via
 `ableton-mcp-extended` + OpenCode + `take_shot.sh`). V1's known weakness:
-the student saw the *outcome* of an action, not the *steps* that produced
+the student saw the _outcome_ of an action, not the _steps_ that produced
 it. This audit's job, before any new code is written, is to:
 
 1. Inventory every tool/capability actually present in V2, from the code,
    not from docs describing intent.
-2. Map how they currently chain together (and where they *don't*).
+2. Map how they currently chain together (and where they _don't_).
 3. Find easy-to-close gaps.
 4. Only then write `AGENTS.md` for V2 — deliberately deferred until the
    audit is done, so it references only what's actually confirmed to work.
@@ -53,16 +53,16 @@ audit tells us exactly which tools/MCP servers it should reference.
 
 ### File status table (verified by direct code read this session)
 
-| File | Role | Status |
-|---|---|---|
-| `dump_ableton_pywinauto.py` | Read-only tree dump. Canonical `find_ableton_window()` + `ensure_window_ready()`. | Mature, imported by everything else — single source of truth for window handling. |
-| `dump_ableton_states.py` | View switching (Session↔Arrangement via Tab) + Browser category switching + dump. | Session/Arrangement: CONFIRMED (verifies before+after via `SessionView.*` id presence). Browser categories: **all 6 confirmed** — evidence in `scritps/dumps/`, docstrings corrected to match (see Resolved section). |
-| `grep_dump.py` | Stdlib substring search over a saved JSON dump. | Solid, no dependencies. |
-| `automate_ableton_task.py` | Action engine. 8 tasks. `resolve()` never caches controls. `click_by_id()` = Mouse→Keyboard→Human ladder (**no MCP/LOM tier by design** — deliberately excluded, see its own docstring). `set_checkbox_by_id()` = click→re-read→retry→raise. Emits `EVENT:` JSON per action. | Solid engine. `--list-tasks`/`--list-tracks` work without Ableton running. |
-| `keyboard_shortcuts.py` | Sourced shortcut registry (cites Ableton manual §), `blocked` flag, `load_shortcut()` guard. | **Built but not wired in** — no `click_by_id()` call site in the current code passes a `keyboard_shortcut`. L2 of the ladder is dead in production tasks; only exercised standalone by `probe_keyboard_activator`. |
-| `orchestrate.sh` | Front door for **single live action + 1 screenshot**, for tasks in its `SINGLE_ACTION_TASKS` list only. Drift-checks schema version via `--list-tasks` before acting. `solo_one` gets per-track looping (1 screenshot/track). | Solid, well-guarded — but see scope exceptions below. |
-| `take_shot.sh` (v6) | WSL→PowerShell screen capture. Auto restore/focus/maximize, DrvFs poll, distinct error codes. **Only ever called from inside `orchestrate.sh`.** | Mature. |
-| Test suite (28 tests) | Stub-based, no Windows/Ableton needed. | Solid, CI-safe. |
+| File                        | Role                                                                                                                                                                                                                                                                         | Status                                                                                                                                                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dump_ableton_pywinauto.py` | Read-only tree dump. Canonical `find_ableton_window()` + `ensure_window_ready()`.                                                                                                                                                                                            | Mature, imported by everything else — single source of truth for window handling.                                                                                                                                     |
+| `dump_ableton_states.py`    | View switching (Session↔Arrangement via Tab) + Browser category switching + dump.                                                                                                                                                                                            | Session/Arrangement: CONFIRMED (verifies before+after via `SessionView.*` id presence). Browser categories: **all 6 confirmed** — evidence in `scritps/dumps/`, docstrings corrected to match (see Resolved section). |
+| `grep_dump.py`              | Stdlib substring search over a saved JSON dump.                                                                                                                                                                                                                              | Solid, no dependencies.                                                                                                                                                                                               |
+| `automate_ableton_task.py`  | Action engine. 8 tasks. `resolve()` never caches controls. `click_by_id()` = Mouse→Keyboard→Human ladder (**no MCP/LOM tier by design** — deliberately excluded, see its own docstring). `set_checkbox_by_id()` = click→re-read→retry→raise. Emits `EVENT:` JSON per action. | Solid engine. `--list-tasks`/`--list-tracks` work without Ableton running.                                                                                                                                            |
+| `keyboard_shortcuts.py`     | Sourced shortcut registry (cites Ableton manual §), `blocked` flag, `load_shortcut()` guard.                                                                                                                                                                                 | **Built but not wired in** — no `click_by_id()` call site in the current code passes a `keyboard_shortcut`. L2 of the ladder is dead in production tasks; only exercised standalone by `probe_keyboard_activator`.    |
+| `orchestrate.sh`            | Front door for **single live action + 1 screenshot**, for tasks in its `SINGLE_ACTION_TASKS` list only. Drift-checks schema version via `--list-tasks` before acting. `solo_one` gets per-track looping (1 screenshot/track).                                                | Solid, well-guarded — but see scope exceptions below.                                                                                                                                                                 |
+| `take_shot.sh` (v6)         | WSL→PowerShell screen capture. Auto restore/focus/maximize, DrvFs poll, distinct error codes. **Only ever called from inside `orchestrate.sh`.**                                                                                                                             | Mature.                                                                                                                                                                                                               |
+| Test suite (28 tests)       | Stub-based, no Windows/Ableton needed.                                                                                                                                                                                                                                       | Solid, CI-safe.                                                                                                                                                                                                       |
 
 ---
 
@@ -74,7 +74,7 @@ two exceptions that still need direct `python.exe automate_ableton_task.py`:
 - Discovery/dry-run calls (`--list-tracks`, `--list-tasks`, any call
   without `--live`) — not `orchestrate.sh`'s job.
 - **`solo_tour`** — explicitly rejected by `orchestrate.sh` ("use solo_one
-  instead — Phase 2"). Since `take_shot.sh` is *only* called from inside
+  instead — Phase 2"). Since `take_shot.sh` is _only_ called from inside
   `orchestrate.sh`, a live `solo_tour` run currently produces **zero
   screenshots**. Not yet confirmed whether `solo_tour` has actually been
   run live in V2 — user doesn't know either, needs checking (Open Items).
@@ -84,15 +84,15 @@ two exceptions that still need direct `python.exe automate_ableton_task.py`:
 ### Archived docs read this session — corroborate, don't contradict, the code read
 
 - **`docs/phased_plan.md`** — the actual Phase 0–3 design doc. Confirms
-  Phase 2's `solo_one` split was a *deliberate, scoped* fix, with the
+  Phase 2's `solo_one` split was a _deliberate, scoped_ fix, with the
   deeper `solo_click`/`play_click`/`stop_click`/`unsolo_click` split
   explicitly flagged as an open question the author chose to ask about
   rather than assume — never answered/implemented. This matches (not
   contradicts) what the current code shows.
 - **`docs/screenshot_orchestration_analysis.md`** — the earlier options
   analysis (Option B / orchestrator chosen over A/C/D). Shortcoming #1 in
-  its own table states outright: *orchestrator "doesn't achieve per-click
-  granularity on its own"* — multi-step tasks only get a before/after
+  its own table states outright: _orchestrator "doesn't achieve per-click
+  granularity on its own"_ — multi-step tasks only get a before/after
   shot unless paired with Option A (atomic decomposition). This is the
   same gap independently reached by reading the current code (see §3 of
   the prior session's summary) — good corroboration, not new information.
@@ -103,9 +103,10 @@ two exceptions that still need direct `python.exe automate_ableton_task.py`:
 
 Both suites execute fully without Windows/Ableton (stub-based, as
 documented) and **all 28 pass**:
+
 - `test_phase0_events.py` — 14/14 pass. Confirms L2 keyboard escalation
   logic itself is correct (`test_click_by_id_escalates_to_l2_and_succeeds`)
-  — reinforces that the gap is *nothing calls it with a shortcut*, not
+  — reinforces that the gap is _nothing calls it with a shortcut_, not
   that the ladder is broken.
 - `test_orchestrate.py` — 14/14 pass, runs the real `orchestrate.sh` as a
   subprocess against stub `automate`/`take_shot` scripts via its own
@@ -118,11 +119,38 @@ claim — verified directly, not taken on trust.
 
 ### Open items — need user verification next session
 
-*(none currently — item 1, `solo_tour` screenshot behavior, resolved
-session 2, see below)*
+_(none currently — item 1, `solo_tour` screenshot behavior, resolved
+session 2, see below)_
 
 ### Resolved this session
 
+- **Agenda item 1 (`solo_tour` screenshot behavior) — done.** Live test
+  confirmed: direct bypass of `orchestrate.sh` runs `solo_tour` to
+  completion with zero screenshots (expected — `take_shot.sh` only ever
+  called from inside `orchestrate.sh`), and solo state was correctly
+  restored on both tested tracks — the historical "solo_tour bug"
+  referenced in old probe docstrings did not reproduce. Full detail in
+  `docs/v2_observations.md` item 1. Caveat: only 2 tracks, 1 pass, one
+  already-open Ableton session — not exhaustive.
+- **Agenda item 2 (trace 3 teaching scenarios) — done, code-only.**
+  Scenario A (arm+monitor) and C (solo tour) fully supported today, C
+  _only_ if the student flow uses `orchestrate.sh ... solo_one`, not the
+  standalone `solo_tour` CLI (that path exists, runs, but produces zero
+  screenshots — a naming trap for an agent). Scenario B (browse Sounds →
+  drag a kick into a track) is a **hard dead end** on the UIA path: code
+  confirms browser _category_ switching exists but item selection/
+  drag-drop into a track does not exist anywhere in the codebase. Full
+  trace in `docs/v2_observations.md` item 2. Feeds directly into agenda
+  items 3 and 8 (does B route to MCP, or get marked unsupported?). Root
+  cause for both gaps also traced (why, not just what) — see
+  `docs/v2_observations.md` item 2's "Root-cause follow-up": B is a
+  lookup-mechanism gap (browser items lack `automation_id`, `resolve()`
+  is automation_id-only), C is a documentation/metadata gap
+  (`--list-tasks` doesn't flag `solo_tour` as screenshot-incapable) —
+  both concrete, low-effort fix candidates for later code work.
+- `docs/v2_observations.md` (new file) — running log for the 8-item
+  agenda below, dated entries, code-read vs. live-verified tagged. Detail
+  lives there now; keep this file's entries terse and pointer-style.
 - **Browser category verification status.** `scritps/dumps/` contains
   tracked (not gitignored-away) real dumps for all six categories,
   timestamped one session (2026-08-04 08:34). Each shows a distinctly-
@@ -138,33 +166,6 @@ session 2, see below)*
   `dump_ableton_states.py`, `orchestrate.sh`, `test_orchestrate.py`) were
   rewritten to be self-contained. Verified via repo-wide grep (zero
   matches) and both test suites still pass (28/28) after the edits.
-- **Agenda item 1 (`solo_tour` screenshot behavior) — done.** Live test
-  confirmed: direct bypass of `orchestrate.sh` runs `solo_tour` to
-  completion with zero screenshots (expected — `take_shot.sh` only ever
-  called from inside `orchestrate.sh`), and solo state was correctly
-  restored on both tested tracks — the historical "solo_tour bug"
-  referenced in old probe docstrings did not reproduce. Full detail in
-  `docs/v2_observations.md` item 1. Caveat: only 2 tracks, 1 pass, one
-  already-open Ableton session — not exhaustive.
-- **Agenda item 2 (trace 3 teaching scenarios) — done, code-only.**
-  Scenario A (arm+monitor) and C (solo tour) fully supported today, C
-  *only* if the student flow uses `orchestrate.sh ... solo_one`, not the
-  standalone `solo_tour` CLI (that path exists, runs, but produces zero
-  screenshots — a naming trap for an agent). Scenario B (browse Sounds →
-  drag a kick into a track) is a **hard dead end** on the UIA path: code
-  confirms browser *category* switching exists but item selection/
-  drag-drop into a track does not exist anywhere in the codebase. Full
-  trace in `docs/v2_observations.md` item 2. Feeds directly into agenda
-  items 3 and 8 (does B route to MCP, or get marked unsupported?). Root
-  cause for both gaps also traced (why, not just what) — see
-  `docs/v2_observations.md` item 2's "Root-cause follow-up": B is a
-  lookup-mechanism gap (browser items lack `automation_id`, `resolve()`
-  is automation_id-only), C is a documentation/metadata gap
-  (`--list-tasks` doesn't flag `solo_tour` as screenshot-incapable) —
-  both concrete, low-effort fix candidates for later code work.
-- `docs/v2_observations.md` (new file) — running log for the 8-item
-  agenda below, dated entries, code-read vs. live-verified tagged. Detail
-  lives there now; keep this file's entries terse and pointer-style.
 
 ### Audit coverage status
 
@@ -188,7 +189,7 @@ sessions) rather than hand-writing it line by line, and does not reliably
 recall implementation details on request. **Do not ask the user to recall
 or confirm specific code behavior from memory.** Instead: read the code
 directly, state findings as claims, and ask whether the user wants to
-*verify it live* (run a command, paste output). Live verification is the
+_verify it live_ (run a command, paste output). Live verification is the
 only thing the user can reliably supply — not code recall.
 
 ---
@@ -264,6 +265,6 @@ can be written once and be accurate, not revised immediately after.
    for Y." Requires understanding both tool surfaces, probably live-
    testing overlapping capabilities on both paths, then writing the
    actual routing rules into a first `AGENTS.md` draft. Once drafted,
-   re-run the #6 scenario *with* the draft and compare behavior against
+   re-run the #6 scenario _with_ the draft and compare behavior against
    the baseline — the hardest item, and the one everything else on this
    list ultimately feeds into.
