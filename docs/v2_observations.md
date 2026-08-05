@@ -44,15 +44,15 @@ Method: pure code trace, no Ableton needed — following the actual function bod
 ### Scenario B — "student browses Sounds for a kick and drags it into a track"
 
 - Browser category switching (e.g. selecting the "Sounds" sidebar category) **is** implemented — `dump_ableton_states.py`, confirmed live for all 6 categories (see `context.md`'s Resolved section from session 1).
-- Everything past that point — searching/scrolling within a category, selecting a specific item (e.g. a kick sample), and drag-and-drop (or any equivalent) into a track/slot — **does not exist in the code at all**. Grepped `automate_ableton_task.py` and `dump_ableton_states.py` for `drag`, `drop`, browser item selection, and any interaction with `SessionView.Track[N].Slot[M]` — the only hit is that automation*id string appearing in a docstring's \_reference list* of the ID scheme, never actually touched by any function.
+- Everything past that point — searching/scrolling within a category, selecting a specific item (e.g. a kick sample), and drag-and-drop (or any equivalent) into a track/slot — **does not exist in the code at all**. Grepped `automate_ableton_task.py` and `dump_ableton_states.py` for `drag`, `drop`, browser item selection, and any interaction with `SessionView.Track[N].Slot[M]` — the only hit is that automation_id string appearing in a docstring's reference list of the ID scheme, never actually touched by any function.
 - This matches — and is now confirmed at the code level, not just taken from — the README's own Status table: "Browser item selection / plugin loading" and "Clip launching" are both listed **Not yet**.
 - Chain: **breaks immediately after category selection.** This scenario is currently impossible to complete via the UIA path. Real question for `AGENTS.md` (agenda item 3): should this route to MCP instead (if `AbletonMCP`/LOM can do item selection/placement — not yet checked), or should `AGENTS.md` just say "not supported, don't attempt" for the UIA path here?
 
 ### Scenario C — "student compares two takes via a solo tour"
 
 - Already effectively traced via agenda item 1's live test. Two viable paths:
-  - `orchestrate.sh ... solo_one --tracks A B` — the intended path. Built-in per-track loop, **one screenshot per track** (seq-numbered), so the student sees each take isolated in its own captured image.
-  - Direct `automate_ableton_task.py --task solo_tour --tracks A B --live` — works (verified live, item 1), but **zero screenshots** — useless for a teaching flow where the student needs to _see_ each take.
+- `orchestrate.sh ... solo_one --tracks A B` — the intended path. Built-in per-track loop, **one screenshot per track** (seq-numbered), so the student sees each take isolated in its own captured image.
+- Direct `automate_ableton_task.py --task solo_tour --tracks A B --live` — works (verified live, item 1), but **zero screenshots** — useless for a teaching flow where the student needs to _see_ each take.
 - Chain: clean **only if the orchestrator's `solo_one` loop path is used**; the standalone `solo_tour` CLI path is a trap for this use case specifically — it looks like the "compare tracks" primitive by name, but produces no visual record. Worth flagging explicitly for `AGENTS.md`: an agent naively reaching for `solo_tour` because it matches "solo tour across tracks" in the task catalog would silently produce a screenshot-less run. `AGENTS.md` should point this scenario at `orchestrate.sh ... solo_one` by name, not just "solo tasks" in general.
 
 ### Root-cause follow-up — why the gaps exist, and whether avoidable
@@ -65,19 +65,19 @@ Prompted by a direct question: not just _what's_ possible/impossible, but _where
 - The actual blocker: every one of these `DataItem` nodes has an **empty `automation_id`** — checked directly in the dump. The entire existing control-lookup mechanism, `resolve()` in `automate_ableton_task.py`, is built exclusively around looking up controls **by `automation_id`** (see its docstring: `"Resolve one control by automation_id, right now, freshly"`). Browser items structurally cannot be found this way — a name-matching lookup strategy would be needed instead, and none exists in the codebase.
 - Compounding factor: the list's own label says "Sounds List, 1001 Items," but the dump's tree only contains **22** child nodes — i.e. UI virtualization (the same phenomenon already documented in the README's "Lessons learned") applies here too. Reaching an arbitrary item would additionally require scroll-and-rescan logic that doesn't exist yet either.
 - **Was it avoidable?** Split judgment:
-  - _Item selection_ (click/select a specific browser item) looks plausibly buildable using the project's existing patterns (fresh resolve, verify-after-action, virtualization-aware rescan) — it just needs a name-based lookup function that doesn't exist yet. Not fundamentally hard, just never attempted.
-  - _Drag-and-drop placement onto a track/slot_ is a genuinely harder problem on top of that: `pywinauto`'s drag simulation is known to be unreliable against custom-drawn, virtualized UI like Ableton's, and the drop target (`Track[N].Slot[M]`) has the same virtualization exposure as the source item.
-  - Searched all 5 docs (`README.md`, `phased_plan.md`, `screenshot_orchestration_analysis.md`, `ableton_ai_educational_risk_framework.md`, `opencode-ableton-mcp-setup.md`) for any mention of browser item selection or drag-drop scope — **zero hits everywhere.** This was never a deliberate, documented scope decision (unlike, say, the Phase 2 solo*one/solo_click granularity question, which \_was* explicitly raised and deferred in `phased_plan.md`). It was simply never reached, not consciously excluded.
+- _Item selection_ (click/select a specific browser item) looks plausibly buildable using the project's existing patterns (fresh resolve, verify-after-action, virtualization-aware rescan) — it just needs a name-based lookup function that doesn't exist yet. Not fundamentally hard, just never attempted.
+- _Drag-and-drop placement onto a track/slot_ is a genuinely harder problem on top of that: `pywinauto`'s drag simulation is known to be unreliable against custom-drawn, virtualized UI like Ableton's, and the drop target (`Track[N].Slot[M]`) has the same virtualization exposure as the source item.
+- Searched all 5 docs (`README.md`, `phased_plan.md`, `screenshot_orchestration_analysis.md`, `ableton_ai_educational_risk_framework.md`, `opencode-ableton-mcp-setup.md`) for any mention of browser item selection or drag-drop scope — **zero hits everywhere.** This was never a deliberate, documented scope decision (unlike, say, the Phase 2 solo_one/solo_click granularity question, which was explicitly raised and deferred in `phased_plan.md`). It was simply never reached, not consciously excluded.
 
 **Scenario C (`solo_tour` screenshot trap) — root cause:**
 
 - Not a technical limitation at all — an **architectural blind spot** from combining two independently reasonable decisions with no link between them:
-  1. `task_solo_tour()` was kept as a standalone CLI entry point for backward compatibility after the Phase 2 `solo_one` split (its own docstring says so).
-  2. `take_shot.sh` was wired to be callable only from inside `orchestrate.sh` (also a reasonable choice on its own — keeps screenshot capture centralized).
-  - Nothing connects these two facts anywhere in the code or in `--list-tasks` metadata. A caller (human or agent) has no way to discover "this specific task, if run standalone, will silently produce zero screenshots" short of already knowing the codebase's internal wiring.
+1. `task_solo_tour()` was kept as a standalone CLI entry point for backward compatibility after the Phase 2 `solo_one` split (its own docstring says so).
+2. `take_shot.sh` was wired to be callable only from inside `orchestrate.sh` (also a reasonable choice on its own — keeps screenshot capture centralized).
+- Nothing connects these two facts anywhere in the code or in `--list-tasks` metadata. A caller (human or agent) has no way to discover "this specific task, if run standalone, will silently produce zero screenshots" short of already knowing the codebase's internal wiring.
 - **Was it avoidable?** Yes, comparatively easily — two low-cost fixes that don't require solving anything new:
-  - Add a `"screenshot_capable": false` (or similar) field to `solo_tour`'s entry in the `--list-tasks` JSON registry, so any caller (including an `AGENTS.md`-following agent) can check before choosing a task.
-  - Or: have `task_solo_tour()` itself warn/refuse when invoked outside an `orchestrate.sh`-managed run, mirroring the guard `orchestrate.sh` already applies from its own side.
+- Add a `"screenshot_capable": false` (or similar) field to `solo_tour`'s entry in the `--list-tasks` JSON registry, so any caller (including an `AGENTS.md`-following agent) can check before choosing a task.
+- Or: have `task_solo_tour()` itself warn/refuse when invoked outside an `orchestrate.sh`-managed run, mirroring the guard `orchestrate.sh` already applies from its own side.
 - **Action item for later code work:** flag this as a concrete, low-effort fix candidate — not filed as its own agenda item yet, but worth surfacing when we get to code changes (agenda items 5/7 or general cleanup), since it's cheap to fix and actively misleading as-is.
 
 ---
@@ -91,15 +91,15 @@ Prompted by a direct question: not just _what's_ possible/impossible, but _where
 Evaluated whether the 3 main UIA gaps (browser item selection/drag-drop, clip launching, device parameters) should fall back to MCP in `AGENTS.md` or be documented as _"not supported in v1"_.
 
 - **Code Audit of MCP Server (`uisato/ableton-mcp-extended`):**
-  - Inspected `_set_device_parameter()` in `AbletonMCP_Remote_Script/__init__.py` directly. Confirmed it executes `param.value = raw_value` and returns `{"new_value": round(clamped, 4)}`. **It never re-reads `param.value` from Ableton after writing.** It echos the calculated target value regardless of whether Ableton accepted, clamped, or rejected the change. This guarantees a 100% false-positive "success" response.
-  - Inspected `_resolve_device()`. Confirmed track resolving uses `self._song.tracks[track_index]` (Live Object Model array order). In projects with collapsed/hidden group tracks, LOM array indexing diverges from visible 0-based Session View track rendering (`SessionView.Track[N]`).
+- Inspected `_set_device_parameter()` in `AbletonMCP_Remote_Script/__init__.py` directly. Confirmed it executes `param.value = raw_value` and returns `{"new_value": round(clamped, 4)}`. **It never re-reads `param.value` from Ableton after writing.** It echos the calculated target value regardless of whether Ableton accepted, clamped, or rejected the change. This guarantees a 100% false-positive "success" response.
+- Inspected `_resolve_device()`. Confirmed track resolving uses `self._song.tracks[track_index]` (Live Object Model array order). In projects with collapsed/hidden group tracks, LOM array indexing diverges from visible 0-based Session View track rendering (`SessionView.Track[N]`).
 - **Screenshot Coordination Risk:**
-  - `take_shot.sh` is technically callable standalone (`./take_shot.sh <lab_dir> <seq> <description>`), allowing screenshot capture after MCP calls.
-  - However, MCP calls produce no `EVENT:` JSON stream, risking `seq` counter collisions and generating screenshots labeled on unverified trust—defeating the core project goal of grounded verification.
+- `take_shot.sh` is technically callable standalone (`./take_shot.sh <lab_dir> <seq> <description>`), allowing screenshot capture after MCP calls.
+- However, MCP calls produce no `EVENT:` JSON stream, risking `seq` counter collisions and generating screenshots labeled on unverified trust—defeating the core project goal of grounded verification.
 - **Decision & Rule for `AGENTS.md`:**
-  - **Do not blindly fall back to MCP for these gaps in v1.**
-  - If MCP is used for device parameters or browser loading, it **must be paired with an explicit post-write read-back verification call** (reading the state back via MCP or UIA), rather than accepting MCP's unverified response ack.
-  - Final arbitration policy details are deferred to Item 8 (UIA-vs-MCP arbitration testing).
+- **Do not blindly fall back to MCP for these gaps in v1.**
+- If MCP is used for device parameters or browser loading, it **must be paired with an explicit post-write read-back verification call** (reading the state back via MCP or UIA), rather than accepting MCP's unverified response ack.
+- Final arbitration policy details are deferred to Item 8 (UIA-vs-MCP arbitration testing).
 
 ---
 
@@ -230,69 +230,22 @@ Replaced `orchestrate.sh`'s `run_one_task()` with a FIFO-based real-time event p
 
 **Status: DONE (2026-08-05, session 6)**
 
-**Correction to the starting premise:** `item_8_plan.md` reads as a diff
-against an existing `AGENTS.md`, but `AGENTS.md` did not exist anywhere —
-not in this repo, not on the user's machine. It was a design doc for a
-file never written. This session wrote `AGENTS.md` from scratch, scoped
-(by explicit user decision) to Control paths + Routing only — the file
-roles / `automation_id` scheme / Python-version-note content that
-`README.md` also describes as belonging in `AGENTS.md` is deliberately
-deferred to a later session.
+**Correction to the starting premise:** `item_8_plan.md` reads as a diff against an existing `AGENTS.md`, but `AGENTS.md` did not exist anywhere — not in this repo, not on the user's machine. It was a design doc for a file never written. This session wrote `AGENTS.md` from scratch, scoped (by explicit user decision) to Control paths + Routing only — the file roles / `automation_id` scheme / Python-version-note content that `README.md` also describes as belonging in `AGENTS.md` is deliberately deferred to a later session.
 
-**What the plan's own verification steps caught, that a straight transcription
-of the plan wouldn't have:**
+**What the plan's own verification steps caught, that a straight transcription of the plan wouldn't have:**
 
-1. **Escalation-ladder mismatch.** `ableton_ai_educational_risk_framework.md`
-   §2 specifies a 4-tier ladder — Mouse → Keyboard → Direct MCP/LOM Call →
-   Human Instructions. Grepped `automate_ableton_task.py`'s `click_by_id()`
-   directly: the real code only implements 3 tiers (Mouse → Keyboard →
-   Human). MCP was never wired in as a per-click fallback tier. Per
-   `context.md`'s own rule (code wins on conflict), `AGENTS.md` documents
-   the real 3-tier ladder and states explicitly that MCP is a separate,
-   task-level path — not a click-level escalation tier — so a future agent
-   doesn't expect a Level-3-MCP tier inside `click_by_id()` that doesn't
-   exist.
+1. **Escalation-ladder mismatch.** `ableton_ai_educational_risk_framework.md` §2 specifies a 4-tier ladder — Mouse → Keyboard → Direct MCP/LOM Call → Human Instructions. Grepped `automate_ableton_task.py`'s `click_by_id()` directly: the real code only implements 3 tiers (Mouse → Keyboard → Human). MCP was never wired in as a per-click fallback tier. Per `context.md`'s own rule (code wins on conflict), `AGENTS.md` documents the real 3-tier ladder and states explicitly that MCP is a separate, task-level path — not a click-level escalation tier — so a future agent doesn't expect a Level-3-MCP tier inside `click_by_id()` that doesn't exist.
 
-2. **MCP tool-name verification.** Rather than trust `item_8_plan.md`'s
-   routing table by name, cloned `uisato/ableton-mcp-extended` fresh and
-   extracted all 46 `@mcp.tool()`-decorated functions from `MCP_Server/server.py`.
-   Cross-checked every tool name in the plan's table against this list —
-   all matched. Ran a gap check (every real tool name grepped against the
-   draft `AGENTS.md`) and found two real gaps the plan's table missed:
-   - `delete_device` — a real MCP tool, not mentioned anywhere in the plan's
-     table. Added, with `get_device_parameters`/`get_chain_info` as the
-     read-back.
-   - `set_tempo` — exists as **both** a UIA task name in `SINGLE_ACTION_TASKS`
-     *and* an MCP tool with the identical name. This is the same shape of
-     hazard as the already-known `solo_tour` naming trap (Agenda #1), but
-     for a write path with no natural "no screenshot" tell to catch it —
-     an agent could reach for the MCP `set_tempo` tool by pattern-matching
-     the verb and never notice it bypassed the verified UIA path. Flagged
-     explicitly in `AGENTS.md` as a second naming trap.
+2. **MCP tool-name verification.** Rather than trust `item_8_plan.md`'s routing table by name, cloned `uisato/ableton-mcp-extended` fresh and extracted all 46 `@mcp.tool()`-decorated functions from `MCP_Server/server.py`. Cross-checked every tool name in the plan's table against this list — all matched. Ran a gap check (every real tool name grepped against the draft `AGENTS.md`) and found two real gaps the plan's table missed:
+- `delete_device` — a real MCP tool, not mentioned anywhere in the plan's table. Added, with `get_device_parameters`/`get_chain_info` as the read-back.
+- `set_tempo` — exists as **both** a UIA task name in `SINGLE_ACTION_TASKS` *and* an MCP tool with the identical name. This is the same shape of hazard as the already-known `solo_tour` naming trap (Agenda #1), but for a write path with no natural "no screenshot" tell to catch it — an agent could reach for the MCP `set_tempo` tool by pattern-matching the verb and never notice it bypassed the verified UIA path. Flagged explicitly in `AGENTS.md` as a second naming trap.
 
-3. **Screenshot-pairing gap.** Dry-running the plan's own verification
-   example #2 ("Set EQ8 frequency to 500Hz on track 1") against the draft
-   table showed the table's "Post-step" column only specified the
-   read-back, not a screenshot — even though the plan's own prose example
-   included `take_shot.sh` at the end. Since MCP never screenshots on its
-   own and the project's whole grounding model depends on the student
-   *seeing* each step, this was a real omission, not a nitpick: without it,
-   an agent following the table literally would produce a verified-but-invisible
-   change. Added a blanket screenshot-pairing rule instead of repeating it
-   in every table row.
+3. **Screenshot-pairing gap.** Dry-running the plan's own verification example #2 ("Set EQ8 frequency to 500Hz on track 1") against the draft table showed the table's "Post-step" column only specified the read-back, not a screenshot — even though the plan's own prose example included `take_shot.sh` at the end. Since MCP never screenshots on its own and the project's whole grounding model depends on the student *seeing* each step, this was a real omission, not a nitpick: without it, an agent following the table literally would produce a verified-but-invisible change. Added a blanket screenshot-pairing rule instead of repeating it in every table row.
 
 **Verification performed (per plan §"Verification plan"):**
 
-- Gap check: all 46 real MCP tool names checked against the drafted
-  `AGENTS.md` (script-based grep, not manual review) — 2 gaps found and
-  fixed (above).
-- Dry-run traces: the plan's 3 example scenarios ("arm track 1", "set EQ8
-  frequency", "load Grand Piano") all resolve correctly against the final
-  `AGENTS.md` routing logic.
-- `context.md` updated: item #8 marked done, Open section now empty for
-  the original 8-item agenda.
+- Gap check: all 46 real MCP tool names checked against the drafted `AGENTS.md` (script-based grep, not manual review) — 2 gaps found and fixed (above).
+- Dry-run traces: the plan's 3 example scenarios ("arm track 1", "set EQ8 frequency", "load Grand Piano") all resolve correctly against the final `AGENTS.md` routing logic.
+- `context.md` updated: item #8 marked done, Open section now empty for the original 8-item agenda.
 
-**Deferred, not forgotten:** file roles table, `automation_id` scheme, and
-the Python-invocation note for `AGENTS.md` — README describes these as
-part of `AGENTS.md`'s job but they were out of scope for this session by
-explicit user choice.
+**Deferred, not forgotten:** file roles table, `automation_id` scheme, and the Python-invocation note for `AGENTS.md` — README describes these as part of `AGENTS.md`'s job but they were out of scope for this session by explicit user choice.
