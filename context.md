@@ -118,9 +118,8 @@ claim — verified directly, not taken on trust.
 
 ### Open items — need user verification next session
 
-1. Has `solo_tour` been run live at all in V2? If yes, did it actually
-   produce zero screenshots as the code implies, or is there some other
-   mechanism catching it that wasn't found in this read-through?
+*(none currently — item 1, `solo_tour` screenshot behavior, resolved
+session 2, see below)*
 
 ### Resolved this session
 
@@ -139,6 +138,33 @@ claim — verified directly, not taken on trust.
   `dump_ableton_states.py`, `orchestrate.sh`, `test_orchestrate.py`) were
   rewritten to be self-contained. Verified via repo-wide grep (zero
   matches) and both test suites still pass (28/28) after the edits.
+- **Agenda item 1 (`solo_tour` screenshot behavior) — done.** Live test
+  confirmed: direct bypass of `orchestrate.sh` runs `solo_tour` to
+  completion with zero screenshots (expected — `take_shot.sh` only ever
+  called from inside `orchestrate.sh`), and solo state was correctly
+  restored on both tested tracks — the historical "solo_tour bug"
+  referenced in old probe docstrings did not reproduce. Full detail in
+  `docs/v2_observations.md` item 1. Caveat: only 2 tracks, 1 pass, one
+  already-open Ableton session — not exhaustive.
+- **Agenda item 2 (trace 3 teaching scenarios) — done, code-only.**
+  Scenario A (arm+monitor) and C (solo tour) fully supported today, C
+  *only* if the student flow uses `orchestrate.sh ... solo_one`, not the
+  standalone `solo_tour` CLI (that path exists, runs, but produces zero
+  screenshots — a naming trap for an agent). Scenario B (browse Sounds →
+  drag a kick into a track) is a **hard dead end** on the UIA path: code
+  confirms browser *category* switching exists but item selection/
+  drag-drop into a track does not exist anywhere in the codebase. Full
+  trace in `docs/v2_observations.md` item 2. Feeds directly into agenda
+  items 3 and 8 (does B route to MCP, or get marked unsupported?). Root
+  cause for both gaps also traced (why, not just what) — see
+  `docs/v2_observations.md` item 2's "Root-cause follow-up": B is a
+  lookup-mechanism gap (browser items lack `automation_id`, `resolve()`
+  is automation_id-only), C is a documentation/metadata gap
+  (`--list-tasks` doesn't flag `solo_tour` as screenshot-incapable) —
+  both concrete, low-effort fix candidates for later code work.
+- `docs/v2_observations.md` (new file) — running log for the 8-item
+  agenda below, dated entries, code-read vs. live-verified tagged. Detail
+  lives there now; keep this file's entries terse and pointer-style.
 
 ### Audit coverage status
 
@@ -152,6 +178,18 @@ both test files, `orchestrate.sh`, `take_shot.sh`), plus all 4 docs
 complete. Remaining unknowns are all things that need the user's live
 Ableton/OpenCode setup, not more reading (see Open Items above, and the
 OpenCode-consistency question from the prior session, still unanswered).
+
+---
+
+### Working rule with the user (binding, established session 2)
+
+The user directed this codebase (e.g. via AI-assisted coding in earlier
+sessions) rather than hand-writing it line by line, and does not reliably
+recall implementation details on request. **Do not ask the user to recall
+or confirm specific code behavior from memory.** Instead: read the code
+directly, state findings as claims, and ask whether the user wants to
+*verify it live* (run a command, paste output). Live verification is the
+only thing the user can reliably supply — not code recall.
 
 ---
 
