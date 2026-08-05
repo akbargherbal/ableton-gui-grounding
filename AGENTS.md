@@ -1,6 +1,7 @@
 # AGENTS.md
 
-Instructions for the AI agent driving Ableton Live 12 automation on this machine (via OpenCode). Read `context.md` first for project intent; this file is the operational routing layer — which tool to reach for, and when.
+Instructions for the AI agent driving Ableton Live 12 automation on this machine (via OpenCode on WSL).
+This file is the operational routing layer — which tool to reach for, and when.
 
 ---
 
@@ -42,24 +43,24 @@ Today's supported tasks: `arm_track`, `set_tempo`, `probe_toggle`, `probe_solo_t
 
 Only when UIA-direct doesn't cover the action. Today that means:
 
-| Scenario | MCP tool(s) | Post-step |
-| --- | --- | --- |
-| Device parameter tweak | `set_device_parameter` | Read back with `get_device_parameters`, compare |
-| Enable/disable a device | `enable_device` / `disable_device` | Read back with `get_device_parameters` |
-| Load instrument/effect | `load_instrument_or_effect` | UIA-verify device appeared (`get_track_info`) + `take_shot.sh` |
-| Load drum kit / plugin | `load_drum_kit`, `load_external_plugin` | UIA-verify + `take_shot.sh` |
-| Browse sounds/instruments | `get_browser_tree`, `get_browser_items_at_path` | Read-only — safe to trust |
-| Create/delete track | `create_midi_track`, `delete_track` | `get_track_info` / `get_track_deletion_status` to confirm |
-| Delete a device | `delete_device` | `get_device_parameters` / `get_chain_info` to confirm removal |
-| Create clip / add notes | `create_clip`, `add_notes_to_clip` | Read back clip/device state |
-| Rename track/clip | `set_track_name`, `set_clip_name` | `get_track_info` read-back |
-| Adjust mixer level/pan | `set_track_volume`, `set_track_panning` | `get_track_volume` and compare |
-| Transport (start/stop) | `start_playback`, `stop_playback` | `get_session_info` / `get_arrangement_info` read-back |
-| Arrangement clip work | `create_arrangement_midi_clip`, `create_arrangement_audio_clip`, `duplicate_clip_to_arrangement`, `delete_arrangement_clip`, `set_arrangement_clip_property` | Read back via `get_arrangement_info` |
-| Cue points / loop / song time | `create_cue_point`, `delete_cue_point`, `jump_to_cue_point`, `set_song_time`, `set_arrangement_loop` | `get_cue_points` / `get_arrangement_info` read-back |
-| Read-only session/track/device/chain/drum-pad info | `get_session_info`, `get_track_info`, `get_track_volume`, `get_device_parameters`, `get_chain_info`, `get_drum_pad_info`, `get_arrangement_info`, `get_cue_points`, `list_external_plugins` | Read-only — safe to trust |
+| Scenario                                           | MCP tool(s)                                                                                                                                                                                 | Post-step                                                      |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Device parameter tweak                             | `set_device_parameter`                                                                                                                                                                      | Read back with `get_device_parameters`, compare                |
+| Enable/disable a device                            | `enable_device` / `disable_device`                                                                                                                                                          | Read back with `get_device_parameters`                         |
+| Load instrument/effect                             | `load_instrument_or_effect`                                                                                                                                                                 | UIA-verify device appeared (`get_track_info`) + `take_shot.sh` |
+| Load drum kit / plugin                             | `load_drum_kit`, `load_external_plugin`                                                                                                                                                     | UIA-verify + `take_shot.sh`                                    |
+| Browse sounds/instruments                          | `get_browser_tree`, `get_browser_items_at_path`                                                                                                                                             | Read-only — safe to trust                                      |
+| Create/delete track                                | `create_midi_track`, `delete_track`                                                                                                                                                         | `get_track_info` / `get_track_deletion_status` to confirm      |
+| Delete a device                                    | `delete_device`                                                                                                                                                                             | `get_device_parameters` / `get_chain_info` to confirm removal  |
+| Create clip / add notes                            | `create_clip`, `add_notes_to_clip`                                                                                                                                                          | Read back clip/device state                                    |
+| Rename track/clip                                  | `set_track_name`, `set_clip_name`                                                                                                                                                           | `get_track_info` read-back                                     |
+| Adjust mixer level/pan                             | `set_track_volume`, `set_track_panning`                                                                                                                                                     | `get_track_volume` and compare                                 |
+| Transport (start/stop)                             | `start_playback`, `stop_playback`                                                                                                                                                           | `get_session_info` / `get_arrangement_info` read-back          |
+| Arrangement clip work                              | `create_arrangement_midi_clip`, `create_arrangement_audio_clip`, `duplicate_clip_to_arrangement`, `delete_arrangement_clip`, `set_arrangement_clip_property`                                | Read back via `get_arrangement_info`                           |
+| Cue points / loop / song time                      | `create_cue_point`, `delete_cue_point`, `jump_to_cue_point`, `set_song_time`, `set_arrangement_loop`                                                                                        | `get_cue_points` / `get_arrangement_info` read-back            |
+| Read-only session/track/device/chain/drum-pad info | `get_session_info`, `get_track_info`, `get_track_volume`, `get_device_parameters`, `get_chain_info`, `get_drum_pad_info`, `get_arrangement_info`, `get_cue_points`, `list_external_plugins` | Read-only — safe to trust                                      |
 
-**Screenshot pairing:** the table above only lists the *verification* step. MCP never screenshots on its own. Any MCP write that's a teaching step the student needs to see — not just a background check — still needs `take_shot.sh` called directly, after the read-back confirms success. This applies to every row above, not only browser loading (which gets its own worked example below because it's the one case that also has no UIA fallback at all).
+**Screenshot pairing:** the table above only lists the _verification_ step. MCP never screenshots on its own. Any MCP write that's a teaching step the student needs to see — not just a background check — still needs `take_shot.sh` called directly, after the read-back confirms success. This applies to every row above, not only browser loading (which gets its own worked example below because it's the one case that also has no UIA fallback at all).
 
 **Catch-all:** any MCP tool not in this table (e.g. `navigate_device_preset`, `fire_clip`, `stop_clip`, `manage_clip_automation`, `set_ableton_view`, `control_arrangement_view`) is a write with no confirmed read-back guarantee — treat it as unverified: call the matching read-tool afterward and compare before reporting success.
 
