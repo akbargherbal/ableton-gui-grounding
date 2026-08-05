@@ -133,6 +133,12 @@ claim — verified directly, not taken on trust.
   the same state relabeled six times. `dump_ableton_states.py`'s
   docstrings/help text (which claimed only 2/6 verified) were the stale
   side here and have been corrected to reflect all 6 as confirmed.
+- **Historical-doc references purged from code.** All 8 in-code
+  citations of the retired `context.md`/`phased_plan.md`/session numbers
+  (across `automate_ableton_task.py`, `keyboard_shortcuts.py`,
+  `dump_ableton_states.py`, `orchestrate.sh`, `test_orchestrate.py`) were
+  rewritten to be self-contained. Verified via repo-wide grep (zero
+  matches) and both test suites still pass (28/28) after the edits.
 
 ### Audit coverage status
 
@@ -162,14 +168,64 @@ OpenCode-consistency question from the prior session, still unanswered).
   document in effect.** If a discrepancy between this file and the code
   ever needs resolving, resolve it the normal way (verify against the
   code/live app), not by appealing to what an earlier document said.
-- Code still contains 8 stale in-code references to the retired
-  `context.md` (comments/docstrings citing "session 4," "LOG," "STATE
-  table" — content that didn't carry forward). Not yet cleaned up — audit
-  is still code-read-only, no edits made. Locations, for whenever cleanup
-  happens:
-  - `scritps/automate_ableton_task.py`: lines 122, 393, 404, 412, 415
-  - `scritps/keyboard_shortcuts.py`: line 62
-  - `scritps/dump_ableton_states.py`: line 121
-  - `orchestrate.sh`: line 2
 - Not writing `AGENTS.md` yet — audit first.
-- Not writing implementation code yet — this is audit/planning only.
+- Not writing implementation code yet — this is audit/planning only,
+  **except** for the historical-doc-reference cleanup done this session
+  (see "Resolved this session" — those 8 locations are fixed, not still
+  open).
+
+---
+
+### Next session agenda — ordered easiest → hardest (combined effort, both sides)
+
+Goal of these items collectively: close enough real gaps that `AGENTS.md`
+can be written once and be accurate, not revised immediately after.
+
+1. **Verify `solo_tour`'s screenshot behavior.** One live command, paste
+   the output/lab folder contents back. Confirms or refutes the
+   zero-screenshots read from the code (still the one open item).
+2. **Trace 2–3 real teaching scenarios through the code by hand.** No
+   Ableton needed — a desk exercise done together in-session. E.g.
+   "student arms a track and sets monitor to In," "student browses
+   Sounds for a kick and drags it in," "student compares two takes via a
+   solo tour." For each: which script/MCP call handles each sub-step,
+   does a screenshot exist for it, where does the chain actually break.
+   This is what turns "imagine scenarios" into a repeatable method rather
+   than ad hoc poking at Ableton.
+3. **Decide what's out of scope for v1 `AGENTS.md`.** Clip launching,
+   device parameters, browser item selection are all "not yet" in the
+   UIA path per README's own Status table. Pure decision, informed by #2
+   — should `AGENTS.md` route these to MCP, or say "not supported yet,
+   don't attempt"? Staying silent and letting the agent guess is the one
+   option to avoid.
+4. **Decide the screenshot-granularity policy for v1.** `phased_plan.md`
+   left "screenshot every sub-click vs. just per-track" as an open
+   question, never answered. Decide on purpose: fix it in code (see #7),
+   or document it as an accepted limit in `AGENTS.md` ("granularity
+   stops at X"). Informed by #1 and #2.
+5. **Wire `keyboard_shortcuts.py` into `click_by_id()` call sites.**
+   Mechanical: pass `load_shortcut("transport_play_stop")` /
+   `load_shortcut("activator_by_position", ...)` at the unblocked call
+   sites so L2 actually gets exercised in production tasks, not just the
+   standalone probe. Code change + one live verification pass.
+6. **Baseline-test OpenCode's default tool routing with NO `AGENTS.md`
+   guidance yet.** Give it one of the #2 scenarios with zero instructions
+   about which tool to use, and watch whether it reaches for
+   `orchestrate.sh`, raw `python.exe`, or `AbletonMCP`. This tells us how
+   much `AGENTS.md` actually needs to constrain vs. what the model
+   already gets right unprompted — a real baseline, not a guess.
+7. **(If #4 chose "fix it") Implement per-click screenshot capability.**
+   The `EVENT:` stream already carries an `action_result` for every
+   click; nothing currently turns that into an intermediate screenshot.
+   Needs design (tail the stream vs. deeper Option-A-style task
+   decomposition) + implementation + live verification. The most
+   code-heavy item on this list.
+8. **Define and codify the UIA-vs-MCP arbitration policy.** The biggest
+   structural gap: no rule anywhere (code or docs) for "use
+   `orchestrate.sh`/`automate_ableton_task.py` for X, use `AbletonMCP`
+   for Y." Requires understanding both tool surfaces, probably live-
+   testing overlapping capabilities on both paths, then writing the
+   actual routing rules into a first `AGENTS.md` draft. Once drafted,
+   re-run the #6 scenario *with* the draft and compare behavior against
+   the baseline — the hardest item, and the one everything else on this
+   list ultimately feeds into.
