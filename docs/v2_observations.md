@@ -228,4 +228,71 @@ Replaced `orchestrate.sh`'s `run_one_task()` with a FIFO-based real-time event p
 
 ## 8. Define and codify the UIA-vs-MCP arbitration policy
 
-**Status: NOT STARTED**
+**Status: DONE (2026-08-05, session 6)**
+
+**Correction to the starting premise:** `item_8_plan.md` reads as a diff
+against an existing `AGENTS.md`, but `AGENTS.md` did not exist anywhere —
+not in this repo, not on the user's machine. It was a design doc for a
+file never written. This session wrote `AGENTS.md` from scratch, scoped
+(by explicit user decision) to Control paths + Routing only — the file
+roles / `automation_id` scheme / Python-version-note content that
+`README.md` also describes as belonging in `AGENTS.md` is deliberately
+deferred to a later session.
+
+**What the plan's own verification steps caught, that a straight transcription
+of the plan wouldn't have:**
+
+1. **Escalation-ladder mismatch.** `ableton_ai_educational_risk_framework.md`
+   §2 specifies a 4-tier ladder — Mouse → Keyboard → Direct MCP/LOM Call →
+   Human Instructions. Grepped `automate_ableton_task.py`'s `click_by_id()`
+   directly: the real code only implements 3 tiers (Mouse → Keyboard →
+   Human). MCP was never wired in as a per-click fallback tier. Per
+   `context.md`'s own rule (code wins on conflict), `AGENTS.md` documents
+   the real 3-tier ladder and states explicitly that MCP is a separate,
+   task-level path — not a click-level escalation tier — so a future agent
+   doesn't expect a Level-3-MCP tier inside `click_by_id()` that doesn't
+   exist.
+
+2. **MCP tool-name verification.** Rather than trust `item_8_plan.md`'s
+   routing table by name, cloned `uisato/ableton-mcp-extended` fresh and
+   extracted all 46 `@mcp.tool()`-decorated functions from `MCP_Server/server.py`.
+   Cross-checked every tool name in the plan's table against this list —
+   all matched. Ran a gap check (every real tool name grepped against the
+   draft `AGENTS.md`) and found two real gaps the plan's table missed:
+   - `delete_device` — a real MCP tool, not mentioned anywhere in the plan's
+     table. Added, with `get_device_parameters`/`get_chain_info` as the
+     read-back.
+   - `set_tempo` — exists as **both** a UIA task name in `SINGLE_ACTION_TASKS`
+     *and* an MCP tool with the identical name. This is the same shape of
+     hazard as the already-known `solo_tour` naming trap (Agenda #1), but
+     for a write path with no natural "no screenshot" tell to catch it —
+     an agent could reach for the MCP `set_tempo` tool by pattern-matching
+     the verb and never notice it bypassed the verified UIA path. Flagged
+     explicitly in `AGENTS.md` as a second naming trap.
+
+3. **Screenshot-pairing gap.** Dry-running the plan's own verification
+   example #2 ("Set EQ8 frequency to 500Hz on track 1") against the draft
+   table showed the table's "Post-step" column only specified the
+   read-back, not a screenshot — even though the plan's own prose example
+   included `take_shot.sh` at the end. Since MCP never screenshots on its
+   own and the project's whole grounding model depends on the student
+   *seeing* each step, this was a real omission, not a nitpick: without it,
+   an agent following the table literally would produce a verified-but-invisible
+   change. Added a blanket screenshot-pairing rule instead of repeating it
+   in every table row.
+
+**Verification performed (per plan §"Verification plan"):**
+
+- Gap check: all 46 real MCP tool names checked against the drafted
+  `AGENTS.md` (script-based grep, not manual review) — 2 gaps found and
+  fixed (above).
+- Dry-run traces: the plan's 3 example scenarios ("arm track 1", "set EQ8
+  frequency", "load Grand Piano") all resolve correctly against the final
+  `AGENTS.md` routing logic.
+- `context.md` updated: item #8 marked done, Open section now empty for
+  the original 8-item agenda.
+
+**Deferred, not forgotten:** file roles table, `automation_id` scheme, and
+the Python-invocation note for `AGENTS.md` — README describes these as
+part of `AGENTS.md`'s job but they were out of scope for this session by
+explicit user choice.
