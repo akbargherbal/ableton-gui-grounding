@@ -4,6 +4,37 @@ This file is written by the AI Assistant for its future self, to restore session
 
 ---
 
+### Project goal
+
+An AI agent teaches a student Ableton Live 12 hands-on, and every action it
+takes on the student's behalf must be **grounded**: verified against the
+actual UI state, not assumed, and shown to the student step-by-step (not
+just as a before/after outcome). This is the standard every audit finding
+in this file should be judged against — "does this serve grounded,
+step-by-step teaching" — not DAW/Ableton feature-completeness for its own sake.
+
+---
+
+### Audit scope — which docs are in play (binding, session 2)
+
+To avoid the doc confusion that happened in a prior session: **only these
+files are in scope for this audit**, and are the only ones this file should
+reference, quote, or reason about going forward:
+
+- `context.md` (this file — the only handoff doc in effect)
+- `docs/v2_observations.md` (running verification log for the 8-item agenda)
+- `docs/ableton_ai_educational_risk_framework.md` (secondary — pre-implementation design doc; code wins on conflict, per the decisions below)
+- `docs/opencode-ableton-mcp-setup.md` (secondary — V1 goal + MCP setup reference)
+
+Everything else under `docs/` has been moved to `docs/archived/` by the user
+(confirmed present there as of this session: `phased_plan.md`,
+`screenshot_orchestration_analysis.md`). **Archived docs are out of scope —
+do not read, cite, or treat them as current for any audit decision.** If a
+question can only be answered by an archived doc, that's a signal to check
+code or ask for live verification instead, not to reach into the archive.
+
+---
+
 ### Goal of THIS audit (not the project's original goal)
 
 V2 of this project adds `scritps/` (`automate_ableton_task.py`, `orchestrate.sh`, `take_shot.sh` v6, tests) on top of the V1 stack (MCP server via `ableton-mcp-extended` + OpenCode + `take_shot.sh`). V1's known weakness: the student saw the _outcome_ of an action, not the _steps_ that produced it. This audit's job, before any new code is written, is to:
