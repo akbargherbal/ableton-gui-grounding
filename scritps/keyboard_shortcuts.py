@@ -59,8 +59,7 @@ SHORTCUTS: dict[str, ShortcutEntry] = {
         note=(
             "Acts on the currently SELECTED track, not Track[N] specifically. "
             "No automation_id in this project's scheme exposes selected-track "
-            "state. Do not unblock until that gap (context.md, session 4 open "
-            "items) is resolved."
+            "state. Do not unblock until that gap is resolved."
         ),
     ),
     "arm_selected_track": ShortcutEntry(
@@ -129,7 +128,7 @@ def activator_shortcut_for_index(track_index: int) -> str:
     sites (same reasoning as consolidating find_ableton_window() to one
     file elsewhere in this project).
 
-    UNVERIFIED (session 5 open item): assumes 0-indexed track_index N maps
+    UNVERIFIED: assumes 0-indexed track_index N maps
     to 1-indexed F-key (N+1) -- Track[0] -> F1, Track[7] -> F8 -- with no
     off-by-one. Only defined for 0..7 since 8 keys exist; raises
     ValueError outside that range rather than guessing what happens beyond

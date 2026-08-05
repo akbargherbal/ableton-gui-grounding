@@ -1,8 +1,8 @@
 """
 test_orchestrate.py
 
-Pure control-flow tests for orchestrate.sh (Phase 1 — see phased_plan.md /
-context.md). Runs the real orchestrate.sh as a subprocess against STUB
+Pure control-flow tests for orchestrate.sh. Runs the real orchestrate.sh
+as a subprocess against STUB
 automate/take_shot scripts (via the ORCH_PYTHON_CMD / ORCH_AUTOMATE_SCRIPT /
 ORCH_TAKE_SHOT env-var seams orchestrate.sh exposes for exactly this
 purpose) — no Windows, no Ableton, no real screenshot needed.

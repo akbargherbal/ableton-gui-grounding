@@ -65,7 +65,7 @@ Usage
     python automate_ableton_task.py --task probe_toggle --tracks 1
     python automate_ableton_task.py --task probe_solo_transport --tracks 1
 
-    # Session 5: test click_by_id()'s L2 keyboard path directly (F1..F8
+    # Test click_by_id()'s L2 keyboard path directly (F1..F8
     # positional shortcut against Track[N].Activator, N=0..7 only)
     python automate_ableton_task.py --task probe_keyboard_activator --tracks 0
 """
@@ -111,15 +111,15 @@ def ensure_window_ready(window):
     _lazy_import_dump()
     _ensure_window_ready(window)
 
-# Session 5: canonical F1..F8 lookup for the Activator positional-shortcut
-# test below. Kept in its own module (keyboard_shortcuts.py) rather than
+# Canonical F1..F8 lookup for the Activator positional-shortcut test
+# below. Kept in its own module (keyboard_shortcuts.py) rather than
 # hardcoded here -- see that file for the full index, sourcing, and which
 # other shortcuts are still BLOCKED on the "no selected-track read" gap.
 from keyboard_shortcuts import activator_shortcut_for_index
 
 
 # --------------------------------------------------------------------------
-# Structured events (Phase 0 -- see context.md / phased_plan.md)
+# Structured events
 # --------------------------------------------------------------------------
 #
 # Goal: replace stdout-parsing-by-wording (an orchestrator grepping for
@@ -130,10 +130,10 @@ from keyboard_shortcuts import activator_shortcut_for_index
 # the same stdout stream (so ordering relative to the print() lines is
 # preserved for free), each prefixed "EVENT: " for a trivial `grep`.
 #
-# The "v" field is a schema version. A consumer (orchestrate.sh, Phase 1)
-# should read the fields it recognizes for the "v" it knows about and
-# ignore the rest -- that's what lets this vocabulary grow later (e.g. a
-# new event type, or a new field on action_result) without breaking an
+# The "v" field is a schema version. A consumer (orchestrate.sh) should
+# read the fields it recognizes for the "v" it knows about and ignore the
+# rest -- that's what lets this vocabulary grow later (e.g. a new event
+# type, or a new field on action_result) without breaking an
 # already-written orchestrator.
 
 EVENT_SCHEMA_VERSION = 1
@@ -390,35 +390,32 @@ def click_by_id(window: UIAWrapper, auto_id: str, dry_run: bool, label: str,
     """Click a control via an escalation ladder: Mouse -> Keyboard shortcut
     -> explicit human instructions.
 
-    NO MCP/LOM TIER HERE. The escalation-ladder design (see context.md,
-    RELATED PROJECT section) has a 4th level for a direct MCP/LOM call --
-    that tier doesn't exist in this codebase. This project deliberately
-    has no MCP/Remote Script/MIDI bridge at all (see README, "A note on
-    scope"); padding in a level that could never fire would be dead code,
-    not a real design. This ladder is scoped to what this file actually
-    has: 3 levels.
+    NO MCP/LOM TIER HERE, on purpose. This project has no MCP/Remote
+    Script/MIDI bridge at all; padding in a 4th level for a direct
+    MCP/LOM call that could never fire here would be dead code, not a
+    real design. This ladder is scoped to what this file actually has:
+    3 levels.
 
     verify: zero-arg callable returning bool, called after each attempt to
-    confirm the action actually landed -- NOT "was a click sent," per the
-    project's core lesson (see set_checkbox_by_id and the stuck-solo bug
-    in context.md LOG). Pass None ONLY for a control with no known
-    structural signal of success. That is a documented gap at the call
-    site, not a silent one -- e.g. SessionView.Track[N].Mixer.Stop (clip
-    stop) has no automation_id exposing "is this slot playing," so there
-    is currently nothing to verify against.
+    confirm the action actually landed -- NOT "was a click sent." Clicking
+    a control and trusting it worked without reading its state back is
+    exactly what leaves a track stuck soloed after a supposed restore.
+    Pass None ONLY for a control with no known structural signal of
+    success. That is a documented gap at the call site, not a silent one
+    -- e.g. SessionView.Track[N].Mixer.Stop (clip stop) has no
+    automation_id exposing "is this slot playing," so there is currently
+    nothing to verify against.
 
     keyboard_shortcut: optional pywinauto key sequence (e.g. "{VK_SPACE}").
     Only pass one that's been independently confirmed unambiguous for
-    THIS control -- per the reference-layer rule (context.md: "checked the
-    manual, no alternate path, escalating" -- evidence-based, not a
-    memory-based guess). No call site in this file passes one yet: the
-    keyboard-shortcut index that's supposed to back this (context.md,
-    "Next session" item 4) hasn't been built, and the manual PDF hasn't
-    been read. Leaving this None everywhere for now is deliberate, not an
-    oversight -- filling it in with a plausible-sounding shortcut here
-    would be exactly the kind of guess the project's standing rule
-    ("don't guess about anything unseen, ask for the file") exists to
-    prevent.
+    THIS control (checked against the manual or keyboard_shortcuts.py's
+    sourced entries) -- evidence-based, never a memory-based guess. No
+    call site in this file passes one yet: keyboard_shortcuts.py's
+    registry exists and several entries are unblocked (e.g.
+    transport_play_stop, activator_by_position), but nothing here calls
+    load_shortcut() to wire one in. Leaving this None everywhere for now
+    is a known gap, not an oversight -- see keyboard_shortcuts.py for
+    which entries are ready to use.
     """
     if verify is None:
         print(f"  [warn] {label}: no verification available for this control -- "
@@ -614,14 +611,14 @@ def task_read_solo_states(window: UIAWrapper, track_indices: list[int]) -> None:
 
 
 def task_probe_keyboard_activator(window: UIAWrapper, track_index: int) -> None:
-    """Diagnostic (session 5): send the F1..F8 positional keyboard shortcut
+    """Diagnostic: send the F1..F8 positional keyboard shortcut
     DIRECTLY to Track[track_index]'s Activator (mute), bypassing
     click_by_id()'s mouse-first ladder entirely, and read state before/after.
 
     WHY THIS CAN'T JUST BE A click_by_id() CALL: click_by_id() always tries
     L1 (mouse) first and only escalates to L2 (keyboard) if L1's verify()
-    fails. The mouse click on Activator already works reliably (same shape
-    as the confirmed Monitoring click in session 4), so a normal
+    fails. The mouse click on Activator already works reliably (same
+    confirmed control shape as Monitoring), so a normal
     click_by_id() call would resolve at L1 every single time -- the
     keyboard path would never actually fire, proving nothing. This probe
     isolates L2 on purpose, the same way probe_toggle isolates the
@@ -654,8 +651,8 @@ def task_probe_keyboard_activator(window: UIAWrapper, track_index: int) -> None:
     before = get_toggle_state(control)
     print(f"  before: {'on' if before else 'off'}")
 
-    print(f"  sending {key!r} to the window (window.type_keys, same call "
-          "confirmed correct for UIAWrapper in session 4)...")
+    print(f"  sending {key!r} to the window (window.type_keys is the "
+          "confirmed-correct call for UIAWrapper)...")
     window.type_keys(key)
     time.sleep(0.2)  # let the UI redraw before re-reading, same as elsewhere
 
@@ -737,9 +734,9 @@ def task_solo_one(window: UIAWrapper, track_index: int,
                     seconds: float, dry_run: bool) -> None:
     """One solo -> play -> wait -> stop -> unsolo cycle for a single track.
 
-    This is the atomic unit that Phase 2 (phased_plan.md) decomposes
-    solo_tour into, so the orchestrator can regain control between tracks
-    and screenshot each one individually. solo_tour() remains a thin
+    This is the atomic unit solo_tour decomposes into, so the orchestrator
+    can regain control between tracks and screenshot each one
+    individually. solo_tour() remains a thin
     in-process loop over this function so standalone CLI use doesn't regress.
 
     Restores the track's original solo state in a finally block, the same
@@ -819,7 +816,7 @@ def run_task(task_name: str, tracks: list[int], fn: Callable[[], None]) -> None:
     One instrumentation point in main()'s dispatch, rather than duplicating
     start/done bookkeeping inside every task_* function -- every dispatch
     path (arm_track, solo_tour, the probes, etc.) goes through here, so
-    "wraps every task_* function" (phased_plan.md, Phase 0) holds without
+    every task_* function gets task_start/task_done coverage without
     touching each function's own body. Re-raises after emitting task_done
     on failure, so the caller's own error handling/exit code is unaffected
     -- this only adds a signal, it never changes control flow.

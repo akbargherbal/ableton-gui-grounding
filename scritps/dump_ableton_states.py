@@ -32,11 +32,14 @@ its own label sub-elements. That's inferred, not proven: clicking the
 outer DataItem hasn't actually been confirmed to change the selected
 category yet.
 
-Only "sounds" and "instruments" were independently checked via
-grep_dump.py. The rest of BROWSER_CATEGORY_NAMES below (drums,
-audio_effects, etc.) were added by pattern -- same DataItem structure,
-visible in the same dump's Browser Sidebar tree -- but NOT individually
-grep-verified. More likely to work than a guess, still unconfirmed.
+All six categories (sounds, instruments, drums, audio_effects,
+midi_effects, plugins) have been run via `--states all` and each
+resulting dump shows a distinctly-named, distinctly-counted list marker
+(e.g. "Sounds List, 1001 Items", "Instruments List, 23 Items", "Drums
+List, 1001 Items", "Audio Effects List, 47 Items", "MIDI Effects List,
+15 Items", "Plug-Ins List, 0 Items") -- confirming each category was
+actually selected, not just re-labeled. See scritps/dumps/ for the dumps
+this was verified against.
 
 How Session/Arrangement switching works
 ------------------------------------------
@@ -100,9 +103,8 @@ SESSION_PREFIX = "SessionView."
 
 # Browser Sidebar category labels -- matched by (control_type, name) since
 # these DataItem nodes carry no automation_id (confirmed via grep_dump.py).
-# "sounds" and "instruments" independently grep-verified to exist with this
-# exact name text; the rest added by the same visible tree structure but
-# not individually re-checked -- see module docstring.
+# All six exact name strings below are grep-verified against a real dump
+# -- see module docstring.
 BROWSER_CATEGORY_NAMES: dict[str, str] = {
     "sounds": "Sounds",
     "instruments": "Instruments",
@@ -116,9 +118,7 @@ BROWSER_CATEGORY_NAMES: dict[str, str] = {
 # insertion order left implicit) so re-runs are reproducible and the
 # order is visible at a glance here rather than only in BROWSER_CATEGORY_NAMES.
 # Session/Arrangement first since those are CONFIRMED; browser categories
-# after, in the order they were verified (sounds/instruments first --
-# CONFIRMED this session -- then the rest, which remain UNVERIFIED as of
-# this writing; see context.md STATE table for current status per item).
+# after -- all six independently grep-verified (see module docstring).
 ALL_STATES: list[str] = ["session", "arrangement"] + list(BROWSER_CATEGORY_NAMES)
 
 
@@ -160,13 +160,14 @@ def find_control_by_name(control: UIAWrapper, control_type: str, name: str,
 
 
 def goto_browser_category(window: UIAWrapper, category: str) -> None:
-    """Click a Browser Sidebar category by name. UNVERIFIED against the
-    real app -- see module docstring. No before/after check like
-    goto_view() has, because there's no known cheap signal yet for "which
-    category is currently selected" the way SessionView.* ids give us for
-    view detection. Confirm by eye, and by checking the resulting dump's
-    printed tree for a line like 'Tree: "<Category> List, N Items"'
-    (matches the 'Sounds List, 1001 Items' pattern already seen).
+    """Click a Browser Sidebar category by name. CONFIRMED against the
+    real app for all six categories (see module docstring). Still no
+    before/after check like goto_view() has, because there's no known
+    cheap signal for "which category is currently selected" the way
+    SessionView.* ids give us for view detection -- confirmation comes
+    only after the fact, from the resulting dump's printed tree showing a
+    line like 'Tree: "<Category> List, N Items"' with the expected name
+    and a distinct item count.
     """
     if category not in BROWSER_CATEGORY_NAMES:
         raise ValueError(f"Unknown browser category: {category!r}")
@@ -253,8 +254,8 @@ def main() -> None:
         choices=["all", "session", "arrangement"] + list(BROWSER_CATEGORY_NAMES),
         help="Which states to dump, in order. Pass 'all' by itself as a "
         "preset for every known state (session, arrangement, every "
-        "browser category), instead of listing them out. Browser "
-        "categories are UNVERIFIED except sounds/instruments -- see "
+        "browser category), instead of listing them out. All states, "
+        "including every browser category, are confirmed working -- see "
         "module docstring.",
     )
     parser.add_argument("--max-depth", type=int, default=10)

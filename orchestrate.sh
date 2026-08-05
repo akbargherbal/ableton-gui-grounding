@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# orchestrate.sh — Phase 1 coordination layer (see phased_plan.md, context.md)
+# orchestrate.sh — coordination layer
 #
 # Runs ONE automate_ableton_task.py task against real Ableton, then takes ONE
 # screenshot of the result via take_shot.sh, auto-numbering and auto-
-# labeling the screenshot from the task's own structured EVENT: output
-# (Phase 0). Single-action tasks only — see SINGLE_ACTION_TASKS below.
-# `solo_tour` is explicitly excluded (Phase 2 territory: it's multi-step
-# internally, so one orchestrate.sh call would only get a before/after
-# screenshot pair, not per-click).
+# labeling the screenshot from the task's own structured EVENT: output.
+# Single-action tasks only — see SINGLE_ACTION_TASKS below.
+# `solo_tour` is explicitly excluded: it's multi-step internally, so one
+# orchestrate.sh call would only get a before/after screenshot pair, not
+# one screenshot per click.
 #
 # Usage:
 #   ./orchestrate.sh <lab_dir> <task> [task-args...]
@@ -22,7 +22,7 @@ EXPECTED_SCHEMA_VERSION=1
 usage() {
   echo "Usage: $0 <lab_dir> <task> [task-args...]" >&2
   echo "  <task> must be one of: ${SINGLE_ACTION_TASKS[*]}" >&2
-  echo "  (solo_tour is explicitly excluded — see phased_plan.md Phase 2)" >&2
+  echo "  (solo_tour is explicitly excluded — multi-step internally, no per-click screenshots)" >&2
   exit 1
 }
 
@@ -87,8 +87,8 @@ for t in "${SINGLE_ACTION_TASKS[@]}"; do
 done
 if [ "$task_is_allowed" -ne 1 ]; then
   if [ "$TASK" = "solo_tour" ]; then
-    echo "[orchestrator] ERROR: solo_tour is multi-step; use solo_one instead (Phase 2)." >&2
-    echo "[orchestrator]        See phased_plan.md Phase 2 for details." >&2
+    echo "[orchestrator] ERROR: solo_tour is multi-step; use solo_one in a loop instead," >&2
+    echo "[orchestrator]        so each track gets its own screenshot." >&2
   else
     echo "[orchestrator] ERROR: unknown or unsupported task '$TASK'." >&2
   fi

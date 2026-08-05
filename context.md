@@ -56,7 +56,7 @@ audit tells us exactly which tools/MCP servers it should reference.
 | File | Role | Status |
 |---|---|---|
 | `dump_ableton_pywinauto.py` | Read-only tree dump. Canonical `find_ableton_window()` + `ensure_window_ready()`. | Mature, imported by everything else — single source of truth for window handling. |
-| `dump_ableton_states.py` | View switching (Session↔Arrangement via Tab) + Browser category switching + dump. | Session/Arrangement: CONFIRMED (verifies before+after via `SessionView.*` id presence). Browser categories: **only sounds/instruments grep-verified per current code's own docstring** — conflicts with an older context.md claiming all 6 confirmed; unresolved, see Open Items. |
+| `dump_ableton_states.py` | View switching (Session↔Arrangement via Tab) + Browser category switching + dump. | Session/Arrangement: CONFIRMED (verifies before+after via `SessionView.*` id presence). Browser categories: **all 6 confirmed** — evidence in `scritps/dumps/`, docstrings corrected to match (see Resolved section). |
 | `grep_dump.py` | Stdlib substring search over a saved JSON dump. | Solid, no dependencies. |
 | `automate_ableton_task.py` | Action engine. 8 tasks. `resolve()` never caches controls. `click_by_id()` = Mouse→Keyboard→Human ladder (**no MCP/LOM tier by design** — deliberately excluded, see its own docstring). `set_checkbox_by_id()` = click→re-read→retry→raise. Emits `EVENT:` JSON per action. | Solid engine. `--list-tasks`/`--list-tracks` work without Ableton running. |
 | `keyboard_shortcuts.py` | Sourced shortcut registry (cites Ableton manual §), `blocked` flag, `load_shortcut()` guard. | **Built but not wired in** — no `click_by_id()` call site in the current code passes a `keyboard_shortcut`. L2 of the ladder is dead in production tasks; only exercised standalone by `probe_keyboard_activator`. |
@@ -97,8 +97,7 @@ two exceptions that still need direct `python.exe automate_ableton_task.py`:
   same gap independently reached by reading the current code (see §3 of
   the prior session's summary) — good corroboration, not new information.
 - Both docs are internally consistent with the current code. No further
-  discrepancies found in this pass (contrast with the old `context.md`'s
-  browser-category claim, which does conflict — see Open Items).
+  discrepancies found in this pass.
 
 ### Test suite — actually run in the sandbox this session (not just read)
 
@@ -119,15 +118,21 @@ claim — verified directly, not taken on trust.
 
 ### Open items — need user verification next session
 
-1. **Browser category discrepancy** (see table above): old `context.md`
-   claims 6/6 confirmed; current code's docstring claims 2/6. Needs a
-   real `--states all` run + `grep_dump.py` check to settle which is true.
-   Not resolved by the archived-docs read — neither `phased_plan.md` nor
-   `screenshot_orchestration_analysis.md` mentions browser categories at
-   all, so they're silent on this, not corroborating either side.
-2. Has `solo_tour` been run live at all in V2? If yes, did it actually
+1. Has `solo_tour` been run live at all in V2? If yes, did it actually
    produce zero screenshots as the code implies, or is there some other
    mechanism catching it that wasn't found in this read-through?
+
+### Resolved this session
+
+- **Browser category verification status.** `scritps/dumps/` contains
+  tracked (not gitignored-away) real dumps for all six categories,
+  timestamped one session (2026-08-04 08:34). Each shows a distinctly-
+  named, distinctly-counted list marker (Sounds=1001, Instruments=23,
+  Drums=1001, Audio Effects=47, MIDI Effects=15, Plug-Ins=0) — strong
+  evidence all six were actually selected and captured correctly, not
+  the same state relabeled six times. `dump_ableton_states.py`'s
+  docstrings/help text (which claimed only 2/6 verified) were the stale
+  side here and have been corrected to reflect all 6 as confirmed.
 
 ### Audit coverage status
 
@@ -149,8 +154,22 @@ OpenCode-consistency question from the prior session, still unanswered).
 - Where `docs/ableton_ai_educational_risk_framework.md` (a pre-implementation
   design doc) conflicts with current code: **code wins**, doc entry is
   stale, not a real gap.
-- Where any old `context.md`/handoff doc conflicts with current code's own
-  docstrings/comments: **current code wins** until live-verified otherwise
-  (same rule, same reasoning).
+- **The pre-V2 `context.md` is retired.** It served its purpose across
+  earlier sessions and is not to be referenced, quoted, or treated as a
+  source of truth going forward — the AI Assistant doing so isn't fair to
+  work done in sessions it has no visibility into. **This file
+  (`context.md` at the repo root, current version) is the only handoff
+  document in effect.** If a discrepancy between this file and the code
+  ever needs resolving, resolve it the normal way (verify against the
+  code/live app), not by appealing to what an earlier document said.
+- Code still contains 8 stale in-code references to the retired
+  `context.md` (comments/docstrings citing "session 4," "LOG," "STATE
+  table" — content that didn't carry forward). Not yet cleaned up — audit
+  is still code-read-only, no edits made. Locations, for whenever cleanup
+  happens:
+  - `scritps/automate_ableton_task.py`: lines 122, 393, 404, 412, 415
+  - `scritps/keyboard_shortcuts.py`: line 62
+  - `scritps/dump_ableton_states.py`: line 121
+  - `orchestrate.sh`: line 2
 - Not writing `AGENTS.md` yet — audit first.
 - Not writing implementation code yet — this is audit/planning only.
