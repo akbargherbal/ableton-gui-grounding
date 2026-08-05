@@ -105,7 +105,15 @@ Evaluated whether the 3 main UIA gaps (browser item selection/drag-drop, clip la
 
 ## 4. Decide the screenshot-granularity policy for v1
 
-**Status: NOT STARTED**
+**Status: DONE**
+
+**2026-08-05 — code audit & decision (user + AI, this session):**
+
+- **Code audit finding:** `orchestrate.sh`'s `run_one_task()` currently takes **one** screenshot per task run, and derives its label from only the **last** `EVENT:` line carrying a `label` field (see `orchestrate.sh` lines ~179-181: `grep '^EVENT: ' ... | tail -n 1`). Confirmed concretely against `task_arm_track()` (Scenario A, agenda item #2), which has two real sub-steps (arm checkbox, then Monitor→In click) but produces a single final screenshot labeled only from the second sub-step.
+- **Infrastructure already in place:** `automate_ableton_task.py` already emits granular `action_start`/`action_result` events (with per-substep `label`) for every `click_by_id()`/`set_checkbox_by_id()` call (lines ~356-487). The data needed for finer-grained screenshots already exists in the `EVENT:` stream — closing this gap is a consumer-side (`orchestrate.sh`) change, not an engine-side one.
+- **Decision: per-sub-click screenshot granularity.** Accept the added cost (more screenshots, more complex `seq` counter handling, `desc` derivation needs to key off each event as it happens rather than the last one) in exchange for closing V2's core gap — showing the student *how* an outcome was reached, not just the outcome. This directly matches the project's stated grounding standard in `context.md`.
+- **Scope note:** this only materially changes behavior for `SINGLE_ACTION_TASKS` with more than one actual sub-step (e.g. `arm_track`). Tasks that are already a single action (e.g. `set_tempo`) are unaffected in practice.
+- **Sequencing agreed with user:** decision recorded now; actual implementation deferred to **Item #7**, in agenda order (after #5 and #6), rather than jumping ahead. Item #7 is no longer conditional — it is now a committed follow-on to this decision, not an "if #4 chose fix it" branch.
 
 ---
 

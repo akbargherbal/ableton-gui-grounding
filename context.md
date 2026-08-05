@@ -95,12 +95,12 @@ Code inspection of `uisato/ableton-mcp-extended` (`AbletonMCP_Remote_Script/__in
 
 - [x] Item 1: Verify `solo_tour` screenshot behavior live.
 - [x] Item 2: Trace 3 teaching scenarios through code (identified Scenario B dead end & Scenario C naming trap).
+- [x] Item 3: Decide v1 `AGENTS.md` scope for UIA gaps. **Decision:** do not blindly fall back to MCP (code audit of `uisato/ableton-mcp-extended` found `_set_device_parameter()` never re-reads state after write — guaranteed false-positive success). Any MCP use for device params/browser loading must be paired with an explicit post-write read-back verification. Final UIA-vs-MCP arbitration deferred to Item #8. Full detail in `docs/v2_observations.md` §3.
+- [x] Item 4: Decide screenshot-granularity policy. **Decision:** move to per-sub-click granularity (not current per-task). Rationale: `orchestrate.sh`'s `run_one_task()` today takes one screenshot per task, labeled from only the *last* `EVENT:` line — confirmed this loses intermediate state on multi-substep tasks (e.g. `arm_track`'s arm-checkbox step vs its Monitor→In step). The per-substep `action_start`/`action_result` events already exist in `automate_ableton_task.py`'s `EVENT:` stream, so this is an `orchestrate.sh`-side (consumer) change, not an engine change. Item #7 is therefore no longer conditional — it's a committed implementation task, sequenced after #5 and #6 per user's explicit request to keep agenda order. Full detail in `docs/v2_observations.md` §4.
 
 **Open Agenda (Ordered Easiest → Hardest):**
 
-1. **Decide Scope for v1 `AGENTS.md` (Item #3):** Decide whether UIA gaps (browser item selection, clip launching, device parameters) are explicitly marked _"not supported in v1"_ or routed to MCP with a required manual read-verify step.
-2. **Decide Screenshot-Granularity Policy (Item #4):** Accept current per-track/per-task granularity or decide to implement per-sub-click screenshots.
-3. **Wire `keyboard_shortcuts.py` into `click_by_id()` Call Sites (Item #5):** Pass `load_shortcut()` at unblocked call sites so L2 of the escalation ladder is active in production tasks.
-4. **Baseline-Test OpenCode Routing (Item #6):** Prompt OpenCode with a scenario without `AGENTS.md` to establish baseline tool selection behavior (orchestrator vs raw Python vs MCP).
-5. **(Conditional) Implement Per-Click Screenshots (Item #7):** If required by Item #4, parse the `EVENT:` stream to take screenshots after intermediate clicks.
-6. **Define UIA-vs-MCP Arbitration Policy & Draft `AGENTS.md` (Item #8):** Codify routing rules between UIA and MCP paths based on verified post-action grounding capabilities.
+1. **Wire `keyboard_shortcuts.py` into `click_by_id()` Call Sites (Item #5):** Pass `load_shortcut()` at unblocked call sites so L2 of the escalation ladder is active in production tasks.
+2. **Baseline-Test OpenCode Routing (Item #6):** Prompt OpenCode with a scenario without `AGENTS.md` to establish baseline tool selection behavior (orchestrator vs raw Python vs MCP).
+3. **Implement Per-Click Screenshots (Item #7):** Committed (per Item #4 decision above). Modify `orchestrate.sh` to parse the `EVENT:` stream and take a screenshot after each `action_start`/`action_result`, not just once per task. Needs: `seq` counter to increment per sub-step (not per task), and `desc` derivation to key off each event as it fires rather than grepping the last labeled line.
+4. **Define UIA-vs-MCP Arbitration Policy & Draft `AGENTS.md` (Item #8):** Codify routing rules between UIA and MCP paths based on verified post-action grounding capabilities.
