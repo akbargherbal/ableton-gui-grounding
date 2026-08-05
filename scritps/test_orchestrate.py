@@ -50,6 +50,11 @@ fi
 if [ -n "${FAKE_AUTOMATE_LABEL_EVENT:-}" ]; then
   echo "EVENT: {\"v\":1,\"type\":\"action_result\",\"label\":\"${FAKE_AUTOMATE_LABEL_EVENT}\",\"level\":\"L1\",\"result\":\"success\"}"
 fi
+if [ -n "${FAKE_AUTOMATE_MULTI_EVENTS:-}" ]; then
+  for _lbl in ${FAKE_AUTOMATE_MULTI_EVENTS}; do
+    echo "EVENT: {\"v\":1,\"type\":\"action_result\",\"label\":\"${_lbl}\",\"level\":\"L1\",\"result\":\"success\"}"
+  done
+fi
 exit "${FAKE_AUTOMATE_EXIT:-0}"
 """
 
@@ -188,7 +193,7 @@ def test_happy_path_derives_desc_from_label_and_passes_lab_dir_unchanged():
         assert len(calls) == 1
         got_lab_dir, got_seq, got_desc = calls[0]
         assert got_lab_dir == lab_dir
-        assert got_seq == "01"
+        assert got_seq == "01_01"
         assert got_desc == "track_1_mixer_arm"
 
 
@@ -242,6 +247,28 @@ def test_seq_independent_per_lab_dir():
         assert by_lab["LABS/lab_b"] == ["01"]
 
 
+def test_per_event_screenshots_sub_step_counters():
+    with Sandbox() as sb:
+        proc = sb.run(
+            "LABS/x",
+            "arm_track",
+            "--tracks",
+            "1",
+            env_overrides={
+                "FAKE_AUTOMATE_MULTI_EVENTS": "arm_toggled monitor_set_to_in transport_play",
+                "FAKE_AUTOMATE_TASK_EVENT": "arm_track",
+            },
+        )
+        assert proc.returncode == 0
+        calls = sb.take_shot_calls()
+        assert len(calls) == 3
+        expected_seqs = ["01_01", "01_02", "01_03"]
+        expected_descs = ["arm_toggled", "monitor_set_to_in", "transport_play"]
+        for (_, actual_seq, actual_desc), exp_seq, exp_desc in zip(calls, expected_seqs, expected_descs):
+            assert actual_seq == exp_seq
+            assert actual_desc == exp_desc
+
+
 # --------------------------------------------------------------------------
 # Error branching
 # --------------------------------------------------------------------------
@@ -264,7 +291,7 @@ def test_automate_failure_still_takes_a_failed_screenshot_and_does_not_retry():
         calls = sb.take_shot_calls()
         assert len(calls) == 1
         _, _, desc = calls[0]
-        assert desc == "track_1_mixer_arm_FAILED"
+        assert desc == "track_1_mixer_arm"
 
 
 def test_take_shot_failure_surfaces_when_automate_succeeded():

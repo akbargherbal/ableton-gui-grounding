@@ -115,7 +115,7 @@ def ensure_window_ready(window):
 # below. Kept in its own module (keyboard_shortcuts.py) rather than
 # hardcoded here -- see that file for the full index, sourcing, and which
 # other shortcuts are still BLOCKED on the "no selected-track read" gap.
-from keyboard_shortcuts import activator_shortcut_for_index
+from keyboard_shortcuts import activator_shortcut_for_index, load_shortcut
 
 
 # --------------------------------------------------------------------------
@@ -409,13 +409,11 @@ def click_by_id(window: UIAWrapper, auto_id: str, dry_run: bool, label: str,
     keyboard_shortcut: optional pywinauto key sequence (e.g. "{VK_SPACE}").
     Only pass one that's been independently confirmed unambiguous for
     THIS control (checked against the manual or keyboard_shortcuts.py's
-    sourced entries) -- evidence-based, never a memory-based guess. No
-    call site in this file passes one yet: keyboard_shortcuts.py's
-    registry exists and several entries are unblocked (e.g.
-    transport_play_stop, activator_by_position), but nothing here calls
-    load_shortcut() to wire one in. Leaving this None everywhere for now
-    is a known gap, not an oversight -- see keyboard_shortcuts.py for
-    which entries are ready to use.
+    sourced entries) -- evidence-based, never a memory-based guess.
+    Currently wired at Transport.Play / Transport.Stop call sites via
+    load_shortcut("transport_play_stop"). Additional call sites should
+    use the same pattern once their matching shortcuts are unblocked in
+    keyboard_shortcuts.py.
     """
     if verify is None:
         print(f"  [warn] {label}: no verification available for this control -- "
@@ -754,10 +752,13 @@ def task_solo_one(window: UIAWrapper, track_index: int,
         print(f"Track {track_index}: solo -> play {seconds}s -> stop -> unsolo")
         set_checkbox_by_id(window, solo_id, desired=True, dry_run=dry_run,
                             label=f"Track[{track_index}].Solo")
-        click_by_id(window, "Transport.Play", dry_run=dry_run, label="Transport.Play")
+        transport_key = load_shortcut("transport_play_stop")
+        click_by_id(window, "Transport.Play", dry_run=dry_run, label="Transport.Play",
+                      keyboard_shortcut=transport_key)
         if not dry_run:
             time.sleep(seconds)
-        click_by_id(window, "Transport.Stop", dry_run=dry_run, label="Transport.Stop")
+        click_by_id(window, "Transport.Stop", dry_run=dry_run, label="Transport.Stop",
+                      keyboard_shortcut=transport_key)
         set_checkbox_by_id(window, solo_id, desired=original, dry_run=dry_run,
                             label=f"Track[{track_index}].Solo")
     finally:

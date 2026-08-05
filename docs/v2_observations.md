@@ -119,19 +119,110 @@ Evaluated whether the 3 main UIA gaps (browser item selection/drag-drop, clip la
 
 ## 5. Wire `keyboard_shortcuts.py` into `click_by_id()` call sites
 
-**Status: NOT STARTED**
+**Status: DONE**
+
+**2026-08-05 — code change (this session):**
+
+Inventory of unblocked shortcuts and where they apply:
+- `transport_play_stop` → `{VK_SPACE}` → unblocked → applies to `Transport.Play` and `Transport.Stop`
+- `activator_by_position` → `{F1}`..`{F8}` → unblocked → applies to `SessionView.Track[N].Mixer.Activator` (no production `click_by_id()` call site uses Activator)
+
+All other shortcuts are blocked (selection-based dependency: `solo_selected_track`, `arm_selected_track`, `deactivate_selected_track`) or have no known key sequence (`monitoring_buttons`) or are out of scope (`launch_selected_slot`).
+
+Changes made:
+1. Added `load_shortcut` to the import from `keyboard_shortcuts` in `automate_ableton_task.py` (line 118).
+2. In `task_solo_one()`, load `transport_play_stop` shortcut once and pass it as `keyboard_shortcut=` to both Transport.Play and Transport.Stop `click_by_id()` call sites (lines 757–763).
+3. Updated `click_by_id()` docstring to reflect that call sites are now wired (removed the "no call site passes one yet" statement).
+
+Test suite: 28/28 passing after changes. `load_shortcut()` correctly raises `ShortcutBlocked` for blocked entries (verified via manual import test).
 
 ---
 
 ## 6. Baseline-test OpenCode's default tool routing with NO `AGENTS.md`
 
-**Status: NOT STARTED**
+**Status: DONE**
+
+**2026-08-05 — live test in separate session (user observed, agent = DeepSeek V4 Flash):**
+
+A separate OpenCode session was pointed at `ableton-gui-grounding-baseline` (project copy with `AGENTS.md` removed). The user gave the prompt:
+
+> "I wants to arm track 1 and set its monitor to In. Show them the steps."
+
+The agent's behavior without any routing guidance:
+
+### Phase 1 — defaulted to MCP (no project exploration)
+
+- Called `AbletonMCP_get_session_info` (errored: "Communication error with Ableton")
+- Called `AbletonMCP_get_track_info` (succeeded — returned track state incl. `"arm": false`)
+- Called `list_mcp_resources` (empty)
+- **Conclusion**: "MCP has no arm/monitor tools." Offered to extend the MCP server or do it manually.
+- **Did NOT**: list project files, read any local file, or check for non-MCP tools.
+
+### Phase 2 — found the engine, gave up on platform assumption
+
+_After user nudge: "Could you check other tools other than mcp servers"_
+- Ran `ls -la`, found `orchestrate.sh`, `scritps/`
+- Ran `glob **/*.py`, found the Python files
+- Read `automate_ableton_task.py` end-to-end — discovered `task_arm_track()` and its CLI usage
+- Read `keyboard_shortcuts.py`
+- **Conclusion**: "Found it — this project already has a GUI-automation script. But it's **Windows-only** and this environment is Linux. Run it from Windows instead."
+- **Did NOT**: try `python.exe` from WSL, read `orchestrate.sh`, read `take_shot.sh`, or read `context.md`.
+
+### Phase 3 — full pipeline, perfect execution
+
+_After second nudge: "We're in WSL; so I believe Windows is accessible. Try also other bash scripts."_
+- Read `orchestrate.sh` and `take_shot.sh` in full
+- Verified `python.exe`, `cmd.exe`, `powershell.exe` all reachable from WSL
+- Ran dry-run: `python.exe ... --task arm_track --tracks 1` → success (no clicks)
+- Ran live via orchestrator: `./orchestrate.sh LABS/arm_track_demo arm_track --tracks 1` → both steps verified, screenshot captured at `01_track_1_monitoring_in.png`
+
+### What the agent NEVER did
+
+- Never read `context.md` — even after exploring the project directory and reading multiple `.py`/`.sh` files, it skipped the project's own state/intent document entirely.
+
+### Dead ends hit (0/2 avoided without AGENTS.md)
+
+1. **MCP gap**: The agent's MCP-first instinct is natural (it's an MCP-connected session), but MCP lacks arm/monitor tools — a dead end.
+2. **Platform assumption**: Agent saw `pywinauto` + `Windows` in docstrings and concluded Linux can't reach Windows, even though WSL interop (`python.exe`, `powershell.exe`) is standard.
+
+### Conclusion
+
+Without `AGENTS.md`, the agent needed **two explicit nudges** to reach the correct path and would have quit after each dead end. With `AGENTS.md`, the instructions "read `context.md` first → `orchestrate.sh` is the front door → `arm_track` is in `SINGLE_ACTION_TASKS`" would have led it directly to the correct `orchestrate.sh` call in one step. The routing rules in `AGENTS.md` are **load-bearing, not cosmetic**.
+
+Full session log: `LIVE_TEST/BASELINE_SESSION_session-ses_02cd.md`
 
 ---
 
 ## 7. (If #4 chose "fix it") Implement per-click screenshot capability
 
-**Status: NOT STARTED**
+**Status: DONE (2026-08-05)**
+
+### What changed
+
+Replaced `orchestrate.sh`'s `run_one_task()` with a FIFO-based real-time event pipeline:
+
+- **Before**: task ran to completion → grep last `EVENT:` line → ONE screenshot at the end. Lost all intermediate visual state (e.g., `arm_track`'s arm-checkbox step was never captured — only the final Monitor→In state).
+- **After**: `(Python → echo $?) | tee log > fifo` pipeline. A `while read` loop consumes the FIFO line-by-line during task execution. Each `action_start` and `action_result` event triggers an immediate `take_shot.sh` call, so the Ableton window is captured at the exact moment each sub-step completes.
+
+### Key design decisions
+
+1. **Real-time, not post-hoc**: screenshots are taken during execution, not after. This preserves intermediate visual state (the Ableton window changes as the task runs). Using a named FIFO lets the orchestrator read events line-by-line without waiting for the task to finish.
+
+2. **Exit code capture via temp file**: the pipeline `(task; echo $? > file) | tee ...` avoids losing Python's exit code (which would otherwise be masked by `tee`'s exit status in a background pipeline).
+
+3. **Sub-step numbering**: `seq` = `{task_seq}_{sub_step}`, e.g. `01_01`, `01_02`. The task-level `seq` still comes from `.orchestrate_seq` and only increments once per `run_one_task()` call. The `sub_step` counter resets each call.
+
+4. **Fallback for read-only tasks**: if a task emits zero `action_start`/`action_result` events (e.g., `read_solo_states`), a single fallback screenshot is taken with the task name as label — lab folders are never left empty.
+
+5. **No `_FAILED` suffix**: removed. Since screenshots are taken during execution (before the exit code is known), marking them retroactively would be misleading. Task success/failure is still surfaced via the orchestrator's exit code.
+
+6. **`take_shot.sh` unchanged**: this was purely an `orchestrate.sh`-side change (consumer), as predicted in §4. The engine's `EVENT:` stream needed no modification.
+
+### Test coverage
+
+- `test_per_event_screenshots_sub_step_counters` — 3 `action_result` events in one task → 3 screenshots with `01_01`, `01_02`, `01_03` seqs
+- All 14 existing tests pass (2 updated: removed `_FAILED` suffix assertion, updated sub-step seq format)
+- Full suite: 15/15 orchestrate tests + 14/14 engine tests = 29 total, all passing
 
 ---
 

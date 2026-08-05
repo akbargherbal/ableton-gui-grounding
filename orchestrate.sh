@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 # orchestrate.sh — coordination layer
 #
-# Runs ONE automate_ableton_task.py task against real Ableton, then takes ONE
-# screenshot of the result via take_shot.sh, auto-numbering and auto-
-# labeling the screenshot from the task's own structured EVENT: output.
+# Runs ONE automate_ableton_task.py task against real Ableton, taking a
+# screenshot after each action_start / action_result EVENT: emitted by the
+# engine — so every click gets its own screenshot (not just one per task).
+# Uses a FIFO-based pipeline to capture the screen at the EXACT moment the
+# step completes, preserving intermediate visual state.
 # Single-action tasks only — see SINGLE_ACTION_TASKS below.
-# `solo_tour` is explicitly excluded: it's multi-step internally, so one
-# orchestrate.sh call would only get a before/after screenshot pair, not
-# one screenshot per click.
+# `solo_tour` is explicitly excluded: though per-event screenshots would
+# work, the multi-track loop inside the task is better driven from
+# orchestrate.sh's solo_one path (one seq per track, clear grouping).
 #
 # Usage:
 #   ./orchestrate.sh <lab_dir> <task> [task-args...]
@@ -146,11 +148,18 @@ slugify() {
 }
 
 # --------------------------------------------------------------------------
-# run_one_task — core "run automate script + take screenshot" unit
+# run_one_task — real-time event-driven screenshot engine
 # --------------------------------------------------------------------------
 #
 # $1 = seq_padded (e.g. "03"), $2 = fallback label (task name), rest = args
 # to automate_ableton_task.py (must include --live for real action).
+#
+# Instead of waiting for the task to finish and taking ONE screenshot from
+# the LAST EVENT: line, we use a FIFO to read the EVENT: stream in real time.
+# Every action_start / action_result event triggers an immediate screenshot
+# (via take_shot.sh), capturing the Ableton window at the exact moment the
+# step completes.  Sub-step numbering looks like "03_01", "03_02", etc.
+#
 # Returns the worse of automate exit code and screenshot exit code.
 
 run_one_task() {
@@ -159,65 +168,124 @@ run_one_task() {
   shift 2
   local auto_args=("$@")
 
-  local events_tmp
-  events_tmp="$(mktemp)"
+  local tmp_dir
+  tmp_dir="$(mktemp -d)"
+  local fifo="$tmp_dir/events.fifo"
+  local py_exit_file="$tmp_dir/py_exit"
+  mkfifo "$fifo"
+
+  local sub_step=0
+  local shot_exit=0
+  local auto_exit=0
 
   log "running: ${auto_args[*]}"
   echo "--- automate_ableton_task.py output ---"
-  "$PYTHON_CMD" "$AUTOMATE_SCRIPT" "${auto_args[@]}" 2>&1 | tee "$events_tmp"
-  local auto_exit="${PIPESTATUS[0]}"
+
+  # ----------------------------------------------------------------------
+  # Pipeline: (Python → echo exit code) | tee → FIFO + log file
+  #
+  # The subshell captures Python's real exit code (not tee's exit code,
+  # which is always 0 on clean EOF) and stores it in a temp file.
+  # tee feeds the FIFO line-by-line so the while-read loop below can
+  # trigger screenshots before the entire task is finished.
+  # ----------------------------------------------------------------------
+  (
+    "$PYTHON_CMD" "$AUTOMATE_SCRIPT" "${auto_args[@]}" 2>&1
+    echo "$?" > "$py_exit_file"
+  ) | tee "$tmp_dir/events.log" > "$fifo" &
+  local task_pid=$!
+
+  while IFS= read -r line; do
+    echo "$line"
+
+    if [[ "$line" != "EVENT: "* ]]; then
+      continue
+    fi
+
+    local json_body="${line#EVENT: }"
+    local event_type
+    event_type="$(extract_field "$json_body" "type")"
+
+    if [ "$event_type" = "action_start" ] || [ "$event_type" = "action_result" ]; then
+      sub_step=$((sub_step + 1))
+      local sub_seq_padded
+      sub_seq_padded="$(printf "%s_%02d" "$run_seq_padded" "$sub_step")"
+
+      local raw_desc
+      raw_desc="$(extract_field "$json_body" "label")"
+      if [ -z "$raw_desc" ]; then
+        raw_desc="$(extract_field "$json_body" "task")"
+      fi
+      if [ -z "$raw_desc" ]; then
+        raw_desc="$run_fallback_label"
+      fi
+
+      local desc
+      desc="$(slugify "$raw_desc")"
+
+      log "capturing screenshot: seq=$sub_seq_padded desc=$desc"
+      echo "--- take_shot.sh output ---"
+      "$TAKE_SHOT" "$LAB_DIR" "$sub_seq_padded" "$desc"
+      local this_shot_exit=$?
+      echo "--- end take_shot.sh output ---"
+
+      [ "$this_shot_exit" -ne 0 ] && shot_exit=$this_shot_exit
+    fi
+  done < "$fifo"
+
+  wait "$task_pid"
+
+  # Read the Python exit code the subshell stashed for us
+  for _ in 1 2 3 4 5; do
+    if [ -f "$py_exit_file" ]; then
+      break
+    fi
+    sleep 0.1
+  done
+  if [ -f "$py_exit_file" ]; then
+    auto_exit="$(cat "$py_exit_file")"
+    case "$auto_exit" in
+      *[!0-9]*) auto_exit=1 ;;
+      '')       auto_exit=1 ;;
+    esac
+  else
+    auto_exit=1
+  fi
+
   echo "--- end automate_ableton_task.py output ---"
 
   if [ "$auto_exit" -eq 0 ]; then
     log "task succeeded (exit 0)"
   else
-    log "task FAILED (exit $auto_exit) — not retrying against live Ableton; still capturing a failure screenshot"
+    log "task FAILED (exit $auto_exit) — not retrying against live Ableton; still captured failure screenshots"
   fi
 
-  # derive <short_description> from EVENT: line
-  local last_event_line
-  last_event_line="$(grep '^EVENT: ' "$events_tmp" | grep '"label":' | tail -n 1 || true)"
-  if [ -z "$last_event_line" ]; then
-    last_event_line="$(grep '^EVENT: ' "$events_tmp" | tail -n 1 || true)"
-  fi
-
-  local raw_desc=""
-  if [ -n "$last_event_line" ]; then
-    local json_body
-    json_body="${last_event_line#EVENT: }"
-    raw_desc="$(extract_field "$json_body" "label")"
-    if [ -z "$raw_desc" ]; then
-      raw_desc="$(extract_field "$json_body" "task")"
-    fi
-  fi
-  if [ -z "$raw_desc" ]; then
+  # Fallback: if no action_start/action_result events were emitted at all
+  # (e.g. a read-only diagnostic task), take one screenshot with the task
+  # name as the label so the lab folder is never left empty.
+  if [ "$sub_step" -eq 0 ]; then
+    local raw_desc
     raw_desc="$run_fallback_label"
+    local desc
+    desc="$(slugify "$raw_desc")"
+
+    log "no action events; capturing fallback screenshot: seq=$run_seq_padded desc=$desc"
+    echo "--- take_shot.sh output ---"
+    "$TAKE_SHOT" "$LAB_DIR" "$run_seq_padded" "$desc"
+    local this_shot_exit=$?
+    echo "--- end take_shot.sh output ---"
+
+    [ "$this_shot_exit" -ne 0 ] && shot_exit=$this_shot_exit
   fi
 
-  local desc
-  desc="$(slugify "$raw_desc")"
-  if [ "$auto_exit" -ne 0 ]; then
-    desc="${desc}_FAILED"
-  fi
+  rm -rf "$tmp_dir"
 
-  rm -f "$events_tmp"
+  local overall_exit=0
+  [ "$auto_exit" -ne 0 ] && overall_exit=$auto_exit
+  [ "$shot_exit" -ne 0 ] && overall_exit=$shot_exit
 
-  log "capturing screenshot: seq=$run_seq_padded desc=$desc"
-  echo "--- take_shot.sh output ---"
-  "$TAKE_SHOT" "$LAB_DIR" "$run_seq_padded" "$desc"
-  local shot_exit=$?
-  echo "--- end take_shot.sh output ---"
-
-  if [ "$shot_exit" -ne 0 ]; then
-    log "screenshot capture FAILED (exit $shot_exit)"
-  fi
-
-  log "done. automate_exit=$auto_exit shot_exit=$shot_exit"
-
-  if [ "$auto_exit" -ne 0 ]; then
-    return "$auto_exit"
-  fi
-  return "$shot_exit"
+  log "done. automate_exit=$auto_exit shot_exit=$shot_exit sub_steps=$sub_step"
+  return "$overall_exit"
 }
 
 # --------------------------------------------------------------------------
