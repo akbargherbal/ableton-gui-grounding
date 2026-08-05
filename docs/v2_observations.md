@@ -84,7 +84,22 @@ Prompted by a direct question: not just _what's_ possible/impossible, but _where
 
 ## 3. Decide what's out of scope for v1 `AGENTS.md`
 
-**Status: NOT STARTED**
+**Status: DONE**
+
+**2026-08-05 — code audit & risk analysis (`uisato/ableton-mcp-extended` inspection):**
+
+Evaluated whether the 3 main UIA gaps (browser item selection/drag-drop, clip launching, device parameters) should fall back to MCP in `AGENTS.md` or be documented as _"not supported in v1"_.
+
+- **Code Audit of MCP Server (`uisato/ableton-mcp-extended`):**
+  - Inspected `_set_device_parameter()` in `AbletonMCP_Remote_Script/__init__.py` directly. Confirmed it executes `param.value = raw_value` and returns `{"new_value": round(clamped, 4)}`. **It never re-reads `param.value` from Ableton after writing.** It echos the calculated target value regardless of whether Ableton accepted, clamped, or rejected the change. This guarantees a 100% false-positive "success" response.
+  - Inspected `_resolve_device()`. Confirmed track resolving uses `self._song.tracks[track_index]` (Live Object Model array order). In projects with collapsed/hidden group tracks, LOM array indexing diverges from visible 0-based Session View track rendering (`SessionView.Track[N]`).
+- **Screenshot Coordination Risk:**
+  - `take_shot.sh` is technically callable standalone (`./take_shot.sh <lab_dir> <seq> <description>`), allowing screenshot capture after MCP calls.
+  - However, MCP calls produce no `EVENT:` JSON stream, risking `seq` counter collisions and generating screenshots labeled on unverified trust—defeating the core project goal of grounded verification.
+- **Decision & Rule for `AGENTS.md`:**
+  - **Do not blindly fall back to MCP for these gaps in v1.**
+  - If MCP is used for device parameters or browser loading, it **must be paired with an explicit post-write read-back verification call** (reading the state back via MCP or UIA), rather than accepting MCP's unverified response ack.
+  - Final arbitration policy details are deferred to Item 8 (UIA-vs-MCP arbitration testing).
 
 ---
 
