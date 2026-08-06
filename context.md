@@ -18,7 +18,6 @@ To prevent documentation confusion across sessions:
 
 - `context.md` (this file — single source of handoff truth)
 - `docs/routing_test_protocol.md` (the 16-probe, Tier 0–7 test protocol; the answer key — never shipped to the agent's runtime folder)
-- `docs/routing_test_results.md` (running log of live probe results)
 
 **Archived Docs (`docs/archived/*`):**
 _Archived docs are strictly out of scope. Do not read, cite, or treat them as current for audit decisions._
