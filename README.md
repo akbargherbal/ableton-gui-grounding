@@ -54,7 +54,7 @@ problem, not a mechanism problem.
 
 | File | Role |
 |---|---|
-| `AGENTS.md` | Agent instructions (Python version, file roles, automation_id scheme, source-of-truth for confirmed status). |
+| `ABLETON_AGENT_POLICY.md` | Agent instructions (Python version, file roles, automation_id scheme, source-of-truth for confirmed status). Named `ABLETON_AGENT_POLICY.md` in this dev repo — not `AGENTS.md` — because `AGENTS.md` is a special filename agentic coding tools auto-read as instructions for themselves; keeping it under that name here would make a dev-session assistant misread it as directed at itself. `build_runtime_env.sh` renames it back to `AGENTS.md` on copy into the agent-facing runtime folder, where that convention is what makes it auto-load. |
 | `docs/phased_plan.md` | Archived: the phased implementation plan that drove Phases 0–3. |
 | `docs/screenshot_orchestration_analysis.md` | Archived: initial analysis of screenshot capture strategies and shortcomings. |
 

@@ -19,7 +19,9 @@ To prevent documentation confusion across sessions:
 **Active Docs in Scope:**
 
 - `context.md` (this file — single source of handoff truth)
-- `docs/v2_observations.md` (running verification log for the 8-item audit agenda)
+- `docs/v2_observations.md` (running verification log for the 8-item audit agenda — that agenda is closed; kept for history)
+- `docs/routing_test_protocol.md` (the 16-probe, Tier 0–7 test protocol; the answer key — never shipped to the agent's runtime folder)
+- `docs/routing_test_results.md` (NEW, session 7 — running log of live probe results, one Tier per session; see "Session 7+ Plan" below)
 - `docs/ableton_ai_educational_risk_framework.md` (secondary — pre-implementation design doc; code wins on conflict)
 - `docs/opencode-ableton-mcp-setup.md` (secondary — V1 setup & MCP architecture reference)
 
@@ -111,4 +113,37 @@ This audit's job, before writing `AGENTS.md`, is to:
 7. ~~**Implement Per-Click Screenshots (Item #7):** Modify `orchestrate.sh` to parse the `EVENT:` stream and take a screenshot after each `action_start`/`action_result`, not just once per task. Needs: a `seq` counter that increments per sub-step (not per task), and `desc` derivation that keys off each event as it fires rather than grepping the last labeled line.~~ **DONE.** FIFO-based real-time pipeline. 15/15 tests pass.
 8. ~~**Finalize UIA-vs-MCP Arbitration Policy in `AGENTS.md` (Item #8):**~~ **DONE (session 6).** `AGENTS.md` written from scratch — see completed-items entry above for details.
 
-**No open agenda items remain from the original 8-item audit.** Next session should decide what's next: extend `AGENTS.md` with the file-roles/automation_id-scheme content that was deliberately deferred this session, or open a new agenda based on live use of the routing rules.
+**No open agenda items remain from the original 8-item audit.** The 8-item audit is closed. Session 7 opened a new, separate agenda: live-testing `AGENTS.md`'s routing rules via `docs/routing_test_protocol.md`.
+
+---
+
+### Session 7+ Plan: Tier-by-Tier Routing Test Analysis
+
+**Setup (done, session 7):** `build_runtime_env.sh ../ableton-ai-training/` produced the isolated agent-facing runtime. The user ran the first 7 of 16 probes (`docs/prompts.json`, generated via `docs/make_prompt.py`) — each probe in its own fresh OpenCode session, against a fresh Ableton session, per `routing_test_protocol.md`'s cold-start requirement. Each session's chat transcript was exported from OpenCode to `../RESULTS/result_01.md` … `result_07.md`. These 7 map to Tier 0 (P0.1, P0.2) + Tier 1 (P1.1–P1.3) + Tier 2 (P2.1–P2.2) — the user then paused before Tier 3, having noticed execution-quality issues that need addressing before trusting further results.
+
+**Rule for this agenda (explicit user correction, session 7):** do not assume the 8-item audit's "DONE" findings or the harness itself were built correctly just because they're marked done. Every session's analysis must look for shortcomings on **both** sides — ours (harness/prompting/environment/isolation setup) and the agent's (routing correctness per each probe's Pass/Fail criteria in `routing_test_protocol.md`) — never default to blaming the agent alone.
+
+**Cadence:** one Tier analyzed per session (matches the user's own token-budget concern — reading all 7 transcripts in one session was explicitly rejected). Findings go in `docs/routing_test_results.md`, one dated section per Tier, each split into an "Our-side issues" and "Agent-side issues" subsection, mirroring `routing_test_protocol.md`'s own Tier structure so a result maps directly back to its probe's Watch-for/Pass/Fail criteria.
+
+**Order:**
+
+1. Tier 0 (P0.1, P0.2) — `result_01.md`, `result_02.md` (exact mapping to be confirmed against filenames/content when uploaded — not yet verified they're in probe order).
+2. Tier 1 (P1.1–P1.3) — `result_03.md`–`result_05.md`.
+3. Tier 2 (P2.1–P2.2) — `result_06.md`, `result_07.md`.
+4. Tiers 3–7 (P3.1–P7.1) — not yet run live; needs fresh probe sessions after Tier 0–2 findings are addressed, same one-probe-per-session discipline.
+
+**Known open threads, not yet resolved (flag for whichever session reaches the relevant Tier):**
+
+- **`python3`/`python` bug (code-confirmed, session 7):** `orchestrate.sh`'s two JSON-extraction helpers (`extract_json_float`, `extract_field`, lines ~45 and ~125) both prefer `python3` first via `command -v`, contradicting README.md:157's documented rule ("`python`, not `python3` — the latter is a stale 3.10"). This is a harness bug independent of any agent behavior — not yet fixed in code, just diagnosed. Fix candidate: flip the `command -v` precedence in both functions.
+- **MCP config edit during a "sandboxed" run (user-reported, session 7, not yet transcript-verified):** user observed the agent editing MCP server config/settings during a run against `ableton-ai-training/`. Confirmed by inspecting `build_runtime_env.sh`'s whitelist: it copies zero MCP-related files into the runtime folder, so whatever got edited was **not** inside the isolated runtime — it was either OpenCode's own global/user config or some other out-of-repo location. User to confirm where OpenCode's MCP config actually lives on their machine; this is the real isolation boundary to audit, not `build_runtime_env.sh` (which looks correct as written).
+- **Agent scope creep (user-reported, session 7, not yet transcript-verified):** user observed the agent "fixing" bugs in the project's own scripts unprompted during a YOLO-mode run — not authorized behavior (agent should use tools as-is, not patch them). Needs transcript confirmation of which run and what was changed.
+- **Directory-listing anomalies spotted in `../ableton-ai-training/` (session 7, not yet explained):**
+- `p08.txt` at the runtime root — not part of `build_runtime_env.sh`'s whitelist, origin unknown.
+- `LABS/arm-track-monitor-in_2026-08-06_0923/` has screenshots numbered `01_01`, then `04_01`–`04_03` — sub-steps `02`/`03` are missing from the sequence. Could be a retry reusing the lab dir, or a real numbering gap in item #7's FIFO per-substep pipeline. That lab's `SESSION_LOG.md` should explain it.
+- `LABS/` also has both `solo-compare-0-1_...` and `solo-compare-tracks0-1_...` — plausibly correct (P2.1 and P2.2 are different probes that both legitimately route to a looped `solo_one`), but not yet confirmed against the transcripts.
+
+**Filename fix, session 7 (done):** `AGENTS.md` was renamed to `ABLETON_AGENT_POLICY.md` **in this dev repo only**. Reason: `AGENTS.md` is a filename convention agentic coding tools (OpenCode, Claude Code, etc.) auto-read as instructions directed at *themselves*. An assistant working in this dev repo (auditing/editing the project, like the current audit) would otherwise risk misreading the Ableton-teaching-agent's routing rules as instructions for itself — the two are unrelated. `build_runtime_env.sh` now copies `ABLETON_AGENT_POLICY.md` → `AGENTS.md` on build (source and destination names deliberately differ for this one file; every other whitelisted file keeps the same relative path both sides) — verified live: `./build_runtime_env.sh /tmp/test-runtime-check` correctly produces `AGENTS.md` in the target with identical content, `bash -n` clean. `README.md`'s file table updated to match and explain the rename. **Action for the user:** merge this rename into the real repo (rename the file, pull the updated `build_runtime_env.sh` and `README.md`), then re-run `build_runtime_env.sh` against `../ableton-ai-training/` to refresh it — the already-built runtime folder still has the old copy under the correct `AGENTS.md` name, so it isn't broken, but any future rebuild needs the updated script.
+
+**Note on filename-to-probe mapping:** `result_01.md`–`result_07.md` are assumed to map to P0.1–P2.2 in order, but this is **not verified** — `docs/make_prompt.py` requires manually typing a selection number (1–16) each run, so export order could be run order, not probe order. Don't trust the filename; when a result file is opened, first confirm which probe it actually is by matching its prompt text against `docs/prompts.json`, before filing any finding under a Tier.
+
+**Next session should:** bring `result_01.md` and `result_02.md` (or confirm which two results are actually Tier 0), plus `LABS/arm-track-monitor-in_2026-08-06_0923/SESSION_LOG.md` and `p08.txt`, and begin the Tier 0 analysis in `docs/routing_test_results.md`.
