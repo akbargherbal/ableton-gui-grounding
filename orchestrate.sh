@@ -42,10 +42,10 @@ log() { echo "[orchestrator] $*"; }
 extract_json_float() {
   local json="$1" field="$2"
   local py_bin=""
-  if command -v python3 >/dev/null 2>&1; then
-    py_bin="python3"
-  elif command -v python >/dev/null 2>&1; then
+  if command -v python >/dev/null 2>&1; then
     py_bin="python"
+  elif command -v python3 >/dev/null 2>&1; then
+    py_bin="python3"
   fi
   if [ -n "$py_bin" ]; then
     "$py_bin" -c '
@@ -122,10 +122,10 @@ extract_field() {
   # $1 = raw JSON body (no "EVENT: " prefix), $2 = field name
   local json="$1" field="$2"
   local py_bin=""
-  if command -v python3 >/dev/null 2>&1; then
-    py_bin="python3"
-  elif command -v python >/dev/null 2>&1; then
+  if command -v python >/dev/null 2>&1; then
     py_bin="python"
+  elif command -v python3 >/dev/null 2>&1; then
+    py_bin="python3"
   fi
 
   if [ -n "$py_bin" ]; then
@@ -225,7 +225,7 @@ run_one_task() {
 
       log "capturing screenshot: seq=$sub_seq_padded desc=$desc"
       echo "--- take_shot.sh output ---"
-      "$TAKE_SHOT" "$LAB_DIR" "$sub_seq_padded" "$desc"
+      "$TAKE_SHOT" "$LAB_DIR" "$sub_seq_padded" "$desc" < /dev/null
       local this_shot_exit=$?
       echo "--- end take_shot.sh output ---"
 
@@ -271,7 +271,7 @@ run_one_task() {
 
     log "no action events; capturing fallback screenshot: seq=$run_seq_padded desc=$desc"
     echo "--- take_shot.sh output ---"
-    "$TAKE_SHOT" "$LAB_DIR" "$run_seq_padded" "$desc"
+    "$TAKE_SHOT" "$LAB_DIR" "$run_seq_padded" "$desc" < /dev/null
     local this_shot_exit=$?
     echo "--- end take_shot.sh output ---"
 
@@ -348,7 +348,12 @@ printf '%s' "$SEQ" > "$SEQ_FILE"
 log "task=$TASK args=${TASK_ARGS[*]:-<none>} lab_dir=$LAB_DIR seq=$SEQ_PADDED"
 log "running automate task (--live, no dry-run — this is a real action)"
 
-run_one_task "$SEQ_PADDED" "$TASK" \
-  --task "$TASK" --live "${TASK_ARGS[@]:-}"
+if [ ${#TASK_ARGS[@]} -gt 0 ]; then
+  run_one_task "$SEQ_PADDED" "$TASK" \
+    --task "$TASK" --live "${TASK_ARGS[@]}"
+else
+  run_one_task "$SEQ_PADDED" "$TASK" \
+    --task "$TASK" --live
+fi
 
 exit $?

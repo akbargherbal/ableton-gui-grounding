@@ -33,6 +33,22 @@ For any task listed in `SINGLE_ACTION_TASKS` in `orchestrate.sh`, use the orches
 
 Today's supported tasks: `arm_track`, `set_tempo`, `probe_toggle`, `probe_solo_transport`, `probe_keyboard_activator`, `read_solo_states`, `solo_one`.
 
+**Required arguments per task, and the `--tracks` convention (added session 12, closing a recurring friction point from Tiers 1–2 where this had to be resolved by reading source instead of this file):**
+
+| Task | Required args | Notes |
+| --- | --- | --- |
+| `arm_track` | `--tracks <one index>` | Exactly one index |
+| `solo_one` | `--tracks <one index>` | Exactly one index; `--seconds` optional (default 3.0) |
+| `set_tempo` | none required | `--bpm` optional (default 120.0); does **not** take `--tracks` |
+| `probe_toggle` | `--tracks <one index>` | Exactly one index |
+| `probe_solo_transport` | `--tracks <one index>` | Exactly one index; `--seconds` optional |
+| `probe_keyboard_activator` | `--tracks <one index>` | Exactly one index, 0–7 only |
+| `read_solo_states` | `--tracks <one or more indices>` | At least one index; multiple allowed |
+
+**`--tracks` is always 0-based**, matching the visible Session View track index (`0` = the first track). This is `automate_ableton_task.py`'s own documented convention (see its `--tracks` help text), not something inferred.
+
+**Interpreter note:** if you ever need to invoke Python directly for any reason (debugging, ad hoc checks, extending a task), always use `python`, never `python3`. In this environment `python` resolves to the current, maintained 3.12; `python3` resolves to a stale, unmaintained 3.10.
+
 **Name collision — `set_tempo` exists on both paths.** There is also an MCP tool called `set_tempo`. For tempo changes, always use `orchestrate.sh ... set_tempo` (the UIA task), not the MCP tool — same reasoning as the `solo_tour` trap below: matching names, but only one path is verified and screenshotted. The MCP `set_tempo` tool should not be used in teaching flows.
 
 **Gotcha — `solo_tour` is a naming trap, not an alternative:** it exists as a task name in the engine and is a real multi-track solo-comparison feature, but it is **explicitly excluded** from `orchestrate.sh` (see the script's own header comment) and produces **zero screenshots** when run directly via `automate_ableton_task.py`. `take_shot.sh` is only ever invoked from inside `orchestrate.sh`. For a solo comparison across tracks, use `orchestrate.sh ... solo_one` looped per track (one screenshot per track) — never call `solo_tour` directly in a teaching flow.
