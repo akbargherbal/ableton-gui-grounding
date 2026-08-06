@@ -1,0 +1,1398 @@
+[
+  {
+    "section_number": "41.1",
+    "category": "Showing and Hiding Views",
+    "shortcuts": [
+      {
+        "action": "Toggle Full Screen Mode",
+        "windows_shortcut": "F11"
+      },
+      {
+        "action": "Toggle Second Window",
+        "windows_shortcut": "Ctrl + Shift + W"
+      },
+      {
+        "action": "Toggle Session/Arrangement View",
+        "windows_shortcut": "Tab"
+      },
+      {
+        "action": "Toggle Between Device/Clip View",
+        "windows_shortcut": "Shift + Tab or F12"
+      },
+      {
+        "action": "Toggle Device and Clip View",
+        "windows_shortcut": "Alt click view toggle"
+      },
+      {
+        "action": "Toggle Hot-Swap Mode",
+        "windows_shortcut": "Q"
+      },
+      {
+        "action": "Toggle Drum Rack/Last Selected Pad",
+        "windows_shortcut": "D"
+      },
+      {
+        "action": "Hide/Show Info View",
+        "windows_shortcut": "Shift + ?"
+      },
+      {
+        "action": "Hide/Show Video Window",
+        "windows_shortcut": "Ctrl + Alt + V"
+      },
+      {
+        "action": "Hide/Show Browser",
+        "windows_shortcut": "Ctrl + Alt + B or Ctrl + Alt + 5"
+      },
+      {
+        "action": "Hide/Show Overview",
+        "windows_shortcut": "Ctrl + Alt + O"
+      },
+      {
+        "action": "Hide/Show In/Out",
+        "windows_shortcut": "Ctrl + Alt + I"
+      },
+      {
+        "action": "Hide/Show Sends",
+        "windows_shortcut": "Ctrl + Alt + S"
+      },
+      {
+        "action": "Hide/Show Mixer",
+        "windows_shortcut": "Ctrl + Alt + M"
+      },
+      {
+        "action": "Hide/Show Clip View",
+        "windows_shortcut": "Ctrl + Alt + 3"
+      },
+      {
+        "action": "Hide/Show Device View",
+        "windows_shortcut": "Ctrl + Alt + 4"
+      },
+      {
+        "action": "Hide/Show the Groove Pool",
+        "windows_shortcut": "Ctrl + Alt + 6"
+      },
+      {
+        "action": "Hide/Show the Learn View",
+        "windows_shortcut": "Ctrl + Alt + 7"
+      },
+      {
+        "action": "Open the Settings",
+        "windows_shortcut": "Ctrl + ,"
+      },
+      {
+        "action": "Close Window/Dialog",
+        "windows_shortcut": "Esc"
+      }
+    ]
+  },
+  {
+    "section_number": "41.2",
+    "category": "Keyboard Focus and Navigation",
+    "shortcuts": [
+      {
+        "action": "Move Focus to the Control Bar",
+        "windows_shortcut": "Alt + 0"
+      },
+      {
+        "action": "Move Focus to the Session View",
+        "windows_shortcut": "Alt + 1"
+      },
+      {
+        "action": "Move Focus to the Arrangement View",
+        "windows_shortcut": "Alt + 2"
+      },
+      {
+        "action": "Move Focus to the Clip View",
+        "windows_shortcut": "Alt + 3"
+      },
+      {
+        "action": "Move Focus to the Device View",
+        "windows_shortcut": "Alt + 4"
+      },
+      {
+        "action": "Move Focus to the Browser",
+        "windows_shortcut": "Alt + 5"
+      },
+      {
+        "action": "Move Focus to the Groove Pool",
+        "windows_shortcut": "Alt + 6"
+      },
+      {
+        "action": "Move Focus to the Learn View",
+        "windows_shortcut": "Alt + 7"
+      },
+      {
+        "action": "Move Focus to the Selected Clip Panel",
+        "windows_shortcut": "Alt + 8"
+      },
+      {
+        "action": "Move Focus to the Clip Panels",
+        "windows_shortcut": "Alt + Shift + P"
+      },
+      {
+        "action": "Move to Next Focusable Control",
+        "windows_shortcut": "Tab"
+      },
+      {
+        "action": "Move to Previous Focusable Control",
+        "windows_shortcut": "Shift + Tab"
+      },
+      {
+        "action": "Move to Next Neighbor of Current Control",
+        "windows_shortcut": "Ctrl + Tab"
+      },
+      {
+        "action": "Move to Previous Neighbor of Current Control",
+        "windows_shortcut": "Ctrl + Shift + Tab"
+      }
+    ]
+  },
+  {
+    "section_number": "41.3",
+    "category": "Working with Sets and the Program",
+    "shortcuts": [
+      {
+        "action": "New Live Set",
+        "windows_shortcut": "Ctrl + N"
+      },
+      {
+        "action": "Open Live Set",
+        "windows_shortcut": "Ctrl + O"
+      },
+      {
+        "action": "Save Live Set",
+        "windows_shortcut": "Ctrl + S"
+      },
+      {
+        "action": "Save Live Set As…",
+        "windows_shortcut": "Ctrl + Shift + S"
+      },
+      {
+        "action": "Quit Live",
+        "windows_shortcut": "Ctrl + Q"
+      },
+      {
+        "action": "Hide Live",
+        "windows_shortcut": null
+      },
+      {
+        "action": "Export Audio/Video",
+        "windows_shortcut": "Ctrl + Shift + R"
+      },
+      {
+        "action": "Export MIDI File",
+        "windows_shortcut": "Ctrl + Shift + E"
+      }
+    ]
+  },
+  {
+    "section_number": "41.4",
+    "category": "Working with Devices and Plug-Ins",
+    "shortcuts": [
+      {
+        "action": "Group Devices",
+        "windows_shortcut": "Ctrl + G"
+      },
+      {
+        "action": "Ungroup Devices",
+        "windows_shortcut": "Ctrl + Shift + G"
+      },
+      {
+        "action": "Activate/Deactivate All Devices in Group",
+        "windows_shortcut": "Hold Alt and click on device activator"
+      },
+      {
+        "action": "Add Device(s) to Selection",
+        "windows_shortcut": "Shift click"
+      },
+      {
+        "action": "See List of Devices on a Track",
+        "windows_shortcut": "right-click on Device View selector"
+      },
+      {
+        "action": "Reset Parameter Value",
+        "windows_shortcut": "Delete or double-click"
+      },
+      {
+        "action": "Load Selected Device from Browser",
+        "windows_shortcut": "Enter"
+      },
+      {
+        "action": "Hot-Swap Selected Device",
+        "windows_shortcut": "Q"
+      },
+      {
+        "action": "Hide/Show Open Plug-In Windows",
+        "windows_shortcut": "Ctrl + Alt + P"
+      },
+      {
+        "action": "Open Multiple Windows with Show/Hide Plug-In Window Button",
+        "windows_shortcut": "Ctrl"
+      },
+      {
+        "action": "Compare A/B: Switch Device State",
+        "windows_shortcut": "P"
+      }
+    ]
+  },
+  {
+    "section_number": "41.5",
+    "category": "Editing",
+    "shortcuts": [
+      {
+        "action": "Cut",
+        "windows_shortcut": "Ctrl + X"
+      },
+      {
+        "action": "Copy",
+        "windows_shortcut": "Ctrl + C"
+      },
+      {
+        "action": "Paste",
+        "windows_shortcut": "Ctrl + V"
+      },
+      {
+        "action": "Duplicate",
+        "windows_shortcut": "Ctrl + D"
+      },
+      {
+        "action": "Delete",
+        "windows_shortcut": "Delete"
+      },
+      {
+        "action": "Undo",
+        "windows_shortcut": "Ctrl + Z"
+      },
+      {
+        "action": "Redo",
+        "windows_shortcut": "Ctrl + Y"
+      },
+      {
+        "action": "Rename",
+        "windows_shortcut": "Ctrl + R"
+      },
+      {
+        "action": "Select All",
+        "windows_shortcut": "Ctrl + A"
+      },
+      {
+        "action": "Select Multiple Items",
+        "windows_shortcut": "Ctrl click"
+      },
+      {
+        "action": "Select Multiple Items by First and Last Item",
+        "windows_shortcut": "Shift click"
+      },
+      {
+        "action": "Move to Next Track/Scene When Renaming",
+        "windows_shortcut": "Tab"
+      },
+      {
+        "action": "Ignore Grid Quantization When Dragging",
+        "windows_shortcut": "Alt"
+      },
+      {
+        "action": "Clips and Slots Across All Tracks",
+        "windows_shortcut": "Shift"
+      },
+      {
+        "action": "Time Across All Tracks",
+        "windows_shortcut": "Shift"
+      },
+      {
+        "action": "The Selected Part of the Envelope",
+        "windows_shortcut": "Alt"
+      }
+    ]
+  },
+  {
+    "section_number": "41.6",
+    "category": "Adjusting Values",
+    "shortcuts": [
+      {
+        "action": "Decrement/Increment",
+        "windows_shortcut": "up and down arrow keys"
+      },
+      {
+        "action": "Decrement/Increment in Octaves or Fine Adjustments",
+        "windows_shortcut": "Shift up and down arrow keys"
+      },
+      {
+        "action": "Finer Resolution When Dragging",
+        "windows_shortcut": "Shift"
+      },
+      {
+        "action": "Return to Default",
+        "windows_shortcut": "Delete"
+      },
+      {
+        "action": "Type In Value",
+        "windows_shortcut": "0…9"
+      },
+      {
+        "action": "Go to Next Field (Bar/Beat/16th)",
+        "windows_shortcut": ".,"
+      },
+      {
+        "action": "Cancel Value Entry",
+        "windows_shortcut": "Esc"
+      },
+      {
+        "action": "Confirm Value Entry",
+        "windows_shortcut": "Enter"
+      }
+    ]
+  },
+  {
+    "section_number": "41.7",
+    "category": "Commands for Breakpoint Envelopes",
+    "shortcuts": [
+      {
+        "action": "Toggle Automation Mode",
+        "windows_shortcut": "A"
+      },
+      {
+        "action": "Finer Resolution When Dragging",
+        "windows_shortcut": "Shift"
+      },
+      {
+        "action": "Create Curved Automation Segment",
+        "windows_shortcut": "Alt"
+      },
+      {
+        "action": "Momentarily Toggle Fade Controls",
+        "windows_shortcut": "F"
+      },
+      {
+        "action": "Delete Selected Breakpoint Envelope",
+        "windows_shortcut": "Ctrl + Delete"
+      },
+      {
+        "action": "Ignore Grid Quantization When Dragging",
+        "windows_shortcut": "Alt"
+      }
+    ]
+  },
+  {
+    "section_number": "41.8",
+    "category": "Loop Brace and Start/End Markers",
+    "shortcuts": [
+      {
+        "action": "Set Start Marker",
+        "windows_shortcut": "Ctrl + F9"
+      },
+      {
+        "action": "Set Loop Brace Start",
+        "windows_shortcut": "Ctrl + F10"
+      },
+      {
+        "action": "Set Loop Brace End",
+        "windows_shortcut": "Ctrl + F11"
+      },
+      {
+        "action": "Set End Marker",
+        "windows_shortcut": "Ctrl + F12"
+      },
+      {
+        "action": "Move Start Marker to Position",
+        "windows_shortcut": "Ctrl click"
+      },
+      {
+        "action": "Move End Marker to Position",
+        "windows_shortcut": "Ctrl + Shift click"
+      },
+      {
+        "action": "Nudge Loop Brace Left/Right",
+        "windows_shortcut": "right and left arrow keys"
+      },
+      {
+        "action": "Move Loop by Loop Length",
+        "windows_shortcut": "up and down arrow keys"
+      },
+      {
+        "action": "Halve/Double Loop Length",
+        "windows_shortcut": "Ctrl up and down arrow keys"
+      },
+      {
+        "action": "Shorten/Lengthen Loop",
+        "windows_shortcut": "Ctrl right and left arrow keys"
+      },
+      {
+        "action": "Select Material in Loop",
+        "windows_shortcut": "Ctrl + Shift + L"
+      }
+    ]
+  },
+  {
+    "section_number": "41.9",
+    "category": "Zooming, Display and Selections",
+    "shortcuts": [
+      {
+        "action": "Zoom In Window",
+        "windows_shortcut": "Ctrl + +"
+      },
+      {
+        "action": "Zoom Out Window",
+        "windows_shortcut": "Ctrl + -"
+      },
+      {
+        "action": "Zoom In Time Ruler",
+        "windows_shortcut": "+"
+      },
+      {
+        "action": "Zoom Out Time Ruler",
+        "windows_shortcut": "-"
+      },
+      {
+        "action": "Scroll Display to Follow Playback",
+        "windows_shortcut": "Ctrl + Shift + F"
+      },
+      {
+        "action": "Scroll Left/Right",
+        "windows_shortcut": "Shift scroll"
+      },
+      {
+        "action": "Pan Left/Right of Selection",
+        "windows_shortcut": "Ctrl + Alt"
+      },
+      {
+        "action": "Add Items to a Selection",
+        "windows_shortcut": "Shift click or drag"
+      },
+      {
+        "action": "Add Adjacent Clips/Tracks/Scenes to Multi-Selection",
+        "windows_shortcut": "Shift click"
+      },
+      {
+        "action": "Add Nonadjacent Clips/Tracks/Scenes to a Multi-Selection",
+        "windows_shortcut": "Ctrl click"
+      }
+    ]
+  },
+  {
+    "section_number": "41.10",
+    "category": "Clip View Editor View Modes",
+    "shortcuts": [
+      {
+        "action": "Switch Between Sample/Envelopes Tabs",
+        "windows_shortcut": "Ctrl + Tab"
+      },
+      {
+        "action": "Switch Between Notes/Envelopes/MPE Tabs",
+        "windows_shortcut": "Ctrl + Tab"
+      },
+      {
+        "action": "Switch to Sample/Notes Tab",
+        "windows_shortcut": "Alt + Shift + 1"
+      },
+      {
+        "action": "Switch to Envelopes Tab",
+        "windows_shortcut": "Alt + Shift + 2"
+      },
+      {
+        "action": "Switch to MPE Tab",
+        "windows_shortcut": "Alt + Shift + 3"
+      }
+    ]
+  },
+  {
+    "section_number": "41.11",
+    "category": "Clip View Sample Editor",
+    "shortcuts": [
+      {
+        "action": "Quantize",
+        "windows_shortcut": "Ctrl + U"
+      },
+      {
+        "action": "Quantize Settings…",
+        "windows_shortcut": "Ctrl + Shift + U"
+      },
+      {
+        "action": "Move Selected Warp Marker",
+        "windows_shortcut": "right and left arrow keys"
+      },
+      {
+        "action": "Select Warp Marker",
+        "windows_shortcut": "Ctrl right and left arrow keys"
+      },
+      {
+        "action": "Scroll Display to Follow Playback",
+        "windows_shortcut": "Ctrl + Shift + F"
+      },
+      {
+        "action": "Move Clip Region with Start Marker",
+        "windows_shortcut": "Shift right and left arrow keys"
+      },
+      {
+        "action": "Zoom to Clip Selection",
+        "windows_shortcut": "Z"
+      },
+      {
+        "action": "Zoom Back from Clip Selection",
+        "windows_shortcut": "X"
+      },
+      {
+        "action": "Insert Warp Marker",
+        "windows_shortcut": "Ctrl + I"
+      },
+      {
+        "action": "Delete Warp Marker",
+        "windows_shortcut": "Delete"
+      },
+      {
+        "action": "Insert Transient",
+        "windows_shortcut": "Ctrl + Shift + I"
+      },
+      {
+        "action": "Delete Transient",
+        "windows_shortcut": "Ctrl + Shift + Delete"
+      },
+      {
+        "action": "Fit Content to View Width",
+        "windows_shortcut": "W"
+      },
+      {
+        "action": "Fit Content to View Height",
+        "windows_shortcut": "H"
+      }
+    ]
+  },
+  {
+    "section_number": "41.12",
+    "category": "Clip View MIDI Note Editor",
+    "shortcuts": [
+      {
+        "action": "Select All Notes",
+        "windows_shortcut": "Ctrl + A"
+      },
+      {
+        "action": "Copy Notes",
+        "windows_shortcut": "Ctrl drag"
+      },
+      {
+        "action": "Chop Selected Notes on Grid or Split Notes at Time Selection Start/End",
+        "windows_shortcut": "Ctrl + E"
+      },
+      {
+        "action": "Chop Notes in Increments of 1",
+        "windows_shortcut": "Ctrl + E drag up/down"
+      },
+      {
+        "action": "Chop Notes in Increments of 2",
+        "windows_shortcut": "Ctrl + Shift + E drag up/down"
+      },
+      {
+        "action": "Split Notes at Exact Location",
+        "windows_shortcut": "Hold E then click to split, drag to move"
+      },
+      {
+        "action": "Join Notes",
+        "windows_shortcut": "Ctrl + J"
+      },
+      {
+        "action": "Fit Notes to Time Range",
+        "windows_shortcut": "Ctrl + Alt + J"
+      },
+      {
+        "action": "Fit Content to View Width",
+        "windows_shortcut": "W"
+      },
+      {
+        "action": "Fit Content to View Height",
+        "windows_shortcut": "H"
+      },
+      {
+        "action": "Quantize",
+        "windows_shortcut": "Ctrl + U"
+      },
+      {
+        "action": "Quantize Settings…",
+        "windows_shortcut": "Ctrl + Shift + U"
+      },
+      {
+        "action": "Scroll Editor Vertically",
+        "windows_shortcut": "Page Up/Down keys"
+      },
+      {
+        "action": "Scroll Editor Vertically in Fine Increments",
+        "windows_shortcut": "Shift Page Up/Down keys"
+      },
+      {
+        "action": "Scroll Editor Horizontally",
+        "windows_shortcut": "Ctrl Page Up/Down keys"
+      },
+      {
+        "action": "Change Velocity from MIDI Note Editor",
+        "windows_shortcut": "Alt drag"
+      },
+      {
+        "action": "Move Insert Marker to Beginning",
+        "windows_shortcut": "Home"
+      },
+      {
+        "action": "Move Insert Marker to End",
+        "windows_shortcut": "End"
+      },
+      {
+        "action": "Select Next/Previous Note",
+        "windows_shortcut": "Alt up and down arrow keys"
+      },
+      {
+        "action": "Select Next/Previous Note in Same Key Track",
+        "windows_shortcut": "Alt left and right arrow keys"
+      },
+      {
+        "action": "Scroll Display to Follow Playback",
+        "windows_shortcut": "Ctrl + Shift + F"
+      },
+      {
+        "action": "Move Clip Region with Start Marker",
+        "windows_shortcut": "Shift right and left arrow keys"
+      },
+      {
+        "action": "Zoom to Clip Selection",
+        "windows_shortcut": "Z"
+      },
+      {
+        "action": "Zoom Back from Clip Selection",
+        "windows_shortcut": "X"
+      },
+      {
+        "action": "Zoom In/Out Horizontally",
+        "windows_shortcut": "+-"
+      },
+      {
+        "action": "Set Note Selection Velocity",
+        "windows_shortcut": "Type a value between 0-127 and press Enter"
+      },
+      {
+        "action": "Adjust Note Selection Velocity",
+        "windows_shortcut": "Ctrl up and down arrow keys"
+      },
+      {
+        "action": "Adjust Note Selection Velocity Deviation",
+        "windows_shortcut": "Ctrl + Shift up and down arrow keys"
+      },
+      {
+        "action": "Adjust Note Selection Chance",
+        "windows_shortcut": "Ctrl + Alt up and down arrow keys"
+      },
+      {
+        "action": "Toggle Full-Size Clip View",
+        "windows_shortcut": "Ctrl + Alt + E"
+      },
+      {
+        "action": "Group Notes (Play All)",
+        "windows_shortcut": "Ctrl + G"
+      },
+      {
+        "action": "Ungroup Notes",
+        "windows_shortcut": "Ctrl + Shift + G"
+      },
+      {
+        "action": "Apply Current MIDI Tool Settings",
+        "windows_shortcut": "Ctrl + Enter"
+      },
+      {
+        "action": "Invert Note Selection",
+        "windows_shortcut": "Ctrl + Shift + A"
+      },
+      {
+        "action": "Highlight Scale",
+        "windows_shortcut": "K"
+      },
+      {
+        "action": "Split Arrangement Clip Based on Time Selection",
+        "windows_shortcut": "Ctrl + Shift + E"
+      },
+      {
+        "action": "Show/Hide MIDI Note Filters",
+        "windows_shortcut": "Ctrl + Shift + F"
+      }
+    ]
+  },
+  {
+    "section_number": "41.13",
+    "category": "Grid Snapping and Drawing",
+    "shortcuts": [
+      {
+        "action": "Toggle Draw Mode (Pitch Lock Off)",
+        "windows_shortcut": "B"
+      },
+      {
+        "action": "Narrow Grid",
+        "windows_shortcut": "Ctrl + 1"
+      },
+      {
+        "action": "Widen Grid",
+        "windows_shortcut": "Ctrl + 2"
+      },
+      {
+        "action": "Triplet Grid",
+        "windows_shortcut": "Ctrl + 3"
+      },
+      {
+        "action": "Snap to Grid",
+        "windows_shortcut": "Ctrl + 4"
+      },
+      {
+        "action": "Fixed/Zoom-Adaptive Grid",
+        "windows_shortcut": "Ctrl + 5"
+      },
+      {
+        "action": "Bypass Snapping While Dragging",
+        "windows_shortcut": "Alt"
+      }
+    ]
+  },
+  {
+    "section_number": "41.14",
+    "category": "Global Quantization",
+    "shortcuts": [
+      {
+        "action": "Sixteenth-Note Quantization",
+        "windows_shortcut": "Ctrl + 6"
+      },
+      {
+        "action": "Eighth-Note Quantization",
+        "windows_shortcut": "Ctrl + 7"
+      },
+      {
+        "action": "Quarter-Note Quantization",
+        "windows_shortcut": "Ctrl + 8"
+      },
+      {
+        "action": "1-Bar Quantization",
+        "windows_shortcut": "Ctrl + 9"
+      },
+      {
+        "action": "Quantization Off",
+        "windows_shortcut": "Ctrl + 0"
+      }
+    ]
+  },
+  {
+    "section_number": "41.15",
+    "category": "Session View",
+    "shortcuts": [
+      {
+        "action": "Launch Selected Clip/Slot",
+        "windows_shortcut": "Enter"
+      },
+      {
+        "action": "Select Neighboring Clip/Slot",
+        "windows_shortcut": "arrow keys"
+      },
+      {
+        "action": "Select All Clips/Slots",
+        "windows_shortcut": "Ctrl + A"
+      },
+      {
+        "action": "Copy Clips",
+        "windows_shortcut": "Ctrl drag"
+      },
+      {
+        "action": "Add/Remove Stop Button",
+        "windows_shortcut": "Ctrl + E"
+      },
+      {
+        "action": "Stop Clips in Track with Slot Selection",
+        "windows_shortcut": "Ctrl + Enter"
+      },
+      {
+        "action": "Insert MIDI clip",
+        "windows_shortcut": "Ctrl + Shift + M"
+      },
+      {
+        "action": "Insert Scene",
+        "windows_shortcut": "Ctrl + I"
+      },
+      {
+        "action": "Insert Captured Scene",
+        "windows_shortcut": "Ctrl + Shift + I"
+      },
+      {
+        "action": "Move Up/Down Between Scenes (One at a Time)",
+        "windows_shortcut": "up and down arrow keys"
+      },
+      {
+        "action": "Move Up/Down Between Scenes (Eight at a Time)",
+        "windows_shortcut": "Page Up/Down keys"
+      },
+      {
+        "action": "Record to Session View",
+        "windows_shortcut": "Ctrl + Shift + F9"
+      },
+      {
+        "action": "Toggle Follow Actions for Selected Clips",
+        "windows_shortcut": "Shift + Enter"
+      },
+      {
+        "action": "Create Follow Action Chain",
+        "windows_shortcut": "Ctrl + Shift + Enter"
+      },
+      {
+        "action": "Move Selected Track Left/Right",
+        "windows_shortcut": "Ctrl left and right arrow keys"
+      },
+      {
+        "action": "Move Nonadjacent Scenes Without Collapsing",
+        "windows_shortcut": "Ctrl up and down arrow keys"
+      },
+      {
+        "action": "Drop Browser Clips as a Scene",
+        "windows_shortcut": "Ctrl"
+      },
+      {
+        "action": "Deactivate Selected Clip",
+        "windows_shortcut": "0"
+      },
+      {
+        "action": "Jump to Highlighted Track Title Bar",
+        "windows_shortcut": "Esc"
+      },
+      {
+        "action": "Jump to the First Track of the Current Scene",
+        "windows_shortcut": "Home"
+      },
+      {
+        "action": "Jump to the Last Track of the Current Scene",
+        "windows_shortcut": "End"
+      },
+      {
+        "action": "Jump to the Current Scene from the Last Track",
+        "windows_shortcut": "End"
+      },
+      {
+        "action": "Solo Selected Chain",
+        "windows_shortcut": "S"
+      }
+    ]
+  },
+  {
+    "section_number": "41.16",
+    "category": "Arrangement View",
+    "shortcuts": [
+      {
+        "action": "Split Clip at Selection",
+        "windows_shortcut": "Ctrl + E"
+      },
+      {
+        "action": "Consolidate Selection into Clip",
+        "windows_shortcut": "Ctrl + J"
+      },
+      {
+        "action": "Crop Selected Clips",
+        "windows_shortcut": "Ctrl + Shift + J"
+      },
+      {
+        "action": "Resize Clip When Insert Marker is at Clip Edge",
+        "windows_shortcut": "Enter left and right arrow keys"
+      },
+      {
+        "action": "Slide Waveform",
+        "windows_shortcut": "Shift + Alt drag"
+      },
+      {
+        "action": "Stretch Warped Clip",
+        "windows_shortcut": "Shift drag in clip title bar"
+      },
+      {
+        "action": "Select Time Within Clip",
+        "windows_shortcut": "Shift + Alt drag in clip title bar"
+      },
+      {
+        "action": "Create Fade/Crossfade",
+        "windows_shortcut": "Ctrl + Alt + F"
+      },
+      {
+        "action": "Delete Fades/Crossfades in Selected Clip(s)",
+        "windows_shortcut": "Ctrl + Alt + Backspace"
+      },
+      {
+        "action": "Momentarily Toggle Fade Handles",
+        "windows_shortcut": "F"
+      },
+      {
+        "action": "Toggle Loop Brace",
+        "windows_shortcut": "Ctrl + L"
+      },
+      {
+        "action": "Adjust Loop Brace Length",
+        "windows_shortcut": "Ctrl left and right arrow keys"
+      },
+      {
+        "action": "Select Loop Brace Contents",
+        "windows_shortcut": "Ctrl + Shift + L"
+      },
+      {
+        "action": "Insert Silence",
+        "windows_shortcut": "Ctrl + I"
+      },
+      {
+        "action": "Cut Time",
+        "windows_shortcut": "Ctrl + Shift + X"
+      },
+      {
+        "action": "Copy Time",
+        "windows_shortcut": "Ctrl + Shift + C"
+      },
+      {
+        "action": "Paste Time",
+        "windows_shortcut": "Ctrl + Shift + V"
+      },
+      {
+        "action": "Duplicate Time",
+        "windows_shortcut": "Ctrl + Shift + D"
+      },
+      {
+        "action": "Delete Time",
+        "windows_shortcut": "Ctrl + Shift + Delete"
+      },
+      {
+        "action": "Fold/Unfold Selected Tracks",
+        "windows_shortcut": "U or left and right arrow keys"
+      },
+      {
+        "action": "Unfold All Tracks",
+        "windows_shortcut": "Alt + U"
+      },
+      {
+        "action": "Adjust Height of Selected Tracks/Clips",
+        "windows_shortcut": "Alt + + and Alt + -"
+      },
+      {
+        "action": "Scroll Display to Follow Playback",
+        "windows_shortcut": "Ctrl + Shift + F"
+      },
+      {
+        "action": "Scroll Display Left/Right of Selection",
+        "windows_shortcut": "Ctrl + Alt drag"
+      },
+      {
+        "action": "Optimize Arrangement Height",
+        "windows_shortcut": "H"
+      },
+      {
+        "action": "Optimize Arrangement Width",
+        "windows_shortcut": "W"
+      },
+      {
+        "action": "Deactivate Selection",
+        "windows_shortcut": "0"
+      },
+      {
+        "action": "Nudge Selection Left/Right",
+        "windows_shortcut": "right and left arrow keys"
+      },
+      {
+        "action": "Reverse Audio Clip Selection",
+        "windows_shortcut": "R"
+      },
+      {
+        "action": "Zoom to Arrangement Time Selection",
+        "windows_shortcut": "Z"
+      },
+      {
+        "action": "Zoom Back from Arrangement Time Selection",
+        "windows_shortcut": "X"
+      },
+      {
+        "action": "Play from Insert Marker in Selected Clip",
+        "windows_shortcut": "Ctrl + Space"
+      },
+      {
+        "action": "Move Insert Marker to Playhead Position",
+        "windows_shortcut": "Ctrl + Shift + Space"
+      },
+      {
+        "action": "Jump to Highlighted Track Title Bar",
+        "windows_shortcut": "Esc"
+      },
+      {
+        "action": "Move Focus to Mixer",
+        "windows_shortcut": "Alt + Shift + M"
+      }
+    ]
+  },
+  {
+    "section_number": "41.17",
+    "category": "Comping",
+    "shortcuts": [
+      {
+        "action": "Show Take Lanes",
+        "windows_shortcut": "Ctrl + Alt + U"
+      },
+      {
+        "action": "Add Selected Take Lane Area to Main Track Lane",
+        "windows_shortcut": "Enter"
+      },
+      {
+        "action": "Audition Selected Take Lane",
+        "windows_shortcut": "T"
+      },
+      {
+        "action": "Add Take Lane",
+        "windows_shortcut": "Shift + Alt + T"
+      },
+      {
+        "action": "Duplicate Selected Take Lane",
+        "windows_shortcut": "Ctrl + D"
+      },
+      {
+        "action": "Replace Main Take Clip with Next/Previous Take",
+        "windows_shortcut": "Ctrl up and down arrow keys"
+      }
+    ]
+  },
+  {
+    "section_number": "41.18",
+    "category": "Bounce to Audio",
+    "shortcuts": [
+      {
+        "action": "Bounce to New Track",
+        "windows_shortcut": "Ctrl + B"
+      },
+      {
+        "action": "Paste Bounced Audio",
+        "windows_shortcut": "Ctrl + Alt + V"
+      }
+    ]
+  },
+  {
+    "section_number": "41.19",
+    "category": "Commands for Tracks",
+    "shortcuts": [
+      {
+        "action": "Insert Audio Track",
+        "windows_shortcut": "Ctrl + T"
+      },
+      {
+        "action": "Insert MIDI Track",
+        "windows_shortcut": "Ctrl + Shift + T"
+      },
+      {
+        "action": "Insert Return Track",
+        "windows_shortcut": "Ctrl + Alt + T"
+      },
+      {
+        "action": "Rename Selected Track",
+        "windows_shortcut": "Ctrl + R"
+      },
+      {
+        "action": "Go to Next Track When Renaming",
+        "windows_shortcut": "Tab"
+      },
+      {
+        "action": "Group Selected Tracks",
+        "windows_shortcut": "Ctrl + G"
+      },
+      {
+        "action": "Ungroup Tracks",
+        "windows_shortcut": "Ctrl + Shift + G"
+      },
+      {
+        "action": "Show Grouped Tracks",
+        "windows_shortcut": "+"
+      },
+      {
+        "action": "Hide Grouped Tracks",
+        "windows_shortcut": "-"
+      },
+      {
+        "action": "Collapse/Expand Grouped Tracks",
+        "windows_shortcut": "U"
+      },
+      {
+        "action": "Hide/Show Return Tracks",
+        "windows_shortcut": "Ctrl + Alt + R"
+      },
+      {
+        "action": "Move Nonadjacent Tracks Without Collapsing",
+        "windows_shortcut": "Ctrl arrow keys"
+      },
+      {
+        "action": "Arm Selected Tracks",
+        "windows_shortcut": "C"
+      },
+      {
+        "action": "Solo Selected Tracks",
+        "windows_shortcut": "S"
+      },
+      {
+        "action": "Add Device from Browser",
+        "windows_shortcut": "Enter"
+      },
+      {
+        "action": "Deactivate Selected Track",
+        "windows_shortcut": "0"
+      },
+      {
+        "action": "Freeze/Unfreeze Tracks",
+        "windows_shortcut": "Ctrl + Alt + Shift + F"
+      },
+      {
+        "action": "Delete Track from Track Title Bar",
+        "windows_shortcut": "Delete"
+      }
+    ]
+  },
+  {
+    "section_number": "41.20",
+    "category": "Transport",
+    "shortcuts": [
+      {
+        "action": "Play from Start Marker/Stop",
+        "windows_shortcut": "Space"
+      },
+      {
+        "action": "Continue Play from Stop Point",
+        "windows_shortcut": "Shift + Space"
+      },
+      {
+        "action": "Stop Playback at End of Selection",
+        "windows_shortcut": "Ctrl + Space"
+      },
+      {
+        "action": "Play Arrangement View Selection",
+        "windows_shortcut": "Space"
+      },
+      {
+        "action": "Move Insert Marker to Beginning",
+        "windows_shortcut": "Home"
+      },
+      {
+        "action": "Record",
+        "windows_shortcut": "F9"
+      },
+      {
+        "action": "Arm Recording in Arrangement View",
+        "windows_shortcut": "Shift + F9"
+      },
+      {
+        "action": "Record to Session View",
+        "windows_shortcut": "Ctrl + Shift + F9"
+      },
+      {
+        "action": "Back to Arrangement",
+        "windows_shortcut": "F10"
+      },
+      {
+        "action": "Activate/Deactivate Track 1…8",
+        "windows_shortcut": "F1…F8"
+      },
+      {
+        "action": "Toggle Metronome",
+        "windows_shortcut": "O"
+      }
+    ]
+  },
+  {
+    "section_number": "41.21",
+    "category": "Audio Engine",
+    "shortcuts": [
+      {
+        "action": "Turn Audio Engine On/Off",
+        "windows_shortcut": "Ctrl + Alt + Shift + E"
+      }
+    ]
+  },
+  {
+    "section_number": "41.22",
+    "category": "Browser",
+    "shortcuts": [
+      {
+        "action": "Scroll Down/Up",
+        "windows_shortcut": "up and down arrow keys"
+      },
+      {
+        "action": "Hide/Show Browser",
+        "windows_shortcut": "Ctrl + Alt + B"
+      },
+      {
+        "action": "Close/Open Folders",
+        "windows_shortcut": "right and left arrow keys"
+      },
+      {
+        "action": "Load Selected Item from Browser",
+        "windows_shortcut": "Enter"
+      },
+      {
+        "action": "Preview Selected File",
+        "windows_shortcut": "Shift + Enter or right arrow key"
+      },
+      {
+        "action": "Search in Browser",
+        "windows_shortcut": "Ctrl + F"
+      },
+      {
+        "action": "Jump to Search Results",
+        "windows_shortcut": "down arrow key or Enter"
+      },
+      {
+        "action": "Assign Color(s) to Selected Browser Item(s)",
+        "windows_shortcut": "1…7"
+      },
+      {
+        "action": "Reset Assigned Color(s) for Selected Browser Item(s)",
+        "windows_shortcut": "0"
+      },
+      {
+        "action": "Show Similar Files Using Similarity Search",
+        "windows_shortcut": "Ctrl + Shift + F"
+      },
+      {
+        "action": "Browser History Back",
+        "windows_shortcut": "Ctrl + ["
+      },
+      {
+        "action": "Browser History Forward",
+        "windows_shortcut": "Ctrl + ]"
+      },
+      {
+        "action": "Hide/Show Filter View",
+        "windows_shortcut": "Ctrl + Alt + G"
+      },
+      {
+        "action": "Hide/Show Tag Editor",
+        "windows_shortcut": "Ctrl + Shift + E"
+      }
+    ]
+  },
+  {
+    "section_number": "41.23",
+    "category": "Similar Sample Swapping",
+    "shortcuts": [
+      {
+        "action": "Swap to Next Similar Sample",
+        "windows_shortcut": "Ctrl right arrow"
+      },
+      {
+        "action": "Swap to Previous Similar Sample",
+        "windows_shortcut": "Ctrl left arrow"
+      },
+      {
+        "action": "Save as Similarity Reference",
+        "windows_shortcut": "Ctrl up arrow"
+      },
+      {
+        "action": "Return to Reference",
+        "windows_shortcut": "Ctrl down arrow"
+      },
+      {
+        "action": "Temporarily Toggle Similar Sample Swap Controls in Drum Racks",
+        "windows_shortcut": "Alt"
+      }
+    ]
+  },
+  {
+    "section_number": "41.24",
+    "category": "Key/MIDI Map Mode and the Computer MIDI Keyboard",
+    "shortcuts": [
+      {
+        "action": "Toggle MIDI Map Mode",
+        "windows_shortcut": "Ctrl + M"
+      },
+      {
+        "action": "Toggle Key Map Mode",
+        "windows_shortcut": "Ctrl + K"
+      },
+      {
+        "action": "Computer MIDI Keyboard",
+        "windows_shortcut": "M"
+      },
+      {
+        "action": "Adjust Computer MIDI Keyboard Octave Range Up/Down",
+        "windows_shortcut": "X and Z keys"
+      },
+      {
+        "action": "Adjust Computer MIDI Keyboard Incoming Note Velocity Up/Down",
+        "windows_shortcut": "C and V keys"
+      }
+    ]
+  },
+  {
+    "section_number": "41.25",
+    "category": "Momentary Latching Shortcuts",
+    "shortcuts": [
+      {
+        "action": "Toggle Arrangement automation mode",
+        "windows_shortcut": "A"
+      },
+      {
+        "action": "Toggle Draw Mode",
+        "windows_shortcut": "B"
+      },
+      {
+        "action": "Toggle soloing the selected track",
+        "windows_shortcut": "S"
+      },
+      {
+        "action": "Toggle zooming into the Arrangement selection",
+        "windows_shortcut": "Z"
+      },
+      {
+        "action": "Toggle Track Activator switch on/off for first eight tracks",
+        "windows_shortcut": "F1 through F8"
+      },
+      {
+        "action": "Toggle between Arrangement and Session View",
+        "windows_shortcut": "Tab"
+      }
+    ]
+  },
+  {
+    "section_number": "41.26",
+    "category": "General Keyboard Navigation and Workflow",
+    "shortcuts": [
+      {
+        "action": "Move to next control (when Use Tab to Move Focus is enabled)",
+        "windows_shortcut": "Tab"
+      },
+      {
+        "action": "Move to previous control (when Use Tab to Move Focus is enabled)",
+        "windows_shortcut": "Shift + Tab"
+      },
+      {
+        "action": "Move to next control in the same row (Session/Arrangement mixers)",
+        "windows_shortcut": "Ctrl + Tab"
+      },
+      {
+        "action": "Move to previous control in the same row (Session/Arrangement mixers)",
+        "windows_shortcut": "Ctrl + Shift + Tab"
+      }
+    ]
+  },
+  {
+    "section_number": "41.28",
+    "category": "Accessing Menus",
+    "shortcuts": [
+      {
+        "action": "Access menu by first letter (e.g. Alt + F for File)",
+        "windows_shortcut": "Alt + [Letter]"
+      },
+      {
+        "action": "Navigate menu items",
+        "windows_shortcut": "Up / Down arrow keys"
+      },
+      {
+        "action": "Open neighboring menu",
+        "windows_shortcut": "Right / Left arrow keys"
+      },
+      {
+        "action": "Choose menu item",
+        "windows_shortcut": "Enter"
+      }
+    ]
+  },
+  {
+    "section_number": "41.29",
+    "category": "Using Live’s Context Menu",
+    "shortcuts": [
+      {
+        "action": "Open context menu",
+        "windows_shortcut": "Right-click or Menu or Shift + F10"
+      }
+    ]
+  }
+]
