@@ -62,8 +62,8 @@
 #
 # All hard-failure error paths (still): ERROR:NOT_FOUND / ERROR:MINIMIZED /
 # ERROR:MINIMIZED_RESTORE_FAILED / ERROR:NOT_FOCUSED / ERROR:FOCUS_FAILED /
-# ERROR:BAD_SIZE / ERROR:FILE_MISSING — see AGENTS.md's "Two-Pass Tutorial
-# Capture" section for how the agent should react to each. Maximize is
+# ERROR:BAD_SIZE / ERROR:FILE_MISSING — see AGENTS.md's "Error codes:
+# take_shot.sh" section for how the agent should react to each. Maximize is
 # informational only (NOTE:, not ERROR:) and never blocks the capture.
 
 set -euo pipefail

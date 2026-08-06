@@ -18,6 +18,9 @@ To prevent documentation confusion across sessions:
 
 - `context.md` (this file — single source of handoff truth)
 - `docs/routing_test_protocol.md` (the 16-probe, Tier 0–7 test protocol; the answer key — never shipped to the agent's runtime folder)
+- `docs/opencode-ableton-mcp-setup.md` (MCP server setup — the secondary control path's installation guide)
+- `docs/ableton_ai_educational_risk_framework.md` (risk framework)
+- `docs/current_risks_2026-08-06_en.md` (audit findings snapshot)
 
 **Archived Docs (`docs/archived/*`):**
 _Archived docs are strictly out of scope. Do not read, cite, or treat them as current for audit decisions._
@@ -76,8 +79,8 @@ Two audiences exist and every file below is tagged with which one it's for:
 
 | Script | Purpose | Used by | Depends on | Notes |
 |---|---|---|---|---|
-| `scritps/test_phase0_events.py` | 14 tests covering `emit_event()`'s shape, checkbox-toggle verification, the click-by-id escalation ladder, and `run_task()`'s start/done wrapping. Installs a fake `pywinauto` module in `sys.modules` when the real one isn't importable, so it runs on Linux without Windows/Ableton. | **Dev only** (CI-safe, per README's "28/28 tests" status line). | fakes out `pywinauto` when absent; otherwise exercises `automate_ableton_task.py` internals directly | Not shipped to runtime — excluded from `build_runtime_env.sh`'s whitelist (`scritps/test_*.py`). |
-| `scritps/test_orchestrate.py` | 14 tests covering `orchestrate.sh` itself: arg parsing, task rejection, sequence counters, error branching, label derivation, drift detection. Runs the **real** `orchestrate.sh` as a subprocess against stub `automate`/`take_shot` scripts injected via the env-var seams `orchestrate.sh` exposes — no real Windows/Ableton/screenshot needed. | **Dev only.** | `orchestrate.sh` (real, as subprocess) + generated stub scripts | Same exclusion as above. |
+| `scritps/test_phase0_events.py` | 14 tests covering `emit_event()`'s shape, checkbox-toggle verification, the click-by-id escalation ladder, and `run_task()`'s start/done wrapping. Installs a fake `pywinauto` module in `sys.modules` when the real one isn't importable, so it runs on Linux without Windows/Ableton. | **Dev only** (CI-safe, per README's "29/29 tests" status line). | fakes out `pywinauto` when absent; otherwise exercises `automate_ableton_task.py` internals directly | Not shipped to runtime — excluded from `build_runtime_env.sh`'s whitelist (`scritps/test_*.py`). |
+| `scritps/test_orchestrate.py` | 15 tests covering `orchestrate.sh` itself: arg parsing, task rejection, sequence counters, error branching, label derivation, drift detection. Runs the **real** `orchestrate.sh` as a subprocess against stub `automate`/`take_shot` scripts injected via the env-var seams `orchestrate.sh` exposes — no real Windows/Ableton/screenshot needed. | **Dev only.** | `orchestrate.sh` (real, as subprocess) + generated stub scripts | Same exclusion as above. |
 
 ### Reference / build tooling (not a "script" acting on Ableton, but governs what ships)
 
@@ -126,5 +129,63 @@ folder, where that convention is exactly what makes the tool auto-load it.
   files. Renaming now would be a multi-file, cross-cutting change — noted
   here rather than silently fixed, since the user's own testing/tooling
   may already depend on the current path.
+- **"Selected track" blind spot:** Ableton's UIA tree exposes no
+  `automation_id` for the currently selected track. This locks 4 shortcuts
+  (`solo_selected_track`, `arm_selected_track`, `deactivate_selected_track`,
+  `launch_selected_slot`) behind `blocked=True` permanently — no internal
+  fix possible within UIA. MCP covers the write side (e.g. device
+  parameters on a specific track) but not "read which track is selected"
+  from the UI. External mitigations (e.g. an AutoHotkey script tracking
+  selection changes in a sidecar file) are out of scope for this project.
 
 ---
+
+## Evidence for routing rules (from prior live tests)
+
+The following findings from archived live-test sessions (`docs/archived/v002/`)
+are cited by active docs (`ABLETON_AGENT_POLICY.md`,
+`docs/routing_test_protocol.md`). Summarized here so active docs don't
+depend on archived sources for their behavioral evidence:
+
+- **Agent defaults to MCP (ex-§6):** Baseline test without `AGENTS.md` present
+  in the runtime folder showed the agent's natural first instinct in an
+  MCP-connected session is to call `get_session_info` / `get_track_info`
+  before exploring the project at all. MCP has no arm/monitor tools, so
+  this is a dead end for UIA-level tasks. This is why
+  `ABLETON_AGENT_POLICY.md` states "UIA-direct is the default, not MCP."
+
+- **`_set_device_parameter` bug (Finding #3):** Code inspection of
+  `ableton-mcp-extended`'s Remote Script side shows the value returned by
+  `set_device_parameter` is the **pre-write calculated target**, not a
+  post-write re-read of Ableton's actual state. This is why every MCP
+  write must be followed by a read-back of the same property, and the
+  read-back value — not the tool's return value — is what gets trusted.
+
+- **`solo_tour` zero-screenshot trap (ex-Scenario C):** A live test
+  confirmed that calling `automate_ableton_task.py --task solo_tour`
+  directly produces zero screenshots (only `orchestrate.sh` calls
+  `take_shot.sh`). The agent pattern-matched on the task name and got a
+  technically correct but unverifiable result. This is why `solo_tour` is
+  explicitly excluded from `orchestrate.sh`'s `SINGLE_ACTION_TASKS` and
+  why `ABLETON_AGENT_POLICY.md` contains a dedicated `solo_tour` trap
+  warning.
+
+- **Pre-flight baseline discipline (ex-§1):** Prior audits established the
+  practice of reading track state before and after any state-changing
+  operation. This is referenced by `docs/routing_test_protocol.md`'s
+  pre-flight instructions and is now standard across all probes.
+
+---
+
+## Verification status of audit findings (`docs/current_risks_2026-08-06_en.md`)
+
+All findings in the risk assessment are **code-inferred** (Linux sandbox,
+no Windows) — confirmed by reading source and running the test suite, not
+by live Ableton testing. The following need live Windows verification:
+
+| Finding | What to verify | Method |
+|---|---|---|
+| #1 (L2 dead at Play/Stop) | Space bar actually toggles Transport state | Run `solo_one --live` with debug logging, check EVENT stream for L2 events |
+| #6a (Browser-category targeting) | Clicking outer DataItem changes category | Run `dump_ableton_states.py --states all`, compare successive dump contents |
+| #7 (Selected track blind spot) | Confirm no auto_id for selection exists | Full UIA tree dump, grep for "selected" or "selection" |
+| #2 (MCP path discovery) | Agent finds MCP path without being told | Fresh agent session, prompt for a device-parameter task, observe routing |

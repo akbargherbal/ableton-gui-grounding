@@ -47,7 +47,9 @@ SHORTCUTS: dict[str, ShortcutEntry] = {
         note=(
             "Single key toggles both directions. NOT live-tested: confirm "
             "get_toggle_state(Transport.Play) reads correctly right after "
-            "a Space press before trusting this in a verify callback."
+            "a Space press. NOTE: currently dead code at the task_solo_one() "
+            "call site because verify=None short-circuits before L2 — a "
+            "verify callback must be added at the call site to activate this."
         ),
     ),
     "solo_selected_track": ShortcutEntry(

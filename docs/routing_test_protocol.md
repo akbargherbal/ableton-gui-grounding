@@ -10,7 +10,7 @@ Written for session 7+. Goal: verify the routing rules in `AGENTS.md` actually w
 - **Record the tool-call sequence, not just the outcome.** A probe can produce the "right" final state on Ableton's screen while having taken the wrong path to get there (e.g. clicking around and getting lucky). The `Watch for` line in each probe tells you what to actually look at.
 - **Do probes roughly in tier order.** Later tiers assume earlier ones aren't broken — no point testing MCP read-back discipline if the agent isn't even finding `AGENTS.md` yet.
 - **Fill in `Observed:` as you go.** This doc doubles as your log. Copy it per test day if you want a clean history, or just append dated entries under each probe.
-- **Pre-flight before any probe that touches live Ableton state:** run `read_solo_states --tracks 0 1 2 3` (or whatever tracks you'll use) yourself first, note the baseline, and check it again after. This is the same discipline `v2_observations.md` §1 used — don't assume the agent's restoration worked, look.
+- **Pre-flight before any probe that touches live Ableton state:** run `read_solo_states --tracks 0 1 2 3` (or whatever tracks you'll use) yourself first, note the baseline, and check it again after. This is the same discipline all prior audits used — don't assume the agent's restoration worked, look.
 
 ---
 
@@ -18,7 +18,7 @@ Written for session 7+. Goal: verify the routing rules in `AGENTS.md` actually w
 
 ### P0.1 — Cold-start routing discovery
 
-**Tests:** whether `AGENTS.md` actually gets read this time, compared to the documented baseline failure (`v2_observations.md` §6) where it never was.
+**Tests:** whether `AGENTS.md` actually gets read this time, compared to the documented baseline failure (per `context.md` §"Evidence for routing rules") where it never was.
 
 **Prompt:**
 
@@ -108,7 +108,7 @@ What's the current solo state of tracks 0 through 3?
 
 ### P2.1 — Solo comparison, un-named
 
-**Tests:** the `solo_tour` trap (`v2_observations.md` §2, Scenario C) — does the agent reach for the *feature* correctly without you naming the task.
+**Tests:** the `solo_tour` trap — does the agent reach for the *feature* correctly without you naming the task. A prior live test (Scenario C) confirmed `solo_tour` produces zero screenshots when run directly, yet the agent pattern-matched on the name.
 
 **Prompt:**
 
@@ -309,4 +309,4 @@ Arm track 2, set its monitor to In, then load a Grand Piano onto it.
 ## After a test day
 
 - Update this file's `Observed:` fields, or copy it dated (`routing_test_protocol_2026-08-06.md`) if you want a clean per-day record instead of overwriting.
-- Any fail worth escalating back into `AGENTS.md` itself belongs in `v2_observations.md` as a new dated finding, same pattern as the existing audit entries — not just noted here and forgotten.
+- Any fail worth escalating back into `AGENTS.md` itself belongs in `context.md`'s "Open items" or "Evidence for routing rules" section as a new finding, not just noted here and forgotten.

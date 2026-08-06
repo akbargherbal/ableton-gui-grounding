@@ -410,8 +410,11 @@ def click_by_id(window: UIAWrapper, auto_id: str, dry_run: bool, label: str,
     Only pass one that's been independently confirmed unambiguous for
     THIS control (checked against the manual or keyboard_shortcuts.py's
     sourced entries) -- evidence-based, never a memory-based guess.
-    Currently wired at Transport.Play / Transport.Stop call sites via
-    load_shortcut("transport_play_stop"). Additional call sites should
+    Currently passed by task_solo_one() at Transport.Play / Transport.Stop,
+    but is dead code at those call sites because verify=None short-circuits
+    before the L2 tier is reached (see the verify is None early-return at
+    line 433). To activate L2 for these controls, add a real verify
+    callback and remove the verify=None guard. Additional call sites should
     use the same pattern once their matching shortcuts are unblocked in
     keyboard_shortcuts.py.
     """

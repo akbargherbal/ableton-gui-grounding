@@ -53,7 +53,7 @@ Today's supported tasks: `arm_track`, `set_tempo`, `probe_toggle`, `probe_solo_t
 
 **Gotcha — `solo_tour` is a naming trap, not an alternative:** it exists as a task name in the engine and is a real multi-track solo-comparison feature, but it is **explicitly excluded** from `orchestrate.sh` (see the script's own header comment) and produces **zero screenshots** when run directly via `automate_ableton_task.py`. `take_shot.sh` is only ever invoked from inside `orchestrate.sh`. For a solo comparison across tracks, use `orchestrate.sh ... solo_one` looped per track (one screenshot per track) — never call `solo_tour` directly in a teaching flow.
 
-**Why UIA-direct is the default, not MCP:** a baseline test (no `AGENTS.md` present) showed the agent's natural first instinct in an MCP-connected session is to reach for MCP tools (`get_session_info`, `get_track_info`) before exploring the project at all. MCP has no arm/monitor tools, so this is a dead end for exactly the kind of task UIA-direct already handles cleanly with a verified, screenshotted result. Full log: `v2_observations.md` §6, `LIVE_TEST/BASELINE_SESSION_session-ses_02cd.md`.
+**Why UIA-direct is the default, not MCP:** a baseline test (no `AGENTS.md` present) showed the agent's natural first instinct in an MCP-connected session is to reach for MCP tools (`get_session_info`, `get_track_info`) before exploring the project at all. MCP has no arm/monitor tools, so this is a dead end for exactly the kind of task UIA-direct already handles cleanly with a verified, screenshotted result. Source: `context.md` §"Evidence for routing rules".
 
 ### When to use MCP instead
 
@@ -125,3 +125,21 @@ Your job here is to teach Ableton, grounded and step-by-step — not to develop 
 - **Folder:** `LABS/<slug>_<YYYY-MM-DD_HHMM>/`, where `<slug>` is a short kebab-case description of the lesson or test (e.g. `arm-track-demo_2026-08-05_1430`, `test-mcp-readback_2026-08-05_1500`). The timestamp exists because `LABS/` is gitignored and reused across sessions — without it, repeat runs of the same lesson silently overwrite or interleave `seq` numbers from a prior run.
 - **Session log:** every lab run must include a `SESSION_LOG.md` inside that same folder, written by the agent, one row per screenshot: `seq`, which path was used (UIA task name, or MCP tool + read-back result), a one-line description of what happened. Nothing in the code produces this automatically — `orchestrate.sh` only numbers and captures images, it doesn't narrate them. Write this as you go, not reconstructed after the fact from memory.
 - `LABS/` is gitignored on purpose (screenshots are session output, not source). If a session is worth keeping past a cleanup, copy the folder out before it's deleted — nothing preserves it otherwise.
+
+---
+
+## Error codes: `take_shot.sh`
+
+When `take_shot.sh` fails, it emits a distinct `ERROR:` line before exiting. Each one tells you what went wrong and what to ask the student to do — don't retry blindly.
+
+| Error code | Meaning | Agent reaction |
+|---|---|---|
+| `ERROR:NOT_FOUND` | No window with "Ableton Live" in its title is visible | Ask student: "Is Ableton Live open? Open it and I'll try again." |
+| `ERROR:MINIMIZED` | Ableton is minimized and `ABLETON_AUTO_FOCUS=0` (auto-restore disabled) | Ask student to un-minimize Ableton, or set `ABLETON_AUTO_FOCUS=1`. |
+| `ERROR:MINIMIZED_RESTORE_FAILED` | Auto-restore tried and failed — window stayed minimized after `ShowWindow(SW_RESTORE)` | Ask student to manually un-minimize Ableton. Windows sometimes blocks automated restore. |
+| `ERROR:NOT_FOCUSED` | Ableton is visible but not the foreground window, and `ABLETON_AUTO_FOCUS=0` | Ask student to Alt+Tab to Ableton, or set `ABLETON_AUTO_FOCUS=1`. |
+| `ERROR:FOCUS_FAILED` | Auto-focus tried and failed — `SetForegroundWindow` didn't bring Ableton to front | Ask student to click on the Ableton window. Windows blocks background processes from stealing focus in some configurations. |
+| `ERROR:BAD_SIZE` | Window has zero or negative dimensions — likely off-screen or in a virtual-desktop limbo state | Ask student: "Is the Ableton window visible on screen, or could it be on a disconnected monitor? Try Win+LeftArrow to snap it back." |
+| `ERROR:FILE_MISSING` | PowerShell reported the screenshot saved but the file wasn't found after 3s of polling | This is a WSL DrvFs caching lag issue. Retry once (same command); if it persists, report as a bug in the tooling, not a student action item. |
+
+All of these are **one-shot failures** — `orchestrate.sh` never retries a failed screenshot on its own. If the student fixes the issue, re-run the same `orchestrate.sh` command (the seq counter auto-increments, so no overwrite).

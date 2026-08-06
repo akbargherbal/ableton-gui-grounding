@@ -1,9 +1,13 @@
 # ableton-gui-grounding
 
-AI-agent-controllable **Ableton Live 12** via Windows UI Automation
-(`pywinauto`). Reads and acts on Ableton's live UIA tree directly — no
-plugin, no Remote Script, no MIDI bridge — so an agent can see what's
-actually on screen and click/type against it like a person would.
+AI-agent-controllable **Ableton Live 12**. Primary path: Windows UI
+Automation (`pywinauto`). Reads and acts on Ableton's live UIA tree
+directly. Secondary path: MCP (via `ableton-mcp-extended`, a Remote
+Script/TCP bridge) for device parameters, browser loading, and
+clip/track operations the UIA tree structurally cannot reach. Both
+paths are verified: UIA via post-click reads, MCP via mandatory
+read-back after every write — the agent can see what's actually on
+screen and act against it like a person would.
 
 ## Why this exists
 
@@ -48,7 +52,7 @@ problem, not a mechanism problem.
 | File | Role |
 |---|---|
 | `scritps/test_phase0_events.py` | 14 tests: `emit_event()` shape, checkbox toggle, click-by-id escalation ladder, `run_task()` start/done wrapping. |
-| `scritps/test_orchestrate.py` | 14 tests: arg parsing, task rejection, seq counters, error branching, label derivation, drift detection. Uses stub scripts — no Windows/Ableton needed. |
+| `scritps/test_orchestrate.py` | 15 tests: arg parsing, task rejection, seq counters, error branching, label derivation, drift detection. Uses stub scripts — no Windows/Ableton needed. |
 
 ### Reference
 
@@ -210,7 +214,7 @@ python automate_ableton_task.py --task solo_tour --tracks 0 1 2 --seconds 2 --li
 # 14 tests: event shapes, checkbox/click-by-id, escalation ladder
 python scritps/test_phase0_events.py
 
-# 14 tests: arg parsing, task rejection, seq counters, error branching, drift
+# 15 tests: arg parsing, task rejection, seq counters, error branching, drift
 python scritps/test_orchestrate.py
 ```
 
@@ -248,16 +252,18 @@ python scritps/test_orchestrate.py
 | Transport Play/Stop (no verify, documented gap) | Live |
 | Keyboard shortcut L2 escalation (F1–F8 on Activator) | Live |
 | Orchestrator + auto-labeled screenshots + drift check | Live |
-| 28/28 tests (stub-based, no Ableton needed) | CI-safe |
+| 29/29 tests (stub-based, no Ableton needed) | CI-safe |
 | Clip launching (SessionView.Track[N].Slot[M]) | Not yet exercised |
 | Device parameter read/write | Not yet |
 | Browser item selection / plugin loading | Not yet |
 
 ## A note on scope
 
-This project deliberately stays at the UI Automation layer — no Remote
-Script, no MIDI bridge, no plugin install inside Ableton. That's a
-tradeoff: it can't reach into device-internal parameter values the way a
-Live Object Model-based integration can, but it has no moving parts inside
-Ableton itself and works against exactly what's on screen, which makes the
-verify-after-every-action model straightforward to apply everywhere.
+This project's primary path is UI Automation; a secondary MCP path
+(see `docs/opencode-ableton-mcp-setup.md` for setup, `ABLETON_AGENT_POLICY.md`
+for the routing table of which tool to use when) covers operations UIA
+structurally cannot reach: device parameter read/write, browser loading,
+clip manipulation, and transport. That's a tradeoff: UIA works against
+exactly what's on screen, which makes the verify-after-every-action model
+straightforward; MCP reaches deeper but requires mandatory read-back
+discipline because its return values aren't always post-write confirmations.
