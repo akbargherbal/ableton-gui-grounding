@@ -27,3 +27,104 @@ _Archived docs are strictly out of scope. Do not read, cite, or treat them as cu
 **Constraint:** the AI Assistant has no direct access to Ableton/Windows — Linux sandbox only. All live verification is done by the user; pasted terminal/screenshot output is ground truth. Audit is expected to span 2–3 sessions (long back-and-forth per verification), hence this file.
 
 ---
+
+## Scripts Audit
+
+Scope: every script in `scritps/` (note: the directory itself is misspelled
+`scritps`, not `scripts` — this is the actual folder name in the repo, not a
+typo introduced here) plus the two top-level shell scripts and
+`build_runtime_env.sh`. Excluded per instructions: `docs/make_prompt.py` and
+the JSON dump files under `scritps/dumps/`.
+
+Two audiences exist and every file below is tagged with which one it's for:
+
+- **Dev repo (this repo).** Used by whoever is developing/auditing the
+  project (the user + this AI Assistant). Has access to `context.md`,
+  `docs/`, tests, `README.md`, and everything else.
+- **Agent runtime** (a separate, minimal folder built by
+  `build_runtime_env.sh`, pointed at by OpenCode or another agentic coding
+  tool). This is the actual Ableton-teaching agent acting on the student's
+  behalf. It only ever sees the whitelisted files copied there — never this
+  dev repo, never `context.md`, never the test suite, never
+  `docs/routing_test_protocol.md` (deliberately withheld — it's the answer
+  key for evaluating the agent).
+
+### Read-only / introspection
+
+| Script | Purpose | Used by | Depends on | Notes |
+|---|---|---|---|---|
+| `scritps/dump_ableton_pywinauto.py` | Walks Ableton's live UIA tree via `pywinauto`'s `uia` backend and writes an indented console dump + timestamped JSON to `scritps/dumps/`. Read-only — never clicks or types. Canonical home of `find_ableton_window()` and `ensure_window_ready()` (window discovery + the maximize/focus routine that works around Session View's UI-virtualization). | **Both.** Runtime: imported by `automate_ableton_task.py` for its two helper functions. Dev: run standalone by the human/AI for manual tree inspection during development. | `pywinauto` (external) | Shipped to runtime via `build_runtime_env.sh` because it's a hard dependency of `automate_ableton_task.py`, not because dumping itself is a runtime task. |
+| `scritps/dump_ableton_states.py` | Automates the "switch view → dump" loop: cycles Ableton through named states (Session View, Arrangement View, the 6 Browser panel categories) and writes one labeled JSON dump per state via `--states all`. Session/Arrangement toggle is done by detecting current view (presence of `SessionView.*` ids) rather than blindly pressing Tab. | **Dev only.** Not in `build_runtime_env.sh`'s whitelist — commented there as "optional: view/browser-category switching," i.e. considered but deliberately left out of the current runtime build. | `dump_ableton_pywinauto.py` (window helpers) | Browser-category selection (`find_control_by_name`) is explicitly flagged in its own docstring as **inferred, not proven** — clicking the outer DataItem hasn't been confirmed to actually change the selected category, only that the resulting dump looks plausible. |
+| `scritps/grep_dump.py` | Pure-stdlib substring search over an existing JSON tree dump (name/automation_id/class_name). No `pywinauto` needed — runs on any machine with the JSON file. | **Dev only.** A discovery tool for the human/AI wiring new `automation_id`s into `automate_ableton_task.py` or `dump_ableton_states.py`; not part of the agent's live-teaching path. | none (stdlib only) | Not in the runtime whitelist. |
+
+### Automation (acts on Live)
+
+| Script | Purpose | Used by | Depends on | Notes |
+|---|---|---|---|---|
+| `scritps/automate_ableton_task.py` | The engine: acts on Live via structural `automation_id`s (solo/arm/mute, tempo, transport, diagnostics). Every control is re-resolved fresh immediately before each touch (no caching across clicks — see module docstring for the stuck-soloed-track bug this fixes). Emits versioned `EVENT: {...}` JSON lines (schema v1) for every action, consumed by `orchestrate.sh`. Exposes `--list-tasks` (task registry as JSON, works without `pywinauto`) and `--list-tracks` (needs a live window). | **Both.** Runtime: this is what the teaching agent actually calls, via `orchestrate.sh`, to act on the student's project. Dev: also run standalone (`--live` / dry-run) while developing/testing tasks. | `dump_ableton_pywinauto.py` (window helpers, lazy-imported), `keyboard_shortcuts.py` (L2 escalation lookup) | Shipped to runtime. 8-task registry (`arm_track`, `solo_one`, `solo_tour`, `set_tempo`, 3 `probe_*` diagnostics, `read_solo_states`). Default is dry-run; `--live` required to actually click. |
+| `scritps/keyboard_shortcuts.py` | Data-only lookup table backing `click_by_id()`'s L2 (keyboard) escalation tier — a dict of `ShortcutEntry` records with a `blocked` flag. Entries stay `blocked=True` (e.g. anything selection-based like `solo_selected_track`) until the "no selected-track read" gap is resolved; `load_shortcut()` raises `ShortcutBlocked` rather than silently handing one back. | **Both.** Runtime: hard dependency of `automate_ableton_task.py`. Dev: edited by hand when new shortcuts are researched/verified. | none (dataclass + dict) | Must be kept in lockstep with `keyboard_shortcuts.md` by hand — the two are **not** derived from each other; a doc/data drift risk if only one is edited. |
+| `scritps/keyboard_shortcuts.md` | Human-readable version of the same shortcut table (source citations, per-row status). | **Both** (reference doc, not executable). Shipped to runtime "as a human-readable shortcut reference" per `build_runtime_env.sh` comment — i.e. for a human operating alongside the agent, not consumed by any script. | — | Not excluded from this audit (it's not a JSON dump), but it's documentation, not a script; included here only because `build_runtime_env.sh` treats it as part of the same unit as `keyboard_shortcuts.py`. |
+
+### Coordination & screenshot capture
+
+| Script | Purpose | Used by | Depends on | Notes |
+|---|---|---|---|---|
+| `orchestrate.sh` | Phase 1 coordination layer. Runs exactly one `automate_ableton_task.py` task against live Ableton, takes a screenshot after every `action_start`/`action_result` EVENT line (one screenshot per click, not per task), auto-derives labels and sequence counters, branches to `_FAILED` captures on error (never retries). Restricted to `SINGLE_ACTION_TASKS` — `solo_tour` is explicitly excluded (multi-track loop, better driven as repeated `solo_one` calls from here for per-track screenshot grouping). Runs a schema-version drift check once before any action. | **Runtime — the top-level entry point the teaching agent invokes.** | `automate_ableton_task.py`, `take_shot.sh` (both called by relative path — `build_runtime_env.sh`'s comment notes both must sit exactly where it expects them) | Exposes `ORCH_PYTHON_CMD` / `ORCH_AUTOMATE_SCRIPT` / `ORCH_TAKE_SHOT` env-var seams solely so `test_orchestrate.py` can stub them out — no other consumer uses these seams. |
+| `take_shot.sh` | Captures only the Ableton Live window (not full screen) from WSL, via .NET/PowerShell types (no extra installs), saving directly into a caller-specified lab folder — no path convention is assumed or baked in (agent owns folder naming per `AGENTS.md`/`ABLETON_AGENT_POLICY.md`). v5: auto-restores a minimized window and auto-refocuses a backgrounded one by default (`ABLETON_AUTO_FOCUS=1`); distinct error codes (`MINIMIZED_RESTORE_FAILED`, `FOCUS_FAILED`) let the caller tell "auto-fix tried and failed" apart from "auto-fix skipped". | **Runtime**, called by `orchestrate.sh`. | WSL2 + Windows interop (PowerShell/.NET) — no Python/pywinauto dependency | |
+
+### Tests (dev-only, no Windows/Ableton required)
+
+| Script | Purpose | Used by | Depends on | Notes |
+|---|---|---|---|---|
+| `scritps/test_phase0_events.py` | 14 tests covering `emit_event()`'s shape, checkbox-toggle verification, the click-by-id escalation ladder, and `run_task()`'s start/done wrapping. Installs a fake `pywinauto` module in `sys.modules` when the real one isn't importable, so it runs on Linux without Windows/Ableton. | **Dev only** (CI-safe, per README's "28/28 tests" status line). | fakes out `pywinauto` when absent; otherwise exercises `automate_ableton_task.py` internals directly | Not shipped to runtime — excluded from `build_runtime_env.sh`'s whitelist (`scritps/test_*.py`). |
+| `scritps/test_orchestrate.py` | 14 tests covering `orchestrate.sh` itself: arg parsing, task rejection, sequence counters, error branching, label derivation, drift detection. Runs the **real** `orchestrate.sh` as a subprocess against stub `automate`/`take_shot` scripts injected via the env-var seams `orchestrate.sh` exposes — no real Windows/Ableton/screenshot needed. | **Dev only.** | `orchestrate.sh` (real, as subprocess) + generated stub scripts | Same exclusion as above. |
+
+### Reference / build tooling (not a "script" acting on Ableton, but governs what ships)
+
+| File | Purpose | Used by | Notes |
+|---|---|---|---|
+| `build_runtime_env.sh` | Assembles the minimal agent-facing runtime folder (default `../ableton-runtime`) from this dev repo via an explicit **whitelist** (fail-safe: a new dev file is invisible to the agent unless deliberately added to `FILES[]`). Renames `ABLETON_AGENT_POLICY.md` → `AGENTS.md` on copy (see rationale below). Never wipes `LABS/` or `scritps/dumps/` in the target if they already exist. | Run by the human/AI, never by the agent itself. | This is the authoritative map of "runtime vs dev-only" used throughout this audit table — cross-checked against its `FILES[]` array and inline comments rather than inferred. |
+
+### Runtime whitelist, as of this audit (from `build_runtime_env.sh`)
+
+Ships to the agent-facing runtime folder:
+`AGENTS.md` (renamed from `ABLETON_AGENT_POLICY.md`), `orchestrate.sh`,
+`take_shot.sh`, `scritps/automate_ableton_task.py`,
+`scritps/dump_ableton_pywinauto.py`, `scritps/keyboard_shortcuts.py`,
+`scritps/keyboard_shortcuts.md`, `scritps/dump_ableton_states.py`, plus
+empty `LABS/` and `scritps/dumps/` directories.
+
+**Deliberately withheld from the agent runtime** (per that script's own
+comment, confirmed against its whitelist): `LICENSE`, `README.md`,
+`context.md`, all of `docs/**` (including
+`docs/routing_test_protocol.md` — the answer key for the agent's own
+eval), `scritps/grep_dump.py`, `scritps/dumps/*` (dev-session dumps),
+`scritps/test_*.py`.
+
+### Naming-convention note (carried from `README.md`/`build_runtime_env.sh`)
+
+`ABLETON_AGENT_POLICY.md` is deliberately **not** named `AGENTS.md` in this
+dev repo, because `AGENTS.md` is a filename convention agentic coding tools
+auto-read as self-directed instructions — a dev-session assistant working
+*on* this repo would otherwise misread instructions meant for the
+Ableton-teaching agent as instructions for itself. `build_runtime_env.sh`
+restores the `AGENTS.md` name only in the copy it produces in the runtime
+folder, where that convention is exactly what makes the tool auto-load it.
+
+### Open items noticed during this audit (not yet verified live)
+
+- `scritps/dump_ableton_states.py`'s Browser-category click targeting is
+  self-flagged as inferred/unproven (see its own docstring) — worth a
+  dedicated live-verification pass if Browser automation becomes load-
+  bearing for a lesson.
+- `keyboard_shortcuts.py` and `keyboard_shortcuts.md` are hand-synced, not
+  generated from one source — a process risk (silent drift) rather than a
+  bug found so far.
+- Directory name `scritps/` (vs. the correct spelling `scripts/`) is a
+  long-standing typo baked into paths across `README.md`,
+  `build_runtime_env.sh`'s whitelist, `orchestrate.sh`, and both test
+  files. Renaming now would be a multi-file, cross-cutting change — noted
+  here rather than silently fixed, since the user's own testing/tooling
+  may already depend on the current path.
+
+---
