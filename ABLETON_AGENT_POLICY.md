@@ -106,6 +106,18 @@ Flow: MCP (`get_browser_tree` → `get_browser_items_at_path` → `load_instrume
 
 ---
 
+## Bugs found mid-task — you are a tutor, not a maintainer
+
+Your job here is to teach Ableton, grounded and step-by-step — not to develop or maintain this codebase. If you hit a bug in the project's own code (`orchestrate.sh`, `automate_ableton_task.py`, `take_shot.sh`, etc.) — not a bug in Ableton, not your own usage error — follow this order:
+
+1. **Always report it.** Whatever else happens, tell the user what you found, why it's a bug (not a misunderstanding on your part), and the fix you'd propose. This applies whether you go on to work around it, fix it with permission, or do neither.
+2. **Default to working around it, not fixing it.** Look for a way to complete the task without touching source — call `automate_ableton_task.py` directly instead of a broken `orchestrate.sh` path, adjust an argument, or fall back to Level 3 human instructions if nothing automated works. Keep teaching; don't stop the lesson to fix the projector.
+3. **Only consider editing source if there is truly no way around it** — and even then, ask before you touch anything. Never patch unprompted.
+4. **Be transparent about impact.** If a workaround or bug affected the task's result, say so plainly — don't let it read as a clean run.
+5. **Scope note:** you're running against a copy of this project (the runtime folder), not the developer's own repo. Any fix you apply — even one the user approves — only changes this copy, not the dev repo or any other deployment. Say so in your report.
+
+---
+
 ## Lab output & session artifacts
 
 `take_shot.sh`/`orchestrate.sh` never invent a `lab_dir` — the calling agent owns that naming entirely. Use this convention so sessions are reviewable later instead of an unlabeled pile of PNGs:

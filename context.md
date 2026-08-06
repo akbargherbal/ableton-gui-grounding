@@ -225,3 +225,43 @@ This audit's job, before writing `AGENTS.md`, is to:
 **6.D.1 — formally closed this session, per decision #5 above:** the `AGENTS.md` auto-load ceiling (Tier 0/1 transcripts show the agent citing `AGENTS.md` before any tool call, with no explicit read visible anywhere — consistent with OpenCode auto-loading it into context at session start) is accepted as a structural property of the test harness, not a bug or gap. No rewording or re-running of any P0.1-style probe can ever test rule *discovery*, only rule *compliance*, since the file's presence is guaranteed by the tool. This does not block or weaken any future Tier 3–7 probe — those test compliance, which remains meaningful — but should not be re-flagged as an open question in future sessions.
 
 **Next step (session 13):** apply Phase 3 (bug 1.4's cast fix, plus its live spot-check from a non-120 starting tempo — flag this explicitly for whoever runs the next live probe), decide and apply Phase 4 (§4.1's scope-creep rule), and revisit whether Phase 5 (instrumentation) is still worth doing given the model constraint. Only after Phase 3 completes (code + live verification) does this file's status become "Comprehensive fix: DONE." Tiers 3–7 (P3.1–P7.1) remain not-yet-started — these need fresh live probe sessions against a running Ableton instance, one probe per session per the established cold-start discipline; no transcripts exist yet for these tiers. Full phase breakdown, effort/impact rationale, and session-mapping suggestion: `docs/session12_phased_fix_plan.md`.
+
+---
+
+### Session 13: Phase 3 (code) applied and test-verified; Phase 4 wording agreed and applied. Live spot-check still outstanding — status is NOT "Comprehensive fix: DONE" yet.
+
+**Pre-work status check (done at the start of session 13, per standing instruction):** confirmed by direct inspection on a fresh clone that Phase 1 and Phase 2 (all four originally-tracked bugs plus the doc additions) are merged into the real GitHub repo, matching session 12's claim exactly:
+- `orchestrate.sh` L227/273: `< /dev/null` present on both `take_shot.sh` call sites (1.1) — confirmed.
+- `orchestrate.sh`'s `extract_json_float()`/`extract_field()`: `python` checked before `python3` (1.2) — confirmed.
+- `orchestrate.sh` ~L350: conditional `TASK_ARGS` array expansion (1.3) — confirmed.
+- `ABLETON_AGENT_POLICY.md`: required-args table, 0-based `--tracks` note, and the python-interpreter note (Phase 1) — confirmed present.
+- `scritps/automate_ableton_task.py` L802: `SetValue(bpm)` still uncast (Phase 3 bug 1.4) — confirmed still open, as documented.
+
+No contradiction found between what session 12 documented and what's actually on GitHub — four consecutive sessions (9–13 now) with a clean status check.
+
+**New discrepancy found and flagged this session (not previously caught):** `ABLETON_AGENT_POLICY.md`'s Phase-1-added task table states `set_tempo` has "none required" for arguments (`--bpm` optional, default 120.0). But the actual `TASK_REGISTRY` in `automate_ableton_task.py` — and thus `--list-tasks`'s live JSON output — reports `set_tempo`'s `required_args` as `["bpm"]`. Confirmed by running `--list-tasks` directly. This is a pre-existing inconsistency in the code's own metadata (every other task's `required_args` entry matches actual necessity; `set_tempo` is the one exception, since `--bpm` has a functioning `argparse` default of `120.0` and is never actually enforced as required). **Decision: noted here, not fixed this session** — deliberately deferred, per explicit user instruction, to a future session.
+
+**Phase 3 — APPLIED this session, test-suite verified (code only — live spot-check still outstanding):**
+- Fix: `scritps/automate_ableton_task.py` L802, `tempo.iface_value.SetValue(bpm)` → `tempo.iface_value.SetValue(str(bpm))`. This is the only change; nothing else in `task_set_tempo` touched.
+- `build_runtime_env.sh` re-run against a scratch target; fix confirmed present in the runtime copy's `scritps/automate_ableton_task.py`.
+- Full test suite (`test_orchestrate.py`, `test_phase0_events.py`): **29/29 passing.** `bash -n orchestrate.sh`: clean.
+- **Important caveat, checked explicitly this session:** the test suite does not actually exercise `task_set_tempo`'s `SetValue` call at all — `test_orchestrate.py`'s `set_tempo` test only stubs an `automate_ableton_task.py` event via an env-var fake; no real (or mocked) pywinauto object is involved. So "29/29 passing" proves this change didn't break bash parsing, argparse handling, or event/orchestration logic around `set_tempo` — it does **not** and cannot prove the cast actually makes the `RangeValuePattern` fast path succeed against live Ableton. That proof requires the live spot-check from a non-120 BPM starting tempo, exactly as `docs/session12_phased_fix_plan.md`'s Phase 3 exit criteria specify, and it still has not happened — no transcript, this session or prior, has ever exercised a real tempo write.
+
+**Phase 4 — decided and applied this session.** §4.1 (scope-creep / "report bugs, don't patch unprompted") was open since session 12. This session:
+1. Confirmed the framing from session 12 applies here: the agent has a genuine, instructable choice when it hits a mid-task bug (patch unprompted / report-and-stop / report-and-work-around), unlike bug 1.2 where no agent-facing lever existed.
+2. Iterated wording through several rounds with the user, converging on a "you are a tutor, not a maintainer" framing: default to working around the bug and continuing the lesson; only consider editing source if there's truly no way around it, and even then ask first; always report the bug regardless of outcome (worked around it, fixed with permission, or neither); be transparent when a workaround affected a task's result; and an explicit scope note that any approved in-session fix only changes the runtime-folder copy, not the dev repo.
+3. Applied as a new top-level section, `## Bugs found mid-task — you are a tutor, not a maintainer`, in `ABLETON_AGENT_POLICY.md`, positioned after "Explicitly unsupported" and before "Lab output & session artifacts."
+4. `build_runtime_env.sh` re-run a second time this session, after the final wording was confirmed, so the runtime `AGENTS.md` reflects the agreed text (verified via direct grep on the runtime copy).
+
+**Phase 5 — untouched this session, as planned.** No priority change (live-test model still has no image input), so still deferred.
+
+**Status: Phases 1–4 are DONE for everything a sandboxed session can verify. This is still NOT "Comprehensive fix: DONE."** That label remains reserved, per `docs/session12_phased_fix_plan.md`'s own exit criteria, for after Phase 3's live spot-check succeeds — which needs a live Ableton session, non-120 starting BPM, run by the user, and has not happened yet (not in this session, not in any prior one). Explicit breakdown of what's actually proven vs. still open:
+
+| Item | Test-suite-verified (this sandbox) | Live-verified (needs the user) |
+|---|---|---|
+| Phases 1–2 (docs + 3 mechanical bugs) | ✅ Yes — 29/29 passing, confirmed merged on GitHub | ✅ Already live-verified in session 12 per its own transcript history |
+| Phase 3 (bug 1.4, `SetValue` cast) | ✅ Yes — code compiles, test suite passes, fix present in runtime copy | ❌ **Not yet.** Needs a live spot-check from a non-120 BPM starting tempo to confirm the `RangeValuePattern` fast path actually succeeds post-fix, not just fails differently |
+| Phase 4 (§4.1 wording) | N/A — pure policy prose, no code to test | N/A — this is a behavioral instruction to the *teaching* agent; its real test is whether a future live-probe transcript shows the agent actually following it when it hits a bug |
+| `set_tempo` required_args discrepancy | Confirmed via direct `--list-tasks` inspection | Not applicable — deferred fix, not yet scheduled |
+
+**Next step (session 14 or next live-probe session):** run Phase 3's live spot-check (non-120 BPM tempo, real Ableton) and report the result back — this is the one remaining item standing between the current state and "Comprehensive fix: DONE." Separately, whenever convenient: fix the `set_tempo` `required_args` metadata discrepancy noted above (change `["bpm"]` to `[]` in `TASK_REGISTRY`, matching its actual optional-with-default behavior). Tiers 3–7 (P3.1–P7.1) remain not-yet-started, unchanged from session 12's note.

@@ -799,7 +799,7 @@ def task_set_tempo(window: UIAWrapper, bpm: float, dry_run: bool) -> None:
         if dry_run:
             print(f"  [dry-run] would set_value({bpm})")
         else:
-            tempo.iface_value.SetValue(bpm)
+            tempo.iface_value.SetValue(str(bpm))
         return
     except Exception as e:
         print(f"  RangeValuePattern unavailable ({e}); falling back to click+type")
