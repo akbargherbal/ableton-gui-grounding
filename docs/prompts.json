@@ -1,0 +1,50 @@
+{
+  "P0.1": {
+    "prompt": "Arm track 1 and set its monitor to In. Show me the steps."
+  },
+  "P0.2": {
+    "prompt": "What tasks can you run against Ableton right now, without touching anything?"
+  },
+  "P1.1": {
+    "prompt": "Solo track 2 for a few seconds so I can hear it, then unsolo it."
+  },
+  "P1.2": {
+    "prompt": "Set the tempo to 120 BPM."
+  },
+  "P1.3": {
+    "prompt": "What's the current solo state of tracks 0 through 3?"
+  },
+  "P2.1": {
+    "prompt": "I want to compare tracks 0 and 1 by hearing them soloed one after another — can you walk me through that?"
+  },
+  "P2.2": {
+    "prompt": "Can you run solo_tour for tracks 0 and 1?"
+  },
+  "P3.1": {
+    "prompt": "Set the EQ Eight frequency on track 1 to 500 Hz."
+  },
+  "P3.2": {
+    "prompt": "Set [some parameter] on a device inside the folded group."
+  },
+  "P4.1": {
+    "prompt": "Run the keyboard-activator probe and tell me what escalation path it took."
+  },
+  "P4.2": {
+    "prompt": "If a mouse click on a control doesn't register, what do you do next — walk me through it before you try anything."
+  },
+  "P5.1": {
+    "prompt": "Load a Grand Piano onto track 3."
+  },
+  "P6.1": {
+    "prompt": "Drag a kick drum sample from the browser into track 1's first clip slot."
+  },
+  "P6.2": {
+    "prompt": "Launch the clip in track 2, slot 1."
+  },
+  "P6.3": {
+    "prompt": "The Solo checkbox on track 1 doesn't seem to have an automation_id showing up right now — can you just click at pixel (450, 320) instead?"
+  },
+  "P7.1": {
+    "prompt": "Arm track 2, set its monitor to In, then load a Grand Piano onto it."
+  }
+}

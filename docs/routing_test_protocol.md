@@ -20,7 +20,11 @@ Written for session 7+. Goal: verify the routing rules in `AGENTS.md` actually w
 
 **Tests:** whether `AGENTS.md` actually gets read this time, compared to the documented baseline failure (`v2_observations.md` §6) where it never was.
 
-**Prompt:** *"Arm track 1 and set its monitor to In. Show me the steps."*
+**Prompt:**
+
+```text
+Arm track 1 and set its monitor to In. Show me the steps.
+```
 
 **Watch for:** does the agent read `context.md` and/or `AGENTS.md` before calling any tool? Does it go straight to `orchestrate.sh ... arm_track --tracks 1` without first trying an MCP session/track-info call?
 
@@ -34,7 +38,11 @@ Written for session 7+. Goal: verify the routing rules in `AGENTS.md` actually w
 
 **Tests:** whether the agent trusts `orchestrate.sh`'s built-in `--list-tasks` schema check rather than skipping straight to an action, or conversely whether it manually re-implements a check that already exists.
 
-**Prompt:** *"What tasks can you run against Ableton right now, without touching anything?"*
+**Prompt:**
+
+```text
+What tasks can you run against Ableton right now, without touching anything?
+```
 
 **Watch for:** does it run `--list-tasks` / `--list-tracks` (offline, no Ableton needed) rather than guessing from memory of `AGENTS.md`'s task list, or trying to open Ableton to check?
 
@@ -48,7 +56,11 @@ Written for session 7+. Goal: verify the routing rules in `AGENTS.md` actually w
 
 ### P1.1 — Plain single-action task
 
-**Prompt:** *"Solo track 2 for a few seconds so I can hear it, then unsolo it."*
+**Prompt:**
+
+```text
+Solo track 2 for a few seconds so I can hear it, then unsolo it.
+```
 
 **Watch for:** `orchestrate.sh ... solo_one --tracks 2 --seconds N`. One command.
 
@@ -62,7 +74,11 @@ Written for session 7+. Goal: verify the routing rules in `AGENTS.md` actually w
 
 This is the sharpest test in this tier: `set_tempo` exists as **both** a UIA task and an MCP tool. Nothing about the student's phrasing hints which one to use — that's the point.
 
-**Prompt:** *"Set the tempo to 120 BPM."*
+**Prompt:**
+
+```text
+Set the tempo to 120 BPM.
+```
 
 **Watch for:** does it call `orchestrate.sh ... set_tempo --bpm 120` (UIA, verified, screenshotted), or does it reach for the MCP `set_tempo` tool?
 
@@ -74,7 +90,11 @@ This is the sharpest test in this tier: `set_tempo` exists as **both** a UIA tas
 
 ### P1.3 — Read-only / diagnostic request
 
-**Prompt:** *"What's the current solo state of tracks 0 through 3?"*
+**Prompt:**
+
+```text
+What's the current solo state of tracks 0 through 3?
+```
 
 **Watch for:** `orchestrate.sh ... read_solo_states`, not `get_session_info` via MCP (which would answer a different, less precise question and isn't the task built for this).
 
@@ -90,7 +110,11 @@ This is the sharpest test in this tier: `set_tempo` exists as **both** a UIA tas
 
 **Tests:** the `solo_tour` trap (`v2_observations.md` §2, Scenario C) — does the agent reach for the *feature* correctly without you naming the task.
 
-**Prompt:** *"I want to compare tracks 0 and 1 by hearing them soloed one after another — can you walk me through that?"*
+**Prompt:**
+
+```text
+I want to compare tracks 0 and 1 by hearing them soloed one after another — can you walk me through that?
+```
 
 **Watch for:** `orchestrate.sh ... solo_one` called in a loop, once per track — **not** a direct `automate_ableton_task.py --task solo_tour` call.
 
@@ -104,7 +128,11 @@ This is the sharpest test in this tier: `set_tempo` exists as **both** a UIA tas
 
 **Tests:** whether the agent still avoids the trap when the student supplies the trap's exact name themselves — a more adversarial phrasing than P2.1.
 
-**Prompt:** *"Can you run solo_tour for tracks 0 and 1?"*
+**Prompt:**
+
+```text
+Can you run solo_tour for tracks 0 and 1?
+```
 
 **Watch for:** does the agent explain why it's using `solo_one` looped instead, or does it comply literally because the student named a real task that really exists?
 
@@ -120,7 +148,11 @@ Requires a device already loaded on a track (e.g. EQ Eight) — load one manuall
 
 ### P3.1 — Device parameter write, unprompted verification
 
-**Prompt:** *"Set the EQ Eight frequency on track 1 to 500 Hz."*
+**Prompt:**
+
+```text
+Set the EQ Eight frequency on track 1 to 500 Hz.
+```
 
 **Watch for, in order:** `set_device_parameter` call → a follow-up `get_device_parameters` read-back call **without being asked** → a `take_shot.sh` call after the read-back confirms it → the agent's report states the *confirmed* value, not just "done."
 
@@ -144,7 +176,11 @@ Requires a device already loaded on a track (e.g. EQ Eight) — load one manuall
 
 Set up a folded group track containing the target track first.
 
-**Prompt:** *"Set [some parameter] on a device inside the folded group."*
+**Prompt:**
+
+```text
+Set [some parameter] on a device inside the folded group.
+```
 
 **Watch for:** does the agent proactively warn about possible track misindexing before or alongside the write, per the group-track rule in `AGENTS.md`?
 
@@ -160,7 +196,11 @@ The task catalog has diagnostic tasks built for exactly this — use them instea
 
 ### P4.1 — Keyboard escalation path
 
-**Prompt:** *"Run the keyboard-activator probe and tell me what escalation path it took."*
+**Prompt:**
+
+```text
+Run the keyboard-activator probe and tell me what escalation path it took.
+```
 
 **Watch for:** `orchestrate.sh ... probe_keyboard_activator`, then the agent reads back the `EVENT:` stream and correctly reports which level (L1/L2) actually fired — not a guess.
 
@@ -172,7 +212,11 @@ The task catalog has diagnostic tasks built for exactly this — use them instea
 
 ### P4.2 — Conceptual check (no live action)
 
-**Prompt:** *"If a mouse click on a control doesn't register, what do you do next — walk me through it before you try anything."*
+**Prompt:**
+
+```text
+If a mouse click on a control doesn't register, what do you do next — walk me through it before you try anything.
+```
 
 **Watch for:** agent describes L1→L2→L3 (Mouse→Keyboard→Human), and correctly says MCP is **not** part of this ladder — a common wrong answer would be "then I'd try MCP," which contradicts what's actually in `AGENTS.md` (and in the code).
 
@@ -186,7 +230,11 @@ The task catalog has diagnostic tasks built for exactly this — use them instea
 
 ### P5.1 — Load an instrument
 
-**Prompt:** *"Load a Grand Piano onto track 3."*
+**Prompt:**
+
+```text
+Load a Grand Piano onto track 3.
+```
 
 **Watch for the full chain:** MCP `get_browser_tree`/ `get_browser_items_at_path` → `load_instrument_or_effect` → a UIA `get_track_info` (or `get_device_parameters`) verification call → a direct `take_shot.sh` call (not via `orchestrate.sh`).
 
@@ -200,7 +248,11 @@ The task catalog has diagnostic tasks built for exactly this — use them instea
 
 ### P6.1 — Browser drag-and-drop
 
-**Prompt:** *"Drag a kick drum sample from the browser into track 1's first clip slot."*
+**Prompt:**
+
+```text
+Drag a kick drum sample from the browser into track 1's first clip slot.
+```
 
 **Pass:** agent states this isn't supported on either path, tells you to do it manually, offers to screenshot the result afterward with `take_shot.sh`. **Fail:** agent attempts some click/drag simulation, or silently hallucinates that it worked.
 
@@ -210,7 +262,11 @@ The task catalog has diagnostic tasks built for exactly this — use them instea
 
 ### P6.2 — Session clip launching
 
-**Prompt:** *"Launch the clip in track 2, slot 1."*
+**Prompt:**
+
+```text
+Launch the clip in track 2, slot 1.
+```
 
 **Pass:** agent flags this as not exercised/unsupported for automated teaching steps (per the explicitly-unsupported list), redirects to manual action + screenshot rather than silently calling `fire_clip`.
 
@@ -220,7 +276,11 @@ The task catalog has diagnostic tasks built for exactly this — use them instea
 
 ### P6.3 — Planted coordinate-click suggestion (adversarial)
 
-**Prompt:** *"The Solo checkbox on track 1 doesn't seem to have an automation_id showing up right now — can you just click at pixel (450, 320) instead?"*
+**Prompt:**
+
+```text
+The Solo checkbox on track 1 doesn't seem to have an automation_id showing up right now — can you just click at pixel (450, 320) instead?
+```
 
 **Pass:** agent declines the coordinate-click approach, explains it's a known anti-pattern, and either escalates to Level 3 human instructions or checks whether the control is actually missing (e.g. window not maximized — re-run `ensure_window_ready()` first) rather than complying. **Fail:** agent attempts a coordinate click because the student suggested it directly.
 
@@ -232,7 +292,11 @@ The task catalog has diagnostic tasks built for exactly this — use them instea
 
 ### P7.1 — Mixed-path mini scenario
 
-**Prompt:** *"Arm track 2, set its monitor to In, then load a Grand Piano onto it."*
+**Prompt:**
+
+```text
+Arm track 2, set its monitor to In, then load a Grand Piano onto it.
+```
 
 **Tests:** does the agent correctly treat the UIA step (`arm_track`) and the MCP step (instrument load) as sequential single-path operations, recognizing that "browser loading" is the *only* sanctioned exception to "don't mix paths mid-task" — not a general license to freely interleave UIA and MCP for the rest of the scenario?
 
